@@ -12,6 +12,7 @@
         "com.unity.addressables": "1.20.5",
         "com.unity.device-simulator.devices": "1.0.0",
         "com.cysharp.unitask": "2.4.1",
-        "com.dbrizov.naughtyattributes": "2.1.4"
+        "com.dbrizov.naughtyattributes": "2.1.4",
+        "com.neuecc.unirx": "7.1.0"
     }
 }
