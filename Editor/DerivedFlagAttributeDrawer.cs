@@ -19,7 +19,10 @@ using UnityEngine;
 public class DerivedFlagAttributeDrawer : PropertyDrawerBase
 {
     private Type         m_baseType;
+    private string       m_assemblyName;
     private List<string> m_derivedNames = new List<string>();
+
+    private Assembly m_assembly;
     
     protected override float GetPropertyHeight_Internal(SerializedProperty property, GUIContent label)
     {
@@ -40,9 +43,11 @@ public class DerivedFlagAttributeDrawer : PropertyDrawerBase
         DerivedFlagAttribute flagAttribute = attribute as DerivedFlagAttribute;
         if (flagAttribute is null) return;
 
-        m_baseType = flagAttribute.BaseType;
+        m_baseType     ??= flagAttribute.BaseType;
+        m_assemblyName =   flagAttribute.AssemblyName;
+        if (m_assembly == null) m_assembly = string.IsNullOrEmpty(m_assemblyName) ? m_baseType.Assembly : Assembly.Load(m_assemblyName);
 
-        Type[]   array  = m_baseType.Assembly.GetExportedTypes().Where(type => type.IsSubclassOf(m_baseType)).ToArray();
+        Type[]   array  = m_assembly.GetExportedTypes().Where(type => type.IsSubclassOf(m_baseType)).ToArray();
         object[] values = new object[array.Length + 1];
         values[0] = "<none>";
         m_derivedNames.Add("<none>");
