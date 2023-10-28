@@ -249,8 +249,7 @@ namespace Base
             if (m_addressableManager.IsInit && m_addressableManager.IsReadyToGetBundle)
             {
                 prefabPath = modelName;
-                inst = await m_addressableManager.InstantiateAsync(prefabPath,
-                        parent: GetCanvasWithTag(UICanvasType.RootCanvas, sceneName), retryCount: 5,
+                inst = await m_addressableManager.InstantiateAsync(prefabPath, retryCount: 5,
                         cancellationToken: cancellationToken);
             }
 
