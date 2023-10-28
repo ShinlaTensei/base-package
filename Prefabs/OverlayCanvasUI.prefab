@@ -31,7 +31,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4906240970050334557}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -96,7 +96,7 @@ RectTransform:
   m_Children:
   - {fileID: 4906240970050334557}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -121,9 +121,8 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
-  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 777271281
-  m_SortingOrder: 100
+  m_SortingOrder: 1000
   m_TargetDisplay: 0
 --- !u!114 &4906240968695904590
 MonoBehaviour:
@@ -177,9 +176,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c36a0545e0e4959a0a721f6a41f548, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isMissingReference: 0
   m_root: {fileID: 4906240970050334557}
   m_blockRaycast: {fileID: 86716078}
   m_loadingIndicator: {fileID: 0}
+  m_checkNetworkInterval: 1
 --- !u!1 &4906240970050334556
 GameObject:
   m_ObjectHideFlags: 0
@@ -210,7 +211,7 @@ RectTransform:
   m_Children:
   - {fileID: 86716080}
   m_Father: {fileID: 4906240968695904576}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

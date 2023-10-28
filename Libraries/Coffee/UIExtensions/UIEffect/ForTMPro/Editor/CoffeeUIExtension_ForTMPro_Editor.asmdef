@@ -1,0 +1,19 @@
+{
+    "name": "CoffeeUIExtension_ForTMPro_Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e30df218536984e5c86c7451ec88175a",
+        "GUID:6546d7765b4165b40850b3667f981c26"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

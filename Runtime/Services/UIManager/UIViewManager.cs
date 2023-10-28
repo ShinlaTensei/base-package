@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Base.Helper;
 using Base.Logging;
@@ -36,7 +37,7 @@ namespace Base
         #region UIView Handle
 
         private Dictionary<string, UIView> m_uiViewPool = new Dictionary<string, UIView>();
-        private List<UIView>               m_stackUi    = new List<UIView>();
+        private Stack<string>              m_stackUI = new Stack<string>();
 
         private UIView m_previous;
         private UIView m_current;
@@ -80,14 +81,14 @@ namespace Base
             return view;
         }
 
-        private async UniTask<UIView> ShowAsync(string viewId, string sceneName, Action<UIView> onInit = null, Transform root = null,
+        private async UniTask<UIView> ShowAsync(string viewId, Action<UIView> onInit = null, Transform root = null,
                                                 CancellationToken cancellationToken = default)
         {
             UIView instance = GetView(viewId);
 
             if (!instance)
             {
-                instance = await InitAsync(viewId, sceneName, null, cancellationToken);
+                instance = await InitAsync(viewId, null, cancellationToken);
             }
 
             if (instance)
@@ -120,14 +121,14 @@ namespace Base
                 where T : UIView
         {
             T inst = await ShowAsync<T>(null, onInit, root, cancellationToken).AttachExternalCancellation(cancellationToken);
-
+            
             return inst;
         }
 
-        public async UniTask<UIView> Show(string viewId, string sceneName, IViewData viewData, Action<UIView> onInit = null, Transform root = null,
+        public async UniTask<UIView> Show(string viewId, IViewData viewData = null, Action<UIView> onInit = null, Transform root = null,
                                              CancellationToken cancellationToken = default)
         {
-            UIView view = await ShowAsync(viewId, sceneName, onInit, root, cancellationToken);
+            UIView view = await ShowAsync(viewId, onInit, root, cancellationToken);
             view.Populate(viewData);
             return view;
         }
@@ -138,36 +139,31 @@ namespace Base
 
             if (m_uiViewPool.ContainsValue(view))
             {
-                if (view.ExitType is ExitType.Remove or ExitType.RemoveImmediate) Remove(view);
-                RemoveStack(view);
+                view.OnHide();
+                if (view.ExitType is ExitType.Remove or ExitType.RemoveImmediate)
+                {
+                    Remove(view);
+                }
+
                 view.Hide();
             }
         }
 
-        public void CloseView<T>(T view, bool showPrevious) where T : UIView
+        public void CloseView<T>(T view, bool showPrevious, IViewData viewData = null) where T : UIView
         {
+            string viewName = view.GetType().Name;
             CloseView(view);
             if (!showPrevious) return;
-            UIView top = GetTopUIView();
-            if (top != null)
-            {
-                top.Show();
-                top.RePopulate();
-            }
-        }
 
-        private UIView GetTopUIView()
-        {
-            for (int i = 0; i < m_stackUi.Count; ++i)
-            {
-                UIView view = m_stackUi[i];
-                if (view && view.IsShowing)
-                {
-                    return view;
-                }
-            }
+            string viewFromStack = GetViewFromStack();
 
-            return null;
+            if (!string.IsNullOrEmpty(viewFromStack))
+            {
+                TaskRunner.Start(Show(viewFromStack, viewData).AsTask(), exception =>
+                                                                                                   {
+                                                                                                       Show(viewName).Forget();
+                                                                                                   });
+            }
         }
 
         public void Add<T>(T view) where T : UIView
@@ -183,14 +179,6 @@ namespace Base
             if (m_uiViewPool.ContainsKey(value.GetType().Name))
             {
                 m_uiViewPool.Remove(value.GetType().Name);
-            }
-        }
-
-        public void RemoveStack<T>(T view) where T : UIView
-        {
-            if (m_stackUi.Contains(view))
-            {
-                m_stackUi.Remove(view);
             }
         }
 
@@ -213,15 +201,37 @@ namespace Base
             return value;
         }
 
-        private void PushStack<T>(T view) where T : UIView
+        private string GetViewFromStack()
         {
-            if (view != null)
+            string modelName = string.Empty;
+            try
             {
-                m_stackUi.Remove(view);
-                m_stackUi.Insert(0, view);
+                modelName = m_stackUI.Pop();
+            }
+            catch (Exception e)
+            {
+                PDebug.Error(e, "[UIView] Get View From Stack Failed: {0}", e.Message);
             }
 
-            PDebug.InfoFormat("[UIViewManager] Push {0}", view.GetType().Name);
+            return modelName;
+        }
+
+        private void AddViewToStack<T>(T view) where T : UIView
+        {
+            UIModelAttribute attribute = view.GetType().GetCustomAttribute(typeof(UIModelAttribute), false) as UIModelAttribute;
+
+            if (attribute == null)
+            {
+                PDebug.ErrorFormat("[UIView]Need to apply UIModelAttribute on class {name}", typeof(T).Name);
+
+                return;
+            }
+
+            string modelName = attribute.ModelName;
+            if (!m_stackUI.Contains(modelName))
+            {
+                m_stackUI.Push(modelName);
+            }
         }
 
         private async UniTask<T> InitAsync<T>(Action<T> onCompleted = null, CancellationToken cancellationToken = default) where T : UIView
@@ -254,7 +264,7 @@ namespace Base
             return view;
         }
 
-        private async UniTask<UIView> InitAsync(string viewID, string sceneName, Action<UIView> onCompleted = null, 
+        private async UniTask<UIView> InitAsync(string viewID, Action<UIView> onCompleted = null, 
                                                CancellationToken cancellationToken = default)
         {
             string modelName = viewID;
@@ -315,6 +325,7 @@ namespace Base
 
             m_previous = m_current;
             m_current  = instance;
+            m_current.OnShow();
             await m_current.Await(cancellationToken).AttachExternalCancellation(cancellationToken);
             m_current.Show();
             if (m_current.ClosePrevOnShow) CloseView(m_previous);
@@ -324,7 +335,7 @@ namespace Base
             Add(instance);
             if (m_current.TriggerViewChange)
             {
-                PushStack(instance);
+                AddViewToStack(m_current);
                 NotifyUIViewChanged();
             }
 
@@ -416,7 +427,7 @@ namespace Base
         {
             m_uiCanvasPool.Clear();
             m_uiViewPool.Clear();
-            m_stackUi.Clear();
+            m_stackUI.Clear();
         }
 
         public void Dispose()
