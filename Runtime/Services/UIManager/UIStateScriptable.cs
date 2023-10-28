@@ -17,6 +17,7 @@ namespace Base
     [CreateAssetMenu(menuName = "Base Framework/UI Manager/UI State Manager")]
     public class UIStateScriptable : ScriptableObject
     {
+        [SerializeField]                    private List<UIViewReference>     m_references = new List<UIViewReference>();
         [SerializeField]                    private UIViewReferenceScriptable m_viewReferenceScriptable;
         [SerializeField, CustomClassDrawer] private List<UIState>             m_states = new List<UIState>();
     }
