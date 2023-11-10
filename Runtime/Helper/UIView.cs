@@ -8,11 +8,13 @@ using UnityEngine.EventSystems;
 namespace Base.Helper
 {
     public enum ExitType {None, Hide, Remove, RemoveImmediate}
-    public enum NavigationState {
+    public enum NavigationState
+    {
         None = 0,
         Obscured,
-        Overlap}
-    
+        Overlap
+    }
+
     public enum ViewBackgroundType {None, Blur, Transparent}
     
     public interface IViewData {}
@@ -104,10 +106,7 @@ namespace Base.Helper
 
         public virtual void Back()
         {
-            if (UIManager && UIManager.Previous)
-            {
-                UIManager.Show(UIManager.Previous).Forget();
-            }
+            
         }
 
         public virtual void Show<T>(T argument) where T : IViewData
@@ -126,7 +125,19 @@ namespace Base.Helper
         {
             if (UIManager != null)
             {
-                UIManager.CloseView(this);
+                UIManager.CloseView(this, false);
+            }
+            else
+            {
+                Hide();
+            }
+        }
+
+        public virtual void CloseAndOpenPrevious()
+        {
+            if (UIManager != null)
+            {
+                UIManager.CloseView(this, true);
             }
             else
             {
@@ -148,6 +159,8 @@ namespace Base.Helper
         }
 
         public abstract void Populate<T>(T viewData) where T : IViewData;
+
+        public abstract void RePopulate();
 
         public void OnPointerClick(PointerEventData eventData)
         {

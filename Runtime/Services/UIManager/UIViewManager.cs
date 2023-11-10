@@ -132,14 +132,27 @@ namespace Base
             return view;
         }
 
-        public void CloseView<T>(T view) where T : UIView
+        private void CloseView<T>(T view) where T : UIView
         {
             if (view is null) return;
 
             if (m_uiViewPool.ContainsValue(view))
             {
                 if (view.ExitType is ExitType.Remove or ExitType.RemoveImmediate) Remove(view);
+                RemoveStack(view);
                 view.Hide();
+            }
+        }
+
+        public void CloseView<T>(T view, bool showPrevious) where T : UIView
+        {
+            CloseView(view);
+            if (!showPrevious) return;
+            UIView top = GetTopUIView();
+            if (top != null)
+            {
+                top.Show();
+                top.RePopulate();
             }
         }
 
@@ -171,10 +184,13 @@ namespace Base
             {
                 m_uiViewPool.Remove(value.GetType().Name);
             }
+        }
 
-            if (m_stackUi.Contains(value))
+        public void RemoveStack<T>(T view) where T : UIView
+        {
+            if (m_stackUi.Contains(view))
             {
-                m_stackUi.Remove(value);
+                m_stackUi.Remove(view);
             }
         }
 
