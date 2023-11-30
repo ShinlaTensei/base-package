@@ -159,10 +159,7 @@ namespace Base
 
             if (!string.IsNullOrEmpty(viewFromStack))
             {
-                TaskRunner.Start(Show(viewFromStack, viewData).AsTask(), exception =>
-                                                                                                   {
-                                                                                                       Show(viewName).Forget();
-                                                                                                   });
+                TaskRunner.Start(Show(viewFromStack, viewData).AsTask());
             }
         }
 

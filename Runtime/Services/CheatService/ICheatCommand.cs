@@ -21,6 +21,10 @@ namespace Base.Cheat
         /// </summary>
         string Name { get; }
         
+        string Category { get; }
+        
+        string Description { get; }
+        
         /// <summary>
         /// Determine if the command is static command
         /// </summary>
@@ -49,6 +53,8 @@ namespace Base.Cheat
     public class MethodCheatCommand : ICheatCommand
     {
         public  string                Name          { get; }
+        public  string                Category      { get; }
+        public  string                Description   { get; }
         public  bool                  IsStatic      { get; }
         public  Type                  DeclaringType { get; }
         private CheatCommandAttribute Attribute     { get; }
@@ -58,6 +64,8 @@ namespace Base.Cheat
         {
             Attribute     = attribute;
             Name          = attribute.Name;
+            Category      = attribute.CheatCategory;
+            Description   = attribute.Description;
             MethodInfo    = methodInfo;
             DeclaringType = methodInfo.DeclaringType;
             IsStatic      = methodInfo.IsStatic;

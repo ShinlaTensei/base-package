@@ -10,13 +10,15 @@ namespace Base.Pattern
 
     public abstract class Service : IService
     {
-        public virtual void Init() { }
+        public         bool IsInitialize { get; protected set; } = false;
+        public virtual void Init()       { }
         
         public virtual void Dispose() {}
     }
     
     public abstract class Service<T> : IService<T>
     {
+        public         bool IsInitialize       { get; protected set; } = false;
         public virtual void UpdateData(T data) {}
         public virtual void Init()             {}
         
