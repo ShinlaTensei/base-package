@@ -73,5 +73,23 @@ namespace Base.Cheat
 
             throw new ArgumentException(string.Format("Cannot convert value \"{0}\" to type {1}", value, targetType.Name));
         }
+
+        public static void RegisterCallerInstance<T>(this T instance)
+        {
+            CheatService cheatService = ServiceLocator.Get<CheatService>();
+            cheatService.RegisterInstance(instance);
+        }
+
+        public static void UnRegisterCallerInstance<T>(this T instance)
+        {
+            CheatService cheatService = ServiceLocator.Get<CheatService>();
+            cheatService.UnRegisterInstance<T>();
+        }
+
+        public static T GetCallerInstance<T>(T type)
+        {
+            CheatService cheatService = ServiceLocator.Get<CheatService>();
+            return cheatService.GetInstance<T>();
+        }
     }
 }

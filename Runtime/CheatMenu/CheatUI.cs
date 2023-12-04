@@ -8,8 +8,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Base.Cheat;
 using Base.Helper;
+using Base.Logging;
 using Base.Pattern;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using TMPro;
 using UnityEngine;
 
@@ -61,6 +63,26 @@ namespace Base
         public override void Populate<T>(T viewData)
         {
             return;
+        }
+
+        public void OnExecuteCheatCommand()
+        {
+            List<ICheatCommand> commands = m_cheatService.GetCheatCommands();
+            if (m_currentIndex >= commands.Count || m_currentIndex < 0)
+            {
+                PDebug.ErrorFormat("[Cheat] Index out of range when calling execute cheat");
+                return;
+            }
+
+            if (commands[m_currentIndex] is MethodCheatCommand methodCheatCommand)
+            {
+                methodCheatCommand.Execute(CheatUtils.GetCallerInstance(methodCheatCommand.DeclaringType), null);
+            }
+        }
+
+        public void OnCloseClick()
+        {
+            
         }
     }
 }
