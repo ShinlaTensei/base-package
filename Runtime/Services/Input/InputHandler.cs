@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Base
 {
-    public class InputHandler : IService
+    public class InputHandler : Service
     {
         #if UNITY_EDITOR || UNITY_STANDALONE
         private bool m_isTouch = false;

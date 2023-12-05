@@ -18,27 +18,20 @@ namespace Base.Cheat
 
         private IDictionary<Type, WeakReference> m_instanceRegistry = new Dictionary<Type, WeakReference>();
 
-        private const string AssemblyName = "Assembly-CSharp";
-
         public CheatService()
         {
             m_commands = new SortedDictionary<string, ICheatCommand>();
         }
-        
-        public override void Dispose()
-        {
-            
-        }
-        public override void Init()
+
+        public void Init(string assemblyName)
         {
             Assembly[] assemblies   = System.AppDomain.CurrentDomain.GetAssemblies();
-            Assembly   mainAssembly = assemblies.FirstOrDefault(a => a.GetName().Name.Equals(AssemblyName));
+            Assembly   mainAssembly = assemblies.FirstOrDefault(a => a.GetName().Name.Equals(assemblyName));
             if (mainAssembly != null)
             {
                 CheatUtils.Scan(mainAssembly.GetTypes());
                 IsInitialize = true;
             }
-            
         }
 
         public void RegisterCommand(ICheatCommand command)

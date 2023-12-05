@@ -4,38 +4,60 @@
 // File name: CheatUI.cs
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Base.Cheat;
 using Base.Helper;
 using Base.Logging;
 using Base.Pattern;
 using Cysharp.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using TMPro;
+using UniRx;
 using UnityEngine;
 
 namespace Base
 {
+    public class CheatParameterData
+    {
+        public ParameterType parameterType;
+        public string        parameterName;
+    }
+    
+    public enum ParameterType {None = 0, Input = 1, Boolean = 2, Enum = 3}
+
     public class CheatUI : UIView
     {
-        [SerializeField] private TMP_Dropdown m_dropdown;
+        [SerializeField] private TMP_Dropdown             m_dropdown;
+        [SerializeField] private ParameterItemDisplayBase m_inputParameter;
+        [SerializeField] private ParameterItemDisplayBase m_boolParameter;
 
         private CheatService m_cheatService;
+        private InputHandler m_inputHandler;
         private int          m_currentIndex = 0;
+        
+        private const string AssemblyName = "Assembly-CSharp";
+        
         protected override void Awake()
         {
             m_cheatService = ServiceLocator.Get<CheatService>();
+            m_inputHandler = ServiceLocator.Get<InputHandler>();
+
+            var clickStream = Observable.EveryUpdate().Where(_ => m_inputHandler.GetTouch().Count > 0);
+            clickStream.Buffer(clickStream.Throttle(TimeSpan.FromMilliseconds(250))).Where(xs => xs.Count >= 2)
+                       .Subscribe(_ => Show()).AddTo(this);
         }
 
         protected override void Start()
         {
+            m_dropdown.onValueChanged.AddListener(OnValueChanged);
             TaskRunner.Start(StartInitializeService());
         }
 
         private async Task StartInitializeService()
         {
-            m_cheatService.Init();
+            m_cheatService.Init(AssemblyName);
             
             await UniTask.WaitUntil(() => m_cheatService.IsInitialize, cancellationToken: this.GetCancellationTokenOnDestroy());
             
@@ -60,6 +82,46 @@ namespace Base
             m_dropdown.AddOptions(listOptions);
             m_dropdown.SetValueWithoutNotify(m_currentIndex);
         }
+
+        private void DrawMethodParameter(MethodCheatCommand command)
+        {
+            ParameterInfo[] parameterInfos = command.GetParameters();
+            if (parameterInfos.Length <= 0) return;
+
+            for (int i = 0; i < parameterInfos.Length; ++i)
+            {
+                
+            }
+        }
+
+        private void OnValueChanged(int index)
+        {
+            try
+            {
+                m_currentIndex = index;
+
+                MethodCheatCommand command = m_cheatService.GetCheatCommands()[m_currentIndex] as MethodCheatCommand;
+
+                if (command is null)
+                {
+                    PDebug.ErrorFormat("[Cheat] Wrong type of Cheat command at Index {0}", index);
+                    return;
+                }
+                
+                DrawMethodParameter(command);
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                PDebug.ErrorFormat("[Cheat] Index out of range: The selected index is out of range of CheatCommand list");
+                m_currentIndex = 0;
+            }
+        }
+
+        public void ExecuteCommand()
+        {
+            ICheatCommand command = m_cheatService.GetCheatCommands()[m_currentIndex];
+        }
+
         public override void Populate<T>(T viewData)
         {
             return;
