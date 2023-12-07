@@ -1,10 +1,13 @@
+using System.Reflection;
 using Base.Helper;
 
-namespace Base
+namespace Base.Cheat
 {
     public abstract class ParameterItemDisplayBase : BaseUI
     {
-        public abstract void Initialize(CheatParameterData parameterData);
+        public bool IsActive { get; protected set; }
+        
+        public abstract void Initialize(ParameterInfo parameterData);
         
         public abstract string GetValue();
     }

@@ -1,20 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 
-namespace Base
+namespace Base.Cheat
 {
     public class InputParameterDisplay : ParameterItemDisplayBase
     {
         [SerializeField] protected TMP_Text m_parameterNameText;
-        public override void Initialize(CheatParameterData parameterData)
+
+        private object m_value;
+        public override void Initialize(ParameterInfo parameterData)
         {
-            
+            m_value = parameterData.HasDefaultValue ? parameterData.DefaultValue : null;
         }
         public override string GetValue()
         {
-            return string.Empty;
+            return m_value.ToString();
         }
     }
 }

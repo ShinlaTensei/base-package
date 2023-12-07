@@ -17,26 +17,17 @@ using TMPro;
 using UniRx;
 using UnityEngine;
 
-namespace Base
+namespace Base.Cheat
 {
-    public class CheatParameterData
-    {
-        public ParameterType parameterType;
-        public string        parameterName;
-    }
-    
-    public enum ParameterType {None = 0, Input = 1, Boolean = 2, Enum = 3}
-
     public class CheatUI : UIView
     {
-        [SerializeField] private TMP_Dropdown             m_dropdown;
-        [SerializeField] private ParameterItemDisplayBase m_inputParameter;
-        [SerializeField] private ParameterItemDisplayBase m_boolParameter;
+        [SerializeField] private TMP_Dropdown                  m_dropdown;
+        [SerializeField] private ParameterItemDisplayContainer m_parameterItemDisplayContainer;
 
-        private CheatService m_cheatService;
-        private InputHandler m_inputHandler;
-        private int          m_currentIndex = 0;
-        
+        private CheatService     m_cheatService;
+        private InputHandler     m_inputHandler;
+        private int              m_currentIndex  = 0;
+
         private const string AssemblyName = "Assembly-CSharp";
         
         protected override void Awake()
@@ -47,6 +38,7 @@ namespace Base
             var clickStream = Observable.EveryUpdate().Where(_ => m_inputHandler.GetTouch().Count > 0);
             clickStream.Buffer(clickStream.Throttle(TimeSpan.FromMilliseconds(250))).Where(xs => xs.Count >= 2)
                        .Subscribe(_ => Show()).AddTo(this);
+            m_parameterItemDisplayContainer.Initialize();
         }
 
         protected override void Start()
@@ -58,9 +50,8 @@ namespace Base
         private async Task StartInitializeService()
         {
             m_cheatService.Init(AssemblyName);
-            
             await UniTask.WaitUntil(() => m_cheatService.IsInitialize, cancellationToken: this.GetCancellationTokenOnDestroy());
-            
+
             DrawCheatCommand();
         }
 
@@ -90,8 +81,13 @@ namespace Base
 
             for (int i = 0; i < parameterInfos.Length; ++i)
             {
-                
+                GenerateParameterDisplay(parameterInfos[i]);
             }
+        }
+
+        private void GenerateParameterDisplay(ParameterInfo parameterInfo)
+        {
+            
         }
 
         private void OnValueChanged(int index)
