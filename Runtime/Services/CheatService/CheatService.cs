@@ -63,14 +63,14 @@ namespace Base.Cheat
             }
         }
 
-        public T GetInstance<T>()
+        public object GetInstance(Type type)
         {
-            if (!IsRegisterInstance(typeof(T)))
+            if (!IsRegisterInstance(type))
             {
-                throw new InvalidOperationException(string.Format("[Cheat] No instance of type {0} registered", typeof(T)));
+                throw new InvalidOperationException(string.Format("[Cheat] No instance of type {0} registered", type));
             }
 
-            return (T) m_instanceRegistry[typeof(T)].Target;
+            return m_instanceRegistry[type].Target;
         }
 
         public List<ICheatCommand> GetCheatCommands()

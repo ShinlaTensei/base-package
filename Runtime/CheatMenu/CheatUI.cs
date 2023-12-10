@@ -35,7 +35,7 @@ namespace Base.Cheat
             m_cheatService = ServiceLocator.Get<CheatService>();
             m_inputHandler = ServiceLocator.Get<InputHandler>();
 
-            var clickStream = Observable.EveryUpdate().Where(_ => m_inputHandler.GetTouch().Count > 0);
+            var clickStream = Observable.EveryUpdate().Where(_ => m_inputHandler.GetTouchBegan());
             clickStream.Buffer(clickStream.Throttle(TimeSpan.FromMilliseconds(250))).Where(xs => xs.Count >= 2)
                        .Subscribe(_ => Show()).AddTo(this);
             m_parameterItemDisplayContainer.Initialize();
@@ -45,6 +45,23 @@ namespace Base.Cheat
         {
             m_dropdown.onValueChanged.AddListener(OnValueChanged);
             TaskRunner.Start(StartInitializeService());
+
+            Application.logMessageReceived += OnLogCallback;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            Application.logMessageReceived -= OnLogCallback;
+        }
+
+        private void OnLogCallback(string condition, string stackTrace, LogType type)
+        {
+            if (type is LogType.Exception or LogType.Error)
+            {
+                int a = 0;
+            }
         }
 
         private async Task StartInitializeService()
@@ -59,6 +76,7 @@ namespace Base.Cheat
         {
             List<ICheatCommand>           commands    = m_cheatService.GetCheatCommands();
             List<TMP_Dropdown.OptionData> listOptions = new List<TMP_Dropdown.OptionData>();
+            listOptions.Add(new TMP_Dropdown.OptionData("<none>"));
             for (int i = 0; i < commands.Count; ++i)
             {
                 TMP_Dropdown.OptionData optionData = new TMP_Dropdown.OptionData
@@ -79,16 +97,9 @@ namespace Base.Cheat
             ParameterInfo[] parameterInfos = command.GetParameters();
             if (parameterInfos.Length <= 0) return;
 
-            for (int i = 0; i < parameterInfos.Length; ++i)
-            {
-                GenerateParameterDisplay(parameterInfos[i]);
-            }
+            m_parameterItemDisplayContainer.PopulateParameterDisplay(parameterInfos);
         }
-
-        private void GenerateParameterDisplay(ParameterInfo parameterInfo)
-        {
-            
-        }
+        
 
         private void OnValueChanged(int index)
         {
@@ -96,7 +107,14 @@ namespace Base.Cheat
             {
                 m_currentIndex = index;
 
-                MethodCheatCommand command = m_cheatService.GetCheatCommands()[m_currentIndex] as MethodCheatCommand;
+                if (m_currentIndex <= 0)
+                {
+                    // Return due to index 0 is <none> by default
+                    m_parameterItemDisplayContainer.ResetDisplay();
+                    return;
+                }
+
+                MethodCheatCommand command = m_cheatService.GetCheatCommands()[m_currentIndex - 1] as MethodCheatCommand;
 
                 if (command is null)
                 {
@@ -113,9 +131,12 @@ namespace Base.Cheat
             }
         }
 
-        public void ExecuteCommand()
+        public override void Show()
         {
-            ICheatCommand command = m_cheatService.GetCheatCommands()[m_currentIndex];
+            base.Show();
+
+            m_dropdown.value = m_currentIndex = 0;
+            m_parameterItemDisplayContainer.ResetDisplay();
         }
 
         public override void Populate<T>(T viewData)
@@ -126,21 +147,23 @@ namespace Base.Cheat
         public void OnExecuteCheatCommand()
         {
             List<ICheatCommand> commands = m_cheatService.GetCheatCommands();
-            if (m_currentIndex >= commands.Count || m_currentIndex < 0)
+            if (m_currentIndex - 1 >= commands.Count || m_currentIndex <= 0)
             {
                 PDebug.ErrorFormat("[Cheat] Index out of range when calling execute cheat");
                 return;
             }
 
-            if (commands[m_currentIndex] is MethodCheatCommand methodCheatCommand)
+            if (commands[m_currentIndex - 1] is MethodCheatCommand methodCheatCommand)
             {
-                methodCheatCommand.Execute(CheatUtils.GetCallerInstance(methodCheatCommand.DeclaringType), null);
+                methodCheatCommand.Execute(CheatUtils.GetCallerInstance(methodCheatCommand.DeclaringType), 
+                                           m_parameterItemDisplayContainer.GetParameterValues().ToArray());
             }
         }
 
         public void OnCloseClick()
         {
-            
+            OnExecuteCheatCommand();
+            Hide();
         }
     }
 }

@@ -74,6 +74,36 @@ namespace Base.Cheat
             throw new ArgumentException(string.Format("Cannot convert value \"{0}\" to type {1}", value, targetType.Name));
         }
 
+        public static string GetValueTypeName(Type targetType)
+        {
+            if (targetType == typeof(int))
+            {
+                return "int";
+            }
+            if (targetType == typeof(float))
+            {
+                return "float";
+            }
+            if (targetType == typeof(bool))
+            {
+                return "bool";
+            }
+            if (targetType == typeof(long))
+            {
+                return "long";
+            }
+            if (targetType == typeof(double))
+            {
+                return "double";
+            }
+            if (targetType == typeof(string))
+            {
+                return "string";
+            }
+
+            return "null";
+        }
+
         public static void RegisterCallerInstance<T>(this T instance)
         {
             CheatService cheatService = ServiceLocator.Get<CheatService>();
@@ -86,10 +116,10 @@ namespace Base.Cheat
             cheatService.UnRegisterInstance<T>();
         }
 
-        public static T GetCallerInstance<T>(T type)
+        public static object GetCallerInstance(Type type)
         {
             CheatService cheatService = ServiceLocator.Get<CheatService>();
-            return cheatService.GetInstance<T>();
+            return cheatService.GetInstance(type);
         }
     }
 }

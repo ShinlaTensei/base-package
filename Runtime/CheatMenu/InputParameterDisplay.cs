@@ -6,16 +6,26 @@ namespace Base.Cheat
 {
     public class InputParameterDisplay : ParameterItemDisplayBase
     {
-        [SerializeField] protected TMP_Text m_parameterNameText;
-
-        private object m_value;
+        [SerializeField] private TMP_InputField m_inputField;
+        
         public override void Initialize(ParameterInfo parameterData)
         {
-            m_value = parameterData.HasDefaultValue ? parameterData.DefaultValue : null;
+            Active               = true;
+            m_value              = parameterData.HasDefaultValue ? parameterData.DefaultValue : null;
+            m_parameterName.text = $"{parameterData.Name}:{CheatUtils.GetValueTypeName(parameterData.ParameterType)}";
+            m_inputField.text    = m_value?.ToString() ?? string.Empty;
+            
+            m_inputField.onEndEdit.RemoveAllListeners();
+            m_inputField.onEndEdit.AddListener(OnEndEdit);
         }
         public override string GetValue()
         {
             return m_value.ToString();
+        }
+
+        private void OnEndEdit(string crrValue)
+        {
+            m_value = crrValue;
         }
     }
 }
