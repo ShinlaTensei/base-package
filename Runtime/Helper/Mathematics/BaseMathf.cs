@@ -1,11 +1,13 @@
 ﻿using System;
+using Base.Logging;
+using UnityEngine;
 
 namespace Base.Helper
 {
     /// <summary>
     /// Provides extension methods for math operations.
     /// </summary>
-    public static class MathExtensions
+    public static class BaseMathf
     {
         /// <summary>
         /// Returns the inversed value. This means a positive value
@@ -66,8 +68,18 @@ namespace Base.Helper
         /// <param name="value">The value to check.</param>
         /// <param name="min">The minimal value.</param>
         /// <param name="max">The maximum value.</param>
+        /// <param name="inclusive">Determine inclusive or exclusive</param>
         /// <returns>Whether the value is in the range.</returns>
-        public static bool InRange(this int value, int min, int max) => value >= min && value <= max;
+        public static bool InRange(this int value, int min, int max, bool inclusive = false)
+        {
+            if (min > max)
+            {
+                PDebug.WarnFormat("[BaseMathf] The range value are inappropriate, this function will return false by default: min({0}) - max({1})", min, max);
+                return false;
+            }
+
+            return inclusive ? value >= min && value <= max : value > min && value < max;
+        }
 
         /// <summary>
         /// Returns the normalized (between 0 and 1) value.
@@ -89,5 +101,27 @@ namespace Base.Helper
         /// <returns>The mapped value.</returns>
         public static float Map(this float value, float min, float max, float targetMin, float targetMax)
                         => (value - min) * ((targetMax - targetMin) / (max - min)) + targetMin;
+        
+        /// <summary>
+        /// Calculate the ballistic vector of 2 position with predefined angle
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="angle"></param>
+        /// <returns></returns>
+        public static Vector3 CalcBallisticVelocityVector(Vector3 source, Vector3 target, float angle)
+        {
+            Vector3 direction = target - source;
+            float h = direction.y;
+            direction.y = 0;
+            float distance = direction.magnitude;
+            float a = angle * Mathf.Deg2Rad;
+            direction.y = distance * Mathf.Tan(a);
+            distance += h / Mathf.Tan(a);
+
+            // calculate velocity
+            float velocity = Mathf.Sqrt(distance * Physics.gravity.magnitude / Mathf.Sin(2 * a));
+            return velocity * direction.normalized;
+        }
     }
 }
