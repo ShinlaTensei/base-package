@@ -56,45 +56,6 @@ namespace Base.Helper
             return ((long) number).ToOrdinalString();
         }
 
-        public static Vector3 CalcBallisticVelocityVector(Vector3 source, Vector3 target, float angle)
-        {
-            Vector3 direction = target - source;
-            float h = direction.y;
-            direction.y = 0;
-            float distance = direction.magnitude;
-            float a = angle * Mathf.Deg2Rad;
-            direction.y = distance * Mathf.Tan(a);
-            distance += h / Mathf.Tan(a);
-
-            // calculate velocity
-            float velocity = Mathf.Sqrt(distance * Physics.gravity.magnitude / Mathf.Sin(2 * a));
-            return velocity * direction.normalized;
-        }
-
-        /// <summary>
-        /// Returns true if the target value is between a and b ( both exclusive ). 
-        /// To include the limits values set the "inclusive" parameter to true.
-        /// </summary>
-        public static bool IsBetween(float target, float a, float b, bool inclusive = false)
-        {
-            if (b > a)
-                return (inclusive ? target >= a : target > a) && (inclusive ? target <= b : target < b);
-            else
-                return (inclusive ? target >= b : target > b) && (inclusive ? target <= a : target < a);
-        }
-
-        /// <summary>
-        /// Returns true if the target value is between a and b ( both exclusive ). 
-        /// To include the limits values set the "inclusive" parameter to true.
-        /// </summary>
-        public static bool IsBetween(int target, int a, int b, bool inclusive = false)
-        {
-            if (b > a)
-                return (inclusive ? target >= a : target > a) && (inclusive ? target <= b : target < b);
-            else
-                return (inclusive ? target >= b : target > b) && (inclusive ? target <= a : target < a);
-        }
-
         public static bool IsCloseTo(Vector3 input, Vector3 target, float tolerance)
         {
             return Vector3.Distance(input, target) <= tolerance;
