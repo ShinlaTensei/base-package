@@ -27,14 +27,14 @@ namespace Base.Helper
             }
             catch (Exception e)
             {
-                PDebug.Error(e, "[TaskRunner]");
+                PDebug.Error(e, "[TaskRunner] Task Run Failed: {0}", e.Message);
                 try
                 {
                     onError?.Invoke(e);
                 }
                 catch (Exception callBackException)
                 {
-                    PDebug.Error(callBackException, "[TaskRunner] Error Callback Exception");
+                    PDebug.Error(callBackException, "[TaskRunner] Error Callback Exception: {0}", callBackException.Message);
                 }
             }
         }
@@ -48,14 +48,14 @@ namespace Base.Helper
             }
             catch (Exception e)
             {
-                PDebug.Error(e, "[TaskRunner]");
+                PDebug.Error(e, "[TaskRunner] Task Run Failed: {0}", e.Message);
                 try
                 {
                     onError?.Invoke(e);
                 }
                 catch (Exception callBackException)
                 {
-                    PDebug.Error(callBackException, "[TaskRunner] Error Callback Exception");
+                    PDebug.Error(callBackException, "[TaskRunner] Error Callback Exception: {0}", callBackException.Message);
                 }
             }
         }

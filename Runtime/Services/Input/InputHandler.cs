@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Base
 {
-    public class InputHandler : IService
+    public class InputHandler : Service
     {
         #if UNITY_EDITOR || UNITY_STANDALONE
         private bool m_isTouch = false;
@@ -54,6 +54,29 @@ namespace Base
             }
 
             return m_touches;
+        }
+
+        public bool GetTouchBegan()
+        {
+            if (m_isTouch)
+            {
+                if (Input.touchCount == 0) return false;
+
+                Touch touch = Input.touches[0];
+                if (touch.phase is TouchPhase.Began)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public void Init()

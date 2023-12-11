@@ -75,7 +75,7 @@ namespace Base.Helper
         public ViewBackgroundType BackgroundType    => m_backgroundType;
         public bool               IsShowing         { get => m_isShow; set => m_isShow = value; }
 
-        public virtual void Show()
+        public override void Show()
         {
             //if (IsMissingReference) return;
             
@@ -83,7 +83,7 @@ namespace Base.Helper
             IsShowing = true;
         }
 
-        public virtual void Hide()
+        public override void Hide()
         {
             //if (IsMissingReference) return;
             IsShowing = false;
@@ -109,19 +109,17 @@ namespace Base.Helper
             
         }
 
-        public virtual void Show<T>(T argument) where T : IViewData
+        public virtual void OnShow()
         {
-            Show();
             
-            Populate(argument);
         }
 
-        public virtual void Hide<T>(T argument) where T : IViewData
+        public virtual void OnHide()
         {
-            Hide();
+            
         }
 
-        public virtual void InternalClose()
+        public void InternalClose()
         {
             if (UIManager != null)
             {
@@ -133,11 +131,11 @@ namespace Base.Helper
             }
         }
 
-        public virtual void CloseAndOpenPrevious()
+        public void CloseAndOpenPrevious(IViewData viewData = null)
         {
             if (UIManager != null)
             {
-                UIManager.CloseView(this, true);
+                UIManager.CloseView(this, true, viewData);
             }
             else
             {
@@ -160,7 +158,10 @@ namespace Base.Helper
 
         public abstract void Populate<T>(T viewData) where T : IViewData;
 
-        public abstract void RePopulate();
+        public virtual void RePopulate()
+        {
+            
+        }
 
         public void OnPointerClick(PointerEventData eventData)
         {
