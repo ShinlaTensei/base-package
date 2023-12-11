@@ -14,10 +14,9 @@ using Object = UnityEngine.Object;
 
 namespace Base
 {
-    public partial class AddressableManager : MonoBehaviour, IService
+    public partial class AddressableManager : Service
     {
         public static float RETRY_DELAY_TIMER = 2f;
-        public bool IsInit { get; set; }
         public bool IsReadyToGetBundle { get; set; }
 
         #region Tracking Asset
@@ -153,7 +152,7 @@ namespace Base
         {
             PDebug.GetLogger().Info("[AddressableManager] Initializing ...");
 
-            IsInit = false;
+            IsInitialize = false;
             IsReadyToGetBundle = false;
 
             try
@@ -181,7 +180,7 @@ namespace Base
             {
                 PDebug.Info("[AddressableManager] Initializing Completed!!!");
 
-                IsInit = true;
+                IsInitialize = true;
                 IsReadyToGetBundle = true;
                 callback?.Invoke(true);
             }
@@ -191,7 +190,7 @@ namespace Base
                 if (retry >= retryCount)
                 {
                     PDebug.ErrorFormat("[AddressableManager] Initializing Error: {msg}", ex.Message);
-                    IsInit = true;
+                    IsInitialize = true;
                     IsReadyToGetBundle = false;
                     callback?.Invoke(false);
                 }
@@ -215,7 +214,7 @@ namespace Base
         {
             PDebug.GetLogger().Info("[AddressableManager] Initializing ...");
 
-            IsInit = false;
+            IsInitialize = false;
             IsReadyToGetBundle = false;
 
             try
@@ -223,7 +222,7 @@ namespace Base
                 await Addressables.InitializeAsync().ToUniTask(cancellationToken: cancellationToken);
 
                 PDebug.GetLogger().Info("[AddressableManager] Initializing Completed!!!");
-                IsInit = IsReadyToGetBundle = true;
+                IsInitialize = IsReadyToGetBundle = true;
 
                 return true;
             }
@@ -236,7 +235,7 @@ namespace Base
                 if (retry >= retryCount)
                 {
                     PDebug.GetLogger().Error("[AddressableManager] Initializing Error: {msg}", exception.Message);
-                    IsInit = true;
+                    IsInitialize = true;
                     IsReadyToGetBundle = false;
                     callback?.Invoke(false);
 

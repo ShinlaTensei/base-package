@@ -13,17 +13,4 @@ namespace Base.Services
     {
         
     }
-    
-    
-    public class ResourceHolderService : IResourceHolderService
-    {
-        public void Dispose()
-        {
-            throw new System.NotImplementedException();
-        }
-        public void Init()
-        {
-            throw new System.NotImplementedException();
-        }
-    }
 }
