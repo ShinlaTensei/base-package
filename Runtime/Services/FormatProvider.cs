@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Base.Services
 {
-    public class FormatProviderService : IService
+    public class FormatProviderService : Service
     {
         private enum RoundingStrategy
         {
@@ -27,15 +27,7 @@ namespace Base.Services
         private const string ROMAN_NUMBER_8  = "VIII";
         private const string ROMAN_NUMBER_9  = "IX";
         private const string ROMAN_NUMBER_10 = "X";
-        public void Dispose()
-        {
-            
-        }
-        public void Init()
-        {
-            
-        }
-        
+
         private double ApplyRounding(double number, int decimalPlaces, RoundingStrategy roundingStrategy)
         {
             switch (roundingStrategy)

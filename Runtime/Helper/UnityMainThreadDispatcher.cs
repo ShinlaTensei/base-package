@@ -4,7 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using Base.Pattern;
 
-public interface IMainThreadDispatcher
+public interface IMainThreadDispatcher : IService
 {
     /// <summary>
     /// Locks the queue and adds the IEnumerator to the queue
@@ -26,9 +26,11 @@ public interface IMainThreadDispatcher
     void Dispatch(float delay, Action action);
 }
 
-public class UnityMainThreadDispatcher : MonoBehaviour, IMainThreadDispatcher, IService
+public class UnityMainThreadDispatcher : MonoBehaviour, IMainThreadDispatcher
 {
     readonly ConcurrentQueue<Action> _executionQueue = new ConcurrentQueue<Action>();
+
+    public bool IsInitialize { get; private set; }
 
     void Update()
     {

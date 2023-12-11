@@ -28,11 +28,13 @@ namespace Base
     {
     }
 
-    public partial class UIViewManager : BaseMono, IService
+    public class UIViewManager : BaseMono, IService
     {
         [SerializeField] private GameObject m_blurObj;
         [SerializeField] private GameObject m_transparentObj;
         private const            string     RootName = "Root";
+
+        public bool IsInitialize { get; private set; } = false;
 
         #region UIView Handle
 
@@ -247,7 +249,7 @@ namespace Base
             GameObject inst       = null;
             string     prefabPath = string.Empty;
 
-            if (m_addressableManager.IsInit && m_addressableManager.IsReadyToGetBundle)
+            if (m_addressableManager.IsInitialize && m_addressableManager.IsReadyToGetBundle)
             {
                 prefabPath = modelName;
                 inst = await m_addressableManager.InstantiateAsync(prefabPath,
@@ -269,7 +271,7 @@ namespace Base
             GameObject inst       = null;
             string     prefabPath = string.Empty;
 
-            if (m_addressableManager.IsInit && m_addressableManager.IsReadyToGetBundle)
+            if (m_addressableManager.IsInitialize && m_addressableManager.IsReadyToGetBundle)
             {
                 prefabPath = modelName;
                 inst = await m_addressableManager.InstantiateAsync(prefabPath, retryCount: 5,
@@ -417,6 +419,7 @@ namespace Base
         public void Init()
         {
             m_addressableManager = ServiceLocator.Get<AddressableManager>();
+            IsInitialize = true;
         }
         
 

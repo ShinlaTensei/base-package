@@ -16,7 +16,7 @@ namespace Base.Services
         public string GetTextByKey(string key);
     }
     
-    public class LocalizeService : IService
+    public class LocalizeService : Service
     {
         private readonly Dictionary<SystemLanguage, LanguageCode> _supportLanguage = new Dictionary<SystemLanguage, LanguageCode>
         {
@@ -30,7 +30,7 @@ namespace Base.Services
 
         public LanguageCode CurrentLanguage => _currentLang;
         
-        public void Init()
+        public override void Init()
         {
 
             if (PlayerPrefs.HasKey(KeyLang))
