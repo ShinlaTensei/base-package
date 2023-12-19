@@ -7,7 +7,9 @@
             "com.cysharp.unitask",
             "com.neuecc.unirx",
             "com.dbrizov.naughtyattributes",
-            "com.coffee.ui-effect"
+            "com.coffee.ui-effect",
+            "com.coffee.unmask",
+            "com.coffee.softmask-for-ugui"
           ]
         }
       ]
