@@ -13,8 +13,6 @@
         "com.unity.device-simulator.devices": "1.0.0",
         "com.cysharp.unitask": "2.5.0",
         "com.dbrizov.naughtyattributes": "2.1.4",
-        "com.neuecc.unirx": "7.1.0",
-        "com.coffee.softmask-for-ugui": "1.0.2",
-        "com.coffee.unmask": "1.4.1"
+        "com.neuecc.unirx": "7.1.0"
     }
 }
