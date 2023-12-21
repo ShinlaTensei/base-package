@@ -16,20 +16,22 @@ namespace Base.Helper
         /// </summary>
         /// <param name="timeInSeconds"></param>
         /// <param name="callBack"></param>
-        public static void RunInterval(float timeInSeconds, Action callBack = null)
+        public static IDisposable RunInterval(float timeInSeconds, Action callBack = null)
         {
-            IDisposable disposable = Observable.Interval(TimeSpan.FromSeconds(timeInSeconds)).Subscribe(_ => callBack?.Invoke(), Instance.OnError);
+            IDisposable disposable = Observable.Interval(TimeSpan.FromSeconds(timeInSeconds)).Subscribe(_ => callBack?.Invoke(), e => Instance
+                                                                                                                                        .OnError(e));
             
             Instance.CompositeDisposable.Add(disposable);
+            return disposable;
         }
         /// <summary>
         /// Run an action on MainThread every amount of seconds
         /// </summary>
         /// <param name="timeInSeconds"></param>
         /// <param name="callback"></param>
-        public static void RunInterval(float timeInSeconds, Action<long> callback = null)
+        public static IDisposable RunInterval(float timeInSeconds, Action<long> callback = null)
         {
-            Observable.Interval(TimeSpan.FromSeconds(timeInSeconds), Scheduler.MainThread)
+            return Observable.Interval(TimeSpan.FromSeconds(timeInSeconds), Scheduler.MainThread)
                                                .Subscribe(unit =>
                                                           {
                                                               callback?.Invoke(unit);
@@ -44,9 +46,9 @@ namespace Base.Helper
         /// <param name="dueTime">Time delay at start</param>
         /// <param name="interval">Time delay every frame</param>
         /// <param name="callback">Action</param>
-        public static void RunInterval(float dueTime, float interval, Action callback = null)
+        public static IDisposable RunInterval(float dueTime, float interval, Action callback = null)
         {
-            Observable.Timer(TimeSpan.FromSeconds(dueTime), TimeSpan.FromSeconds(interval))
+            return Observable.Timer(TimeSpan.FromSeconds(dueTime), TimeSpan.FromSeconds(interval))
                                                .Subscribe(_ => callback?.Invoke(), e => Instance.OnError(e))
                                                .AddTo(Instance.CompositeDisposable);
         }
@@ -57,13 +59,15 @@ namespace Base.Helper
         /// <param name="dueTime">Time delay at start</param>
         /// <param name="startAction"></param>
         /// <param name="scheduler">Can be schedule on MainThread, MainThreadEndOfFrame, ...</param>
-        public static void RunAfterTime(float dueTime, Action startAction = null, IScheduler scheduler = null)
+        public static IDisposable RunAfterTime(float dueTime, Action startAction = null, IScheduler scheduler = null)
         {
             scheduler ??= Scheduler.MainThread;
 
             IDisposable disposable = Observable.Timer(TimeSpan.FromSeconds(dueTime), scheduler)
                                                .Subscribe(_ => startAction?.Invoke(), e => Instance.OnError(e));
             Instance.CompositeDisposable.Add(disposable);
+
+            return disposable;
         }
 
         private void OnError(Exception exception)
@@ -74,6 +78,11 @@ namespace Base.Helper
         public static void Cancel()
         {
             Instance.CompositeDisposable.Clear();
+        }
+
+        public static void StopInterval(IDisposable disposable)
+        {
+            Instance.CompositeDisposable.Remove(disposable);
         }
     }
 }

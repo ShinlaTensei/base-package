@@ -25,7 +25,7 @@ namespace Base.Helper
         /// <returns></returns>
         public static long TimeUtc(DateTime dateTime)
         {
-            return (long)(DateTime.UtcNow - EpochUTC).TotalSeconds;
+            return (long)(dateTime - EpochUTC).TotalSeconds;
         }
         
         /// <summary>

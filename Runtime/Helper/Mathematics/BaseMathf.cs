@@ -123,5 +123,32 @@ namespace Base.Helper
             float velocity = Mathf.Sqrt(distance * Physics.gravity.magnitude / Mathf.Sin(2 * a));
             return velocity * direction.normalized;
         }
+        
+        /// <summary>
+        /// Modulo operation. Always returns positive values.
+        /// </summary>
+        public static int Mod(int x, int m)
+        {
+            return (x % m + m) % m;
+        }
+        
+        /// <summary>
+        /// It is a k % n but in case k is negative , the result is k + n
+        /// E.g in case k = -1 and n = 12 than the result would be -1 + 12 = 11
+        /// </summary>
+        public static int CircularModulo(int k, int n)
+        {
+            return ((k %= n) < 0) ? k + n : k;
+        }
+        
+        /// <summary>
+        /// Truncate a float value to the set amount of decimal places.
+        /// Example: Truncate(10.553, 2) -> 10.55
+        /// </summary>
+        public static float Truncate(float value, int decimalPlaces)
+        {
+            int floatOffset = 10 * decimalPlaces;
+            return (int)(value * floatOffset) / (float)floatOffset;
+        }
     }
 }
