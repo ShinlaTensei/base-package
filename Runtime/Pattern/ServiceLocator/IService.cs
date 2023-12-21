@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Base.Helper;
 
 namespace Base.Pattern
 {
@@ -25,6 +26,18 @@ namespace Base.Pattern
     {
         public bool IsInitialize { get; protected set; } = false;
         public virtual void UpdateData(T data) {}
+
+        public virtual void Init()
+        {
+            IsInitialize = true;
+        }
+        
+        public virtual void Dispose() {}
+    }
+
+    public abstract class MonoService : BaseMono, IService
+    {
+        public bool IsInitialize { get; protected set; } = false;
 
         public virtual void Init()
         {
