@@ -23,15 +23,19 @@ namespace Base.Cheat
             m_commands = new SortedDictionary<string, ICheatCommand>();
         }
 
-        public void Init(string assemblyName)
+        public void Init(string[] assemblyName)
         {
             Assembly[] assemblies   = System.AppDomain.CurrentDomain.GetAssemblies();
-            Assembly   mainAssembly = assemblies.FirstOrDefault(a => a.GetName().Name.Equals(assemblyName));
-            if (mainAssembly != null)
+            for (int i = 0; i < assemblyName.Length; ++i)
             {
-                CheatUtils.Scan(mainAssembly.GetTypes());
-                IsInitialize = true;
+                Assembly mainAssembly = assemblies.FirstOrDefault(a => a.GetName().Name.Equals(assemblyName[i]));
+                if (mainAssembly != null)
+                {
+                    CheatUtils.Scan(mainAssembly.GetTypes());
+                    IsInitialize = true;
+                }
             }
+            
         }
 
         public void RegisterCommand(ICheatCommand command)

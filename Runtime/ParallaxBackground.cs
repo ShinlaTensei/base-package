@@ -1,21 +1,11 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class ParallaxBackground : MonoBehaviour {
-
+[InfoBox("This class is used to create a parallax effect for 2D background, please add this to a background layer")]
+public class ParallaxBackground : MonoBehaviour 
+{
     [SerializeField] private Vector2 parallaxEffectMultiplier;
     [SerializeField] private bool infiniteHorizontal;
     [SerializeField] private bool infiniteVertical;
@@ -33,6 +23,8 @@ public class ParallaxBackground : MonoBehaviour {
         textureUnitSizeX = texture.width / sprite.pixelsPerUnit;
         textureUnitSizeY = texture.height / sprite.pixelsPerUnit;
     }
+    
+    private UniTas
 
     private void LateUpdate() {
         Vector3 deltaMovement = cameraTransform.position - lastCameraPosition;

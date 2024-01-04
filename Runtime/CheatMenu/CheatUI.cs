@@ -64,9 +64,17 @@ namespace Base.Cheat
             }
         }
 
-        private async Task StartInitializeService()
+        private async Task StartInitializeService(params string[] assemblyNames)
         {
-            m_cheatService.Init(AssemblyName);
+            string[] assemblies = new string[] { AssemblyName, "Unity.BaseFramework" };
+            if (assemblyNames.Length > 0)
+            {
+                for (int i = 0; i < assemblyNames.Length; ++i)
+                {
+                    assemblies.AddIfNotContains(assemblyNames[i]);
+                }
+            }
+            m_cheatService.Init(assemblies);
             await UniTask.WaitUntil(() => m_cheatService.IsInitialize, cancellationToken: this.GetCancellationTokenOnDestroy());
 
             DrawCheatCommand();
