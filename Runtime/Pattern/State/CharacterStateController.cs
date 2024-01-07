@@ -2,7 +2,7 @@
 using Base.Helper;
 using System.Collections.Generic;
 using Base.Module;
-using NaughtyAttributes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Base.Pattern
@@ -227,7 +227,7 @@ namespace Base.Pattern
         [Tooltip("Choose what type of moment reference should be using. Should it use its own transform, the world coordinates or an external transform")]
         public MovementReferenceMode movementReferenceMode;
 
-        [ShowIf("movementReferenceMode", MovementReferenceMode.External)]
+        [ShowIf("@this.movementReferenceParam", Value = MovementReferenceMode.External)]
         public Transform external = null;
     }
     

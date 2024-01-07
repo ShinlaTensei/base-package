@@ -14,14 +14,14 @@ namespace Base.Services
 {
     public class AudioEventHandler : SerializedMonoBehaviour
     {
-        [SerializeField, ValueDropdown(nameof(GetAudioEventsValue), DrawDropdownForListElements = false)]
+        [SerializeField, ValueDropdown(nameof(GetAudioEventsValue), DrawDropdownForListElements = false), ListDrawerSettings(ShowFoldout = false)]
         private List<AudioEvent> m_audioEvents = new List<AudioEvent>();
 
         private IEnumerable GetAudioEventsValue()
         {
             List<ValueDropdownItem> result = new List<ValueDropdownItem>()
                                              {
-                                                     new ValueDropdownItem("OneShot", new OneShotAudioEvent()),
+                                                     new("OneShot", new OneShotAudioEvent()),
                                                      new("Sound", new SoundAudioEvent()),
                                                      new("Music", new MusicAudioEvent())
                                              };
