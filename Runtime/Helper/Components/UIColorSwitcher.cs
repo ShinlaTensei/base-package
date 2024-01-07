@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using Base.Logging;
 using Base.Utilities;
 using JetBrains.Annotations;
-using NaughtyAttributes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -61,7 +61,7 @@ namespace Base.Helper
 
         }
         
-        [Button("Simulate", EButtonEnableMode.Editor), UsedImplicitly]
+        [Button(ButtonSizes.Small, ButtonStyle.Box, Name = "Simulate"), UsedImplicitly]
         private void UpdateColor()
         {
             if (m_simulate)

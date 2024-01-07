@@ -1,6 +1,6 @@
 ﻿using System;
 using Base.Logging;
-using NaughtyAttributes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Base.Helper
