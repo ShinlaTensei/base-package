@@ -90,5 +90,7 @@ namespace Base.Services
         {
             return m_audioInfoConfigs.Where(item => item.AudioGenre == genre).ToList();
         }
+
+        public List<AudioInfoConfig> GetConfig() => m_audioInfoConfigs;
     }
 }

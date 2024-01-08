@@ -329,6 +329,6 @@ namespace Base.Helper
         /// <param name="list">The list to check the bounds of.</param>
         /// <param name="index">The index to check.</param>
         /// <returns>Whether the index is inside the bounds.</returns>
-        public static bool HasIndex<T>(this IList<T> list, int index) => index.InRange(0, list.Count - 1);
+        public static bool HasIndex<T>(this IList<T> list, int index) => index.InRange(0, list.Count - 1, true);
     }
 }
