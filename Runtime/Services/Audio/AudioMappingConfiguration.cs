@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Base.Services
 {
     [Serializable]
-    public struct AudioInfoConfig : ISearchFilterable
+    public class AudioInfoConfig : ISearchFilterable
     {
         [FoldoutGroup("$FriendlyName")]
         [PropertyOrder(1)]

@@ -5,6 +5,7 @@
 #endregion
 
 using System;
+using Base.Core;
 using Base.Pattern;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -12,99 +13,35 @@ using UnityEngine;
 namespace Base.Services
 {
     [Serializable]
-    public abstract class AudioEvent
+    public class AudioEvent
     {
         [SerializeField, InfoBox("The name of audio event, this should be the same with audio key in configuration file and unique for the project")]
         protected string m_name;
 
-        public string Name => m_name;
+        public string Name       => m_name;
+        public string Type       { get; set; }
+        public string SettingKey { get; set; } = SoundService.GLOBAL;
 
         [SerializeField, EnumToggleButtons] private InvokeStrategy m_invokeStrategy = InvokeStrategy.Manual;
 
         internal InvokeStrategy InvokeStrategy => m_invokeStrategy;
 
-        [SerializeField, Range(0, 1)] protected float m_volume;
+        public void Play()
+        {
+            ServiceLocator.Get<SoundService>().Play(Type, Name, SettingKey);
+        }
 
-        [SerializeField] protected bool m_overrideSetting = false;
-
-        public abstract void Play();
-        public abstract void Pause();
-        public abstract void Resume();
-        public abstract void Stop();
-    }
-
-    public class OneShotAudioEvent : AudioEvent
-    {
-        public override void Play()
+        public void Pause()
         {
-            if (m_overrideSetting)
-            {
-                ServiceLocator.Get<SoundService>().SetAudioVolume(AudioGenre.OneShot, m_volume);
-            }
-            
-            ServiceLocator.Get<SoundService>().Play(AudioGenre.OneShot, Name);
+            ServiceLocator.Get<SoundService>().Pause(Type);
         }
-        public override void Pause()
+        public void Resume()
         {
-            
+            ServiceLocator.Get<SoundService>().Resume(Type);
         }
-        public override void Resume()
+        public void Stop()
         {
-            
-        }
-        public override void Stop()
-        {
-            
-        }
-    }
-
-    public class MusicAudioEvent : AudioEvent
-    {
-        public override void Play()
-        {
-            if (m_overrideSetting)
-            {
-                ServiceLocator.Get<SoundService>().SetAudioVolume(AudioGenre.Music, m_volume);
-            }
-            
-            ServiceLocator.Get<SoundService>().Play(AudioGenre.Music, Name);
-        }
-        public override void Pause()
-        {
-            ServiceLocator.Get<SoundService>().Pause(AudioGenre.Music, Name);
-        }
-        public override void Resume()
-        {
-            ServiceLocator.Get<SoundService>().Resume(AudioGenre.Music, Name);
-        }
-        public override void Stop()
-        {
-            ServiceLocator.Get<SoundService>().Stop(AudioGenre.Music, Name);
-        }
-    }
-
-    public class SoundAudioEvent : AudioEvent
-    {
-        public override void Play()
-        {
-            if (m_overrideSetting)
-            {
-                ServiceLocator.Get<SoundService>().SetAudioVolume(AudioGenre.Sound, m_volume);
-            }
-            
-            ServiceLocator.Get<SoundService>().Play(AudioGenre.Sound, Name);
-        }
-        public override void Pause()
-        {
-            ServiceLocator.Get<SoundService>().Pause(AudioGenre.Sound, Name);
-        }
-        public override void Resume()
-        {
-            ServiceLocator.Get<SoundService>().Resume(AudioGenre.Sound, Name);
-        }
-        public override void Stop()
-        {
-            ServiceLocator.Get<SoundService>().Stop(AudioGenre.Sound, Name);
+            ServiceLocator.Get<SoundService>().Stop(Type);
         }
     }
 

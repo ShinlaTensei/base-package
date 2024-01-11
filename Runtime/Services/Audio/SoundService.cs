@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Base.Core;
+using Base.Helper;
 using Base.Logging;
 using Base.Pattern;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
@@ -12,25 +15,13 @@ namespace Base.Services
     /// </summary>
     public class SoundService : MonoService, IService<AudioMappingConfiguration>
     {
+        public const string GLOBAL = "Global";
+
         private AudioDataContainer m_audioDataContainer = null;
 
-        private IDictionary<AudioGenre, AudioSource> m_audioSourceMap;
+        private IDictionary<string, AudioSource> m_audioSourceMap;
 
-
-        private void OnSoundVolumeChanged(float value)
-        {
-            GetAudioSourceByGenre(AudioGenre.Sound).volume = value;
-        }
-
-        private void OnMusicVolumeChanged(float value)
-        {
-            GetAudioSourceByGenre(AudioGenre.Music).volume = value;
-        }
-
-        private void OnOneShotVolumeChanged(float value)
-        {
-            GetAudioSourceByGenre(AudioGenre.OneShot).volume = value;
-        }
+        private AddressableManager m_addressableManager;
 
         public void UpdateData(AudioMappingConfiguration data)
         {
@@ -40,136 +31,131 @@ namespace Base.Services
         {
             ServiceLocator.Set(this);
             m_audioDataContainer = new AudioDataContainer();
-            m_audioSourceMap = new Dictionary<AudioGenre, AudioSource>();
-
-            string[] source = Enum.GetNames(typeof(AudioGenre));
-            for (int i = 0; i < source.Length; ++i)
-            {
-                string genreName = source[i];
-                GameObject sourceObj = new GameObject($"AudioSource-{genreName}");
-                AudioSource audioSource = sourceObj.AddComponent<AudioSource>();
-                audioSource.transform.SetParent(CacheTransform);
-                AudioGenre genre = Enum.Parse<AudioGenre>(genreName);
-                if (!m_audioSourceMap.ContainsKey(genre))
-                {
-                    m_audioSourceMap.Add(genre, audioSource);
-                }
-                
-                SetAudioVolume(genre, m_audioDataContainer.GetVolumeOf(genre));
-            }
-            
-            m_audioDataContainer.GlobalMusicVolume.Subscribe(OnMusicVolumeChanged).AddTo(this);
-            m_audioDataContainer.GlobalSoundVolume.Subscribe(OnSoundVolumeChanged).AddTo(this);
-            m_audioDataContainer.GlobalOneShotVolume.Subscribe(OnOneShotVolumeChanged).AddTo(this);
+            m_audioSourceMap     = new Dictionary<string, AudioSource>();
+            m_addressableManager = ServiceLocator.Get<AddressableManager>();
 
             IsInitialize = true;
         }
 
-        public bool IsAudioPlaying(AudioGenre genre) => m_audioSourceMap.TryGetValue(genre, out AudioSource source) && source.isPlaying;
+        public bool IsAudioPlaying(string audioType) => m_audioSourceMap.TryGetValue(audioType, out AudioSource source) && source.isPlaying;
 
-        public void SetAudioVolume(AudioGenre genre, float value)
+        public AudioSource GetAudioSourceByType(string audioType)
         {
-            m_audioDataContainer.SetVolumeOf(genre, value);
-        }
-
-        public AudioSource GetAudioSourceByGenre(AudioGenre genre)
-        {
-            if (!m_audioSourceMap.TryGetValue(genre, out AudioSource source))
+            if (!m_audioSourceMap.TryGetValue(audioType, out AudioSource source))
             {
-                throw new ArgumentNullException($"AudioSource of type {genre.ToString()} is not initialized");
+                PDebug.Warn($"AudioSource of type {audioType} is not initialized");
+                PDebug.InfoFormat("Start Create audio source for type {0}", audioType);
+                GameObject sourceObj = new GameObject($"AudioSource-{audioType}");
+                source = sourceObj.AddComponent<AudioSource>();
+                sourceObj.transform.SetParent(CacheTransform);
             }
 
             return source;
         }
 
-        public void Play(AudioGenre genre, string audioKey)
+        private async UniTask PlayAsync(string audioType, string audioKey , string settingKey = GLOBAL, bool isOneTime = false)
         {
-            AudioInfo audioInfo = m_audioDataContainer.GetAudioInfoOf(genre, audioKey);
+            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
             if (audioInfo == null)
             {
                 return;
             }
 
-            if (!m_audioSourceMap.TryGetValue(genre, out AudioSource source))
+            AudioClip clip = await audioInfo.Evaluate(m_addressableManager, audioKey)
+                                            .AttachExternalCancellation(TaskRunner.GetCancellationTokenForType(nameof(SoundService)));
+            AudioSource audioSource = GetAudioSourceByType(audioType);
+            
+            AudioSetting setting = ServiceLocator.Get<ISettingAccessor>().GetSetting<AudioSetting>(settingKey);
+            audioSource.volume = setting.Volume;
+            audioSource.loop   = setting.Loop;
+
+            if (setting.Is3DAudio && setting is Audio3DSetting audio3DSetting)
             {
-                return;
+                
             }
 
-            if (genre is not AudioGenre.OneShot)
+            if (clip != null)
             {
-                source.clip = audioInfo.AudioClip;
-                source.loop = audioInfo.Loop;
-                source.mute = audioInfo.Mute;
-                source.Play();
-            }
-            else
-            {
-                source.PlayOneShot(audioInfo.AudioClip);
+                audioSource.clip = clip;
+                if (isOneTime)
+                {
+                    audioSource.PlayOneShot(clip);
+                }
+                else
+                {
+                    audioSource.Play();
+                }
             }
         }
 
-        public void Pause(AudioGenre genre, string audioKey)
+        public void Play(string audioType, string audioKey, string settingKey = GLOBAL)
         {
-            AudioInfo audioInfo = m_audioDataContainer.GetAudioInfoOf(genre, audioKey);
-            if (audioInfo == null)
-            {
-                return;
-            }
+            TaskRunner.Start(PlayAsync(audioType, audioKey, settingKey).AsTask());
+        }
 
-            if (!m_audioSourceMap.TryGetValue(genre, out AudioSource source))
+        public void PlayOneShot(string audioType, string audioKey, string settingKey = GLOBAL)
+        {
+            TaskRunner.Start(PlayAsync(audioType, audioKey, settingKey, true).AsTask());
+        }
+
+        public void Pause(string audioType)
+        {
+            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
+            if (audioInfo == null)
             {
                 return;
             }
             
-            source.Pause();
+            AudioSource audioSource = GetAudioSourceByType(audioType);
+            audioSource.Pause();
         }
 
-        public void Resume(AudioGenre genre, string audioKey)
+        public void Resume(string audioType)
         {
-            AudioInfo audioInfo = m_audioDataContainer.GetAudioInfoOf(genre, audioKey);
+            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
             if (audioInfo == null)
             {
                 return;
             }
 
-            if (!m_audioSourceMap.TryGetValue(genre, out AudioSource source))
-            {
-                return;
-            }
-            
-            source.UnPause();
+            AudioSource audioSource = GetAudioSourceByType(audioType);
+            audioSource.UnPause();
         }
 
-        public void Stop(AudioGenre genre, string audioKey)
+        public void Stop(string audioType)
         {
-            AudioInfo audioInfo = m_audioDataContainer.GetAudioInfoOf(genre, audioKey);
+            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
             if (audioInfo == null)
             {
                 return;
             }
 
-            if (!m_audioSourceMap.TryGetValue(genre, out AudioSource source))
-            {
-                return;
-            }
-            
-            source.Stop();
+            AudioSource audioSource = GetAudioSourceByType(audioType);
+            audioSource.Stop();
         }
 
-        public void Mute(AudioGenre genre, string audioKey, bool isMute)
+        public void Mute(string audioType)
         {
-            AudioInfo audioInfo = m_audioDataContainer.GetAudioInfoOf(genre, audioKey);
+            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
             if (audioInfo == null)
             {
                 return;
             }
 
-            if (!m_audioSourceMap.TryGetValue(genre, out AudioSource source))
+            AudioSource audioSource = GetAudioSourceByType(audioType);
+            audioSource.mute = true;
+        }
+        
+        public void UnMute(string audioType)
+        {
+            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
+            if (audioInfo == null)
             {
                 return;
             }
 
-            source.mute = isMute;
+            AudioSource audioSource = GetAudioSourceByType(audioType);
+            audioSource.mute = false;
         }
     }
 }
