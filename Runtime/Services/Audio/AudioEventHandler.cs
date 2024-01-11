@@ -21,9 +21,9 @@ namespace Base.Services
         {
             List<ValueDropdownItem> result = new List<ValueDropdownItem>()
                                              {
-                                                     new("OneShot", new OneShotAudioEvent()),
-                                                     new("Sound", new SoundAudioEvent()),
-                                                     new("Music", new MusicAudioEvent())
+                                                     new("OneShot", new AudioEvent()),
+                                                     new("Sound", new AudioEvent()),
+                                                     new("Music", new AudioEvent())
                                              };
 
             return result;

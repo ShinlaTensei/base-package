@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Base
 {
+    // TODO: Update GridBase with OdinInspector
     public class GridBase
     {
         private int _width, _height;
