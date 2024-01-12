@@ -37,7 +37,7 @@ namespace Base.Core
         /// Creates the internal dictionary of data keyed to its name for consecutive access.
         /// </summary>
         /// <param name="dataCollection"></param>
-        private void CreateDictionary(List<T> dataCollection)
+        protected virtual void CreateDictionary(List<T> dataCollection)
         {
             m_dataDictionary = new Dictionary<string, T>();
             for (int i = 0; i < dataCollection.Count; i++)
@@ -108,7 +108,7 @@ namespace Base.Core
             m_dataDictionary = null;
 
             EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
+            AssetDatabase.SaveAssetIfDirty(this);
             AssetDatabase.Refresh();
 #endif
         }
