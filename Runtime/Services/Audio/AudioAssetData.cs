@@ -18,7 +18,7 @@ using UnityEngine;
 namespace Base.Services
 {
     [Serializable]
-    public class AudioAssetData : ReferenceData
+    public class AudioAssetData : ReferenceData, ISearchFilterable
     {
         /// <summary>
         /// Backing field for <see cref="Clips"/> used for serialization.
@@ -75,6 +75,11 @@ namespace Base.Services
             }
 
             return clip;
+        }
+
+        public bool IsMatch(string searchString)
+        {
+            return ObjectName.Contains(searchString);
         }
     }
     

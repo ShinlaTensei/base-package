@@ -16,7 +16,7 @@ namespace Base.Core
     /// </summary>
     /// <typeparam name="T">The element type of the collection.</typeparam>
     [Serializable]
-    public class WorkingCopyCollection<T>
+    public class WorkingCopyCollection<T> where T : class
     {
         [SerializeField] private List<T> m_data;
 
@@ -64,7 +64,10 @@ namespace Base.Core
                 Data.Add(GetDataCopy(value));
             }
         }
-
+        
+        /// <summary>
+        /// Clear all the changed had made.
+        /// </summary>
         public void Revert()
         {
             CreateWorkingCopy();
@@ -72,22 +75,22 @@ namespace Base.Core
         
         public virtual T GetWorkingCopy(T original)
         {
-            return original;
+            return (T) Activator.CreateInstance(original.GetType(), original);
         }
 
         public virtual T GetDataCopy(T original)
         {
-            return original;
+            return (T) Activator.CreateInstance(original.GetType(), original);
         }
     }
-    
+
     /// <summary>
     /// Class representing a collection with a separate working copy to allow reverting.
     /// The working copy is shallow, meaning list element instances are shared between both lists.
     /// </summary>
     /// <typeparam name="T">The element type of the collection.</typeparam>
     [Serializable]
-    public class DeepWorkingCopyCollection<T> : WorkingCopyCollection<T> where T : ICloneable
+    public class DeepWorkingCopyCollection<T> : WorkingCopyCollection<T> where T : class, ICloneable
     {
         public override T GetWorkingCopy(T original)
         {
