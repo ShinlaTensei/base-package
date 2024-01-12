@@ -13,7 +13,7 @@ namespace Base.Services
     /// <summary>
     /// This class is used to control the global sound of the project. For individual sound, please use another approach
     /// </summary>
-    public class SoundService : MonoService, IService<AudioMappingConfiguration>
+    public class SoundService : MonoService
     {
         public const string GLOBAL = "Global";
 
@@ -22,11 +22,7 @@ namespace Base.Services
         private IDictionary<string, AudioSource> m_audioSourceMap;
 
         private AddressableManager m_addressableManager;
-
-        public void UpdateData(AudioMappingConfiguration data)
-        {
-            m_audioDataContainer.UpdateAudioInfos(data);
-        }
+        
         public override void Init()
         {
             ServiceLocator.Set(this);
