@@ -51,8 +51,7 @@ namespace Base.Services
 
         private async UniTask PlayAsync(string audioType, string audioKey , string settingKey = GLOBAL, bool isOneTime = false)
         {
-            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
-            if (audioInfo == null)
+            if (!m_audioDataContainer.TryGetData(audioType, out AudioAssetData audioInfo))
             {
                 return;
             }
@@ -96,8 +95,7 @@ namespace Base.Services
 
         public void Pause(string audioType)
         {
-            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
-            if (audioInfo == null)
+            if (!m_audioDataContainer.TryGetData(audioType, out AudioAssetData audioInfo))
             {
                 return;
             }
@@ -108,8 +106,7 @@ namespace Base.Services
 
         public void Resume(string audioType)
         {
-            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
-            if (audioInfo == null)
+            if (!m_audioDataContainer.TryGetData(audioType, out AudioAssetData audioInfo))
             {
                 return;
             }
@@ -120,8 +117,7 @@ namespace Base.Services
 
         public void Stop(string audioType)
         {
-            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
-            if (audioInfo == null)
+            if (!m_audioDataContainer.TryGetData(audioType, out AudioAssetData audioInfo))
             {
                 return;
             }
@@ -132,8 +128,7 @@ namespace Base.Services
 
         public void Mute(string audioType)
         {
-            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
-            if (audioInfo == null)
+            if (!m_audioDataContainer.TryGetData(audioType, out AudioAssetData audioInfo))
             {
                 return;
             }
@@ -144,8 +139,7 @@ namespace Base.Services
         
         public void UnMute(string audioType)
         {
-            AudioAssetData audioInfo = m_audioDataContainer.GetAudioInfoOf(audioType);
-            if (audioInfo == null)
+            if (!m_audioDataContainer.TryGetData(audioType, out AudioAssetData audioInfo))
             {
                 return;
             }
