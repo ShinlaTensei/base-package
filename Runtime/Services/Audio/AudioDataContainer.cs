@@ -16,6 +16,10 @@ namespace Base.Services
         /// The serialized assets used to fill <see cref="DataCollection"/>
         /// </summary>
         [SerializeField] private List<string> m_serializedAssets;
+        /// <summary>
+        /// Backing field for <see cref="AudioTypes"/>
+        /// </summary>
+        [SerializeField] private List<string> m_audioTypes;
 
         /// <summary>
         /// Backing field for <see cref="DataCollection"/>
@@ -25,6 +29,14 @@ namespace Base.Services
         /// Backing field for <see cref="WorkingCopy"/>
         /// </summary>
         private List<AudioAssetData> m_audioAssetWorkingCopy;
+        /// <summary>
+        /// The audio type which is hold a set of clip name
+        /// </summary>
+        public List<string> AudioTypes
+        {
+            get => m_audioTypes;
+            set => m_audioTypes = value;
+        }
 
         public override List<AudioAssetData> DataCollection
         {
