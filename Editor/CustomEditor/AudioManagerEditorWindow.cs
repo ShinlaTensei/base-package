@@ -5,7 +5,6 @@
 #endregion
 
 using System;
-using System.IO;
 using Base.Module;
 using Base.Services;
 using Newtonsoft.Json;
@@ -27,7 +26,7 @@ namespace Base.Editor
         protected override string EditorConfigName { get; } = "AudioSystemEditorConfig.txt";
 
         private AudioSystemEditorConfig m_editorConfig;
-        private AudioSystemEditorConfig EditorConfig
+        protected override IEditorConfig EditorConfig
         {
             get
             {
@@ -38,10 +37,8 @@ namespace Base.Editor
 
                 return m_editorConfig;
             }
-            set => m_editorConfig = value;
+            set => m_editorConfig = (AudioSystemEditorConfig)value;
         }
-
-        private string GetAssetPath() => $"{OutputPath}/{nameof(AudioDataContainer)}.asset";
 
         private AudioDataContainer AudioDataContainer
         {
@@ -60,14 +57,12 @@ namespace Base.Editor
         [MenuItem("BaseFramework/Audio Asset Manager %&a", false, 300)]
         public static void ShowWindow()
         {
-            m_window         = GetWindow<AudioManagerEditorWindow>("Audio Asset Manager");
-            m_window.minSize = new Vector2(1000f, 500f);
+            GetWindow<AudioManagerEditorWindow>("Audio Asset Manager");
         }
 
         protected override void OnOutputPathChanged(string value)
         {
             EditorConfig.OutputPath = value;
-            
             LoadConfigObject();
         }
         protected override void DeSerializeConfigData(string stringData)
@@ -81,6 +76,7 @@ namespace Base.Editor
             if (EditorConfig != null)
             {
                 OutputPath = EditorConfig.OutputPath;
+                LoadConfigObject();
             }
         }
         
@@ -108,7 +104,7 @@ namespace Base.Editor
     }
     
     [Serializable]
-    public record AudioSystemEditorConfig
+    public record AudioSystemEditorConfig : IEditorConfig
     {
         [OdinSerialize] public string OutputPath { get; set; }
     }

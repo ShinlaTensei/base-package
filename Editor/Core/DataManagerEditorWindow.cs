@@ -2,6 +2,7 @@ using System;
 using Base.Core;
 using Base.Helper;
 using Base.Module;
+using Newtonsoft.Json;
 using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 
@@ -14,7 +15,9 @@ namespace Base.Editor
         /// </summary>
         protected static DataManagerEditorWindow<T> m_window;
         protected abstract string OutputPath       { get; set; }
-        protected abstract string         EditorConfigName { get; } 
+        protected abstract string         EditorConfigName { get; }
+
+        protected abstract IEditorConfig EditorConfig { get; set; }
 
         protected override void Initialize()
         {
@@ -24,13 +27,20 @@ namespace Base.Editor
             }
         }
 
+        protected override void OnDisable()
+        {
+            SerializeConfigData(JsonConvert.SerializeObject(EditorConfig));
+        }
+
         protected abstract void OnOutputPathChanged(string value);
         protected abstract void DeSerializeConfigData(string stringData);
         protected abstract void CreateDataContainer();
         protected abstract void DeleteDataContainer();
-        protected void SerializeConfigData(string data)
+        private void SerializeConfigData(string data)
         {
-            string pathToConfig = PathUtility.Combine(Application.dataPath, EditorConstant.EDITOR_CONFIG_PATH, EditorConfigName);
+            string pathToConfig = EditorConstant.EDITOR_CONFIG_PATH;
+            AssetDatabaseUtility.EnsureFolderExits(ref pathToConfig);
+            pathToConfig = PathUtility.Combine(Application.dataPath, EditorConstant.EDITOR_CONFIG_PATH, EditorConfigName);
             FileUtilities.SaveTextFile(pathToConfig, data);
         }
 
@@ -44,5 +54,10 @@ namespace Base.Editor
             string textResource = FileUtilities.LoadTextFile(pathToConfig);
             return textResource;
         }
+    }
+
+    public interface IEditorConfig
+    {
+        public string OutputPath { get; set; }
     }
 }

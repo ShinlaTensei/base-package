@@ -5,6 +5,8 @@
 #endregion
 
 using System;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Base.Module
@@ -17,7 +19,6 @@ namespace Base.Module
         private T m_oldValue;
 
         public bool HasValueChanged => OldValue.CompareTo(Value) != 0;
-
         public T Value
         {
             get => m_value;
@@ -31,7 +32,7 @@ namespace Base.Module
         public T OldValue
         {
             get => m_oldValue;
-            set => m_oldValue = value;
+            private set => m_oldValue = value;
         }
 
         public MutableValue()
@@ -41,8 +42,7 @@ namespace Base.Module
 
         public MutableValue(T defaultValue)
         {
-            m_value    = defaultValue;
-            m_oldValue = defaultValue;
+            Value = defaultValue;
         }
     }
 }
