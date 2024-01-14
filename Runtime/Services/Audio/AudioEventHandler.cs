@@ -16,7 +16,8 @@ namespace Base.Services
     {
         [SerializeField, ValueDropdown(nameof(GetAudioEventsValue), DrawDropdownForListElements = false), ListDrawerSettings(ShowFoldout = false)]
         private List<AudioEvent> m_audioEvents = new List<AudioEvent>();
-
+        
+        // This code run on editor
         private IEnumerable GetAudioEventsValue()
         {
             List<ValueDropdownItem> result = new List<ValueDropdownItem>()
@@ -28,7 +29,7 @@ namespace Base.Services
 
             return result;
         }
-
+        // -----------------------------------------------------------------------------------------------------------------------
         private void Start()
         {
             AutomaticallyInvoke(InvokeStrategy.AutomaticallyOnStart);

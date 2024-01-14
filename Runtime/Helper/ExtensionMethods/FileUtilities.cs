@@ -177,15 +177,41 @@ namespace Base.Helper
         {
             try
             {
-                var textResouce = Resources.Load<TextAsset>(filePath);
+                var textResource = Resources.Load<TextAsset>(filePath);
 
-                return textResouce.text;
+                return textResource.text;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
 
-                return null;
+                return string.Empty;
+            }
+        }
+
+        public static string LoadTextFile(string filePath)
+        {
+            try
+            {
+                return File.ReadAllText(filePath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+
+                return string.Empty;
+            }
+        }
+
+        public static void SaveTextFile(string filePath, string content)
+        {
+            try
+            {
+                File.WriteAllText(filePath, content);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 
