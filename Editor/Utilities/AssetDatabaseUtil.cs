@@ -4,10 +4,12 @@
 // File name: AssetDatabaseUtil.cs
 #endregion
 
+using System;
 using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Base.Editor
 {
@@ -26,7 +28,7 @@ namespace Base.Editor
             }
 
             if (new DirectoryInfo($"{Application.dataPath.Replace("Assets/", "")}/{dir}").Exists) return;
-            
+
             var folderNames = dir.Split('/');
 
             // Always include "Assets" as first directory
@@ -47,7 +49,7 @@ namespace Base.Editor
                 pathBuilder.Append($"/{folderNames[i]}");
             }
         }
-        
+
         public static T[] LoadAssetsAtPath<T>(string directory, string assetFilter = "") where T : Object
         {
             if (!directory.Contains("Assets/"))
@@ -55,12 +57,12 @@ namespace Base.Editor
                 directory = $"Assets/{directory}";
             }
             //todo add type filter
-            string[] fileGuids = AssetDatabase.FindAssets(assetFilter, new[] {directory});
+            string[] fileGuids = AssetDatabase.FindAssets(assetFilter, new[] { directory });
             T[]      results   = LoadAssetsFromGuids<T>(fileGuids);
 
             return results;
         }
-        
+
         public static T[] LoadAssetsFromGuids<T>(string[] fileGuids) where T : Object
         {
             T[] results = new T[fileGuids.Length];
@@ -93,6 +95,41 @@ namespace Base.Editor
             AssetDatabase.Refresh();
 
             return asset;
+        }
+
+        public static T LoadAssetOfType<T>(string path, string name = "") where T : UnityEngine.Object
+        {
+            try
+            {
+                EnsureFolderExits(ref path);
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+                if (asset != null)
+                {
+                    return asset;
+                }
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return null;
+            }
+        }
+
+        public static void CreateAssetOfType<T>(T asset, string path) where T : Object
+        {
+            try
+            {
+                EnsureFolderExits(ref path);
+                AssetDatabase.CreateAsset(asset, path);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
         }
 
         public static bool DoesAssetOfTypeExist<T>()
