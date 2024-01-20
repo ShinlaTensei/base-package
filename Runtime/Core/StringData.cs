@@ -104,7 +104,7 @@ namespace Base.Core
         /// <c>0</c> if they have the same sort order;
         /// <c>1</c> if the provided object follows this instance or it is <c>null</c>
         /// </returns>
-        public int CompareTo(object obj)
+        public virtual int CompareTo(object obj)
         {
             StringData compareData = obj as StringData;
             return compareData == null ? 1 : string.Compare(ObjectName, compareData.ObjectName, StringComparison.Ordinal);
