@@ -5,8 +5,10 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Base.Core;
+using Base.CustomAttribute;
 using Base.Helper;
 using Cysharp.Threading.Tasks;
 #if ODIN_INSPECTOR
@@ -23,12 +25,24 @@ namespace Base.Services
         /// <summary>
         /// Backing field for <see cref="Clips"/> used for serialization.
         /// </summary>
-        [SerializeField] private List<string> m_clips = new List<string>();
+        [SerializeField, ValueDropdown("@this.ClipNameValueDropdown")] 
+        private List<string> m_clips = new List<string>();
         
         /// <summary>
         /// Backing field of <see cref="CachedClip"/>
         /// </summary>
         private IDictionary<string, AudioClip> m_cachedClip;
+
+#if UNITY_EDITOR
+        [NonSerialized]
+        private IEnumerable ClipNameValueDropdown = new ValueDropdownList<string>() { new ValueDropdownItem<string>("Default", "Default") };
+
+        public void SetClipNameValueDropdown(IEnumerable newValue)
+        {
+            ClipNameValueDropdown = newValue;
+        }
+#endif
+
 
         /// <summary>
         /// The audio clips addressable name associated with the asset.
@@ -58,6 +72,11 @@ namespace Base.Services
             
         }
 
+        public AudioAssetData(AudioAssetData original) : base(original)
+        {
+            CopyData(original);
+        }
+
         public async UniTask<AudioClip> Evaluate(AddressableManager addressableService, string clipId)
         {
             if (!Clips.Contains(clipId))
@@ -80,6 +99,17 @@ namespace Base.Services
         public bool IsMatch(string searchString)
         {
             return ObjectName.Contains(searchString);
+        }
+
+        public override void CopyData(StringData data)
+        {
+            base.CopyData(data);
+
+            if (data is AudioAssetData audioAssetData)
+            {
+                m_clips = new List<string>();
+                m_clips.AddRange(audioAssetData.Clips);
+            }
         }
     }
     

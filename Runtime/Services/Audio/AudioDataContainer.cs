@@ -62,19 +62,19 @@ namespace Base.Services
         {
             m_serializedAssetTypes = new List<string>();
             m_serializedAssets = new List<string>();
-
+        
             if (DataCollection == null)
             {
                 return;
             }
-
+        
             foreach (AudioAssetData data in DataCollection)
             {
                 m_serializedAssetTypes.Add(data.GetType().FullName);
                 m_serializedAssets.Add(JsonConvert.SerializeObject(data));
             }
         }
-
+        
         public void OnAfterDeserialize()
         {
             DataCollection = new List<AudioAssetData>();

@@ -10,10 +10,6 @@ namespace Base.Editor
 {
     public abstract class DataManagerEditorWindow<T> : OdinEditorWindow where T : class, IDataObject
     {
-        /// <summary>
-        /// Static reference to the window itself to avoid multiple memory allocations when opening and closing the window.
-        /// </summary>
-        protected static DataManagerEditorWindow<T> m_window;
         protected abstract string OutputPath       { get; set; }
         protected abstract string         EditorConfigName { get; }
 

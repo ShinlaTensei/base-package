@@ -32,6 +32,14 @@ namespace Base.Helper
             }
         }
 
+        public static void AddIfNotContainsT<T>(this IList<T> list, T value) where T : IComparable
+        {
+            if (!list.Contains(value, (IEqualityComparer<T>)new ComparableDataComparer()))
+            {
+                list.Add(value);
+            }
+        }
+
         public static void AddRangeIfNotContains<T>(this List<T> list, IList<T> values)
         {
             list.AddRange(values.Where(x => !list.Contains(x)));

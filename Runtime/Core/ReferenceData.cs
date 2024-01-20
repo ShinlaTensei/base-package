@@ -5,6 +5,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Base.Core
@@ -67,6 +68,12 @@ namespace Base.Core
             {
                 Guid = referenceData.Guid;
             }
+        }
+
+        public override int CompareTo(object obj)
+        {
+            ReferenceData compareData = obj as ReferenceData;
+            return compareData == null ? 1 : string.Compare(Guid, compareData.Guid, StringComparison.Ordinal);
         }
     }
 }

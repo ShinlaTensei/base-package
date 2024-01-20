@@ -15,7 +15,7 @@ using Sirenix.Utilities;
 [DrawerPriority(0.01, 0, 0)]
 public class ListItemSelectorAttributeDrawer : OdinAttributeDrawer<ListItemSelectorAttribute>
 {
-        private static Color selectedColor = new Color(0.301f, 0.563f, 1f, 0.497f);
+    private static Color selectedColor = new Color(0.301f, 0.563f, 1f, 0.497f);
     private bool isListElement;
     private InspectorProperty baseMemberProperty;
     private PropertyContext<InspectorProperty> globalSelectedProperty;
