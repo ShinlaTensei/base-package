@@ -73,7 +73,7 @@ namespace Base.Core
         public override int CompareTo(object obj)
         {
             ReferenceData compareData = obj as ReferenceData;
-            return compareData == null ? 1 : string.Compare(Guid, compareData.Guid, StringComparison.Ordinal);
+            return compareData == null ? 1 : string.Compare(ObjectName, compareData.ObjectName, StringComparison.Ordinal);
         }
     }
 }

@@ -25,7 +25,8 @@ namespace Base.Services
         /// <summary>
         /// Backing field for <see cref="Clips"/> used for serialization.
         /// </summary>
-        [SerializeField, ValueDropdown("@this.ClipNameValueDropdown")] 
+        [SerializeField, ValueDropdown("@this.ClipNameValueDropdown"), ListItemSelector(nameof(OnClipSelectItem))]
+        [Searchable]
         private List<string> m_clips = new List<string>();
         
         /// <summary>
@@ -36,10 +37,27 @@ namespace Base.Services
 #if UNITY_EDITOR
         [NonSerialized]
         private IEnumerable ClipNameValueDropdown = new ValueDropdownList<string>() { new ValueDropdownItem<string>("Default", "Default") };
+        [NonSerialized]
+        private Action<string> m_onClipSelectAction;
+
+        public void Subscribe(Action<string> listener)
+        {
+            m_onClipSelectAction += listener;
+        }
+
+        public void Remove()
+        {
+            m_onClipSelectAction = null;
+        }
 
         public void SetClipNameValueDropdown(IEnumerable newValue)
         {
             ClipNameValueDropdown = newValue;
+        }
+
+        private void OnClipSelectItem(int index)
+        {
+            m_onClipSelectAction?.Invoke(m_clips[index]);
         }
 #endif
 

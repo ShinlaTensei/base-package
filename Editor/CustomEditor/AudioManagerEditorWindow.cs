@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Base.Helper;
 using Base.Services;
 using Newtonsoft.Json;
@@ -14,6 +15,8 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.Serialization;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -50,6 +53,8 @@ namespace Base.Editor
             set => m_audioDataContainer = value;
         }
 
+        private List<string> AudioClipEntries { get; set; } = new List<string>();
+
         [BoxGroup("OutputPath", false), HorizontalGroup("OutputPath/Box")]
         [FolderPath(ParentFolder = "Assets", RequireExistingPath = true, UseBackslashes = true), OdinSerialize]
         [OnValueChanged(nameof(OnOutputPathChanged))]
@@ -73,6 +78,17 @@ namespace Base.Editor
         protected override void Initialize()
         {
             base.Initialize();
+
+            AddressableAssetSettings     settings = AddressableAssetSettingsDefaultObject.Settings;
+            string[]                     assets   = AssetDatabase.FindAssets("t:audioClip");
+            for (int i = 0; i < assets.Length; ++i)
+            {
+                AddressableAssetEntry entry = settings.FindAssetEntry(assets[i]);
+                if (entry != null)
+                {
+                    AudioClipEntries.Add(entry.address);
+                }
+            }
         }
         
         protected override void DeSerializeConfigData(string stringData)
@@ -89,7 +105,7 @@ namespace Base.Editor
                 LoadConfigObject();
             }
         }
-        
+
         [HorizontalGroup("OutputPath/Box", 0.1f, MarginLeft = 25f), VerticalGroup("OutputPath/Box/Vertical")]
         [Button(ButtonSizes.Small, Name = "Create")]
         protected override void CreateDataContainer()
@@ -116,6 +132,21 @@ namespace Base.Editor
          GUIColor("green"), PropertySpace(5f, 5f)]
         private void SaveEditor()
         {
+            if (m_audioAssetData != null)
+            {
+                if (!AudioDataContainer.WorkingCopy.ContainsT(m_audioAssetData))
+                {
+                    AudioDataContainer.WorkingCopy.Add(m_audioAssetData);
+                }
+                else
+                {
+                    AudioAssetData value = AudioDataContainer.WorkingCopy.Get(m_audioAssetData);
+                    if (value != null)
+                    {
+                        value.CopyData(m_audioAssetData);
+                    }
+                }
+            }
             AudioDataContainer.Save();
         }
         
@@ -129,7 +160,7 @@ namespace Base.Editor
         [ValueDropdown(nameof(GetAudioType)), OnValueChanged(nameof(OnAudioTypeChanged))]
         private string m_audioType;
         
-        [TabGroup("Tab", "Data", Order = 2)]
+        [TabGroup("Tab", "Data", Order = 2), HorizontalGroup("Tab/Data/Horizontal2", .5f), OnInspectorGUI(Append = nameof(OnAudioAssetDataGUI))]
         [SerializeField, ShowIf("@m_audioType != null"), InlineProperty, HideLabel]
         private AudioAssetData m_audioAssetData;
 
@@ -143,22 +174,40 @@ namespace Base.Editor
 
             return result;
         }
+        
+        private void OnAudioAssetDataGUI(InspectorProperty property)
+        {
+            SirenixEditorGUI.DrawVerticalLineSeperator(property.LastDrawnValueRect.width + 20, property.LastDrawnValueRect.y, property
+            .LastDrawnValueRect.height, 1f);
+        }
 
         private void OnAudioTypeChanged(string value)
         {
             if (string.IsNullOrEmpty(value)) return;
 
             AudioDataContainer.TryGetData(value, out m_audioAssetData);
-
-            m_audioAssetData ??= new AudioAssetData(AudioDataContainer.WorkingCopy.Count, value, GUID.Generate().ToString());
             
+            m_audioAssetData?.Remove();
+            m_audioAssetData ??= new AudioAssetData(AudioDataContainer.WorkingCopy.Count, value, GUID.Generate().ToString());
+            m_audioAssetData.Subscribe(OnSelectClipHandler);
+            m_audioAssetData.SetClipNameValueDropdown(AudioClipEntries);
+
             AudioDataContainer.WorkingCopy.AddIfNotContainsT(m_audioAssetData);
         }
 
+        private void OnSelectClipHandler(string clipName)
+        {
+            
+        }
 
-        [TabGroup("Tab", "Settings")]
-        [OdinSerialize]
-        private string m_test;
+
+        [TabGroup("Tab", "Settings"), Title("Audio Type Settings")]
+        [OdinSerialize, HideLabel, HorizontalGroup("Tab/Settings/Horizontal", .4f)]
+        private List<string> AudioTypeSettings
+        {
+            get => AudioDataContainer.AudioTypes;
+            set => AudioDataContainer.AudioTypes = value;
+        }
     }
     
     [Serializable]
