@@ -40,6 +40,10 @@ namespace Base.Core
         protected virtual void CreateDictionary(List<T> dataCollection)
         {
             m_dataDictionary = new Dictionary<string, T>();
+            if (dataCollection is null)
+            {
+                return;
+            }
             for (int i = 0; i < dataCollection.Count; i++)
             {
                 if (m_dataDictionary.ContainsKey(dataCollection[i].ObjectName))

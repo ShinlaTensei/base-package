@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -34,7 +35,7 @@ namespace Base.Helper
 
         public static void AddIfNotContainsT<T>(this IList<T> list, T value) where T : IComparable
         {
-            if (!list.Contains(value, (IEqualityComparer<T>)new ComparableDataComparer()))
+            if (!list.ContainsT(value))
             {
                 list.Add(value);
             }
@@ -43,6 +44,11 @@ namespace Base.Helper
         public static void AddRangeIfNotContains<T>(this List<T> list, IList<T> values)
         {
             list.AddRange(values.Where(x => !list.Contains(x)));
+        }
+
+        public static void AddRangeIfNotContainsT<T>(this IList<T> list, IList<T> values) where T : IComparable
+        {
+            list.AddRange(values.Where(x => !list.ContainsT(x)));
         }
 
         /// <summary> Return a random item from the list. Sampling with replacement.  </summary>
@@ -338,5 +344,24 @@ namespace Base.Helper
         /// <param name="index">The index to check.</param>
         /// <returns>Whether the index is inside the bounds.</returns>
         public static bool HasIndex<T>(this IList<T> list, int index) => index.InRange(0, list.Count - 1, true);
+
+        public static bool ContainsT<T>(this IList<T> list, T item) where T : IComparable
+        {
+            return list.Contains(item, (IEqualityComparer<T>)new ComparableDataComparer());
+        }
+
+        public static T Get<T>(this IList<T> list, T compareValue) where T : IComparable
+        {
+            ComparableDataComparer comparer = new ComparableDataComparer();
+            foreach (T item in list)
+            {
+                if (comparer.Equals(compareValue, item))
+                {
+                    return item;
+                }
+            }
+
+            return default;
+        }
     }
 }
