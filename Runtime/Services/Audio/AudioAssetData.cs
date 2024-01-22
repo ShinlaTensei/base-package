@@ -31,7 +31,7 @@ namespace Base.Services
         [SerializeField, ValueDropdown("@this.ClipNameValueDropdown", ExcludeExistingValuesInList = true, DisableGUIInAppendedDrawer = true, 
         DrawDropdownForListElements = false), 
         ListItemSelector(nameof(OnClipSelectItem))]
-        [Searchable]
+        [Searchable, CustomValueDrawer(nameof(CustomClipListItemGUI))]
         private List<string> m_clips = new List<string>();
         
         /// <summary>
@@ -44,6 +44,12 @@ namespace Base.Services
         private IEnumerable ClipNameValueDropdown = new ValueDropdownList<string>() { new ValueDropdownItem<string>("Default", "Default") };
         [NonSerialized]
         private Action<string> m_onClipSelectAction;
+
+        private string CustomClipListItemGUI(string value, GUIContent label)
+        {
+            EditorGUILayout.LabelField(value);
+            return value;
+        }
 
         public void Subscribe(Action<string> listener)
         {
@@ -138,7 +144,7 @@ namespace Base.Services
     }
     
     #if ODIN_INSPECTOR
-    public record AudioSetting
+    public record AudioSetting : IBaseSetting
     {
         /// <summary>
         /// The index of the <see cref="UnityEngine.Audio.AudioMixerGroup"/> to be assigned to the <see cref="AudioSource"/> playing the clips.
@@ -156,16 +162,6 @@ namespace Base.Services
         /// Predefine if the asset is play in 3D environment
         /// </summary>
         [OdinSerialize] public bool Is3DAudio { get; set; } = false;
-    }
-
-    public record Audio3DSetting : AudioSetting
-    {
-        
-    }
-
-    public record AudioTypeConfig
-    {
-        
     }
     #endif
 }

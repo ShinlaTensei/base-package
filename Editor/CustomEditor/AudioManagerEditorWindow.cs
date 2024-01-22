@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Base.CustomAttribute;
 using Base.Helper;
 using Base.Services;
 using Newtonsoft.Json;
@@ -63,7 +64,7 @@ namespace Base.Editor
         [FolderPath(ParentFolder = "Assets", RequireExistingPath = true, UseBackslashes = true), OdinSerialize]
         [OnValueChanged(nameof(OnOutputPathChanged))]
         private string m_outputPath;
-        
+
         [OdinSerialize, HorizontalGroup("OutputPath/Box", 0.3f), ReadOnly, HideLabel]
         private AudioDataContainer m_audioDataContainer;
 
@@ -98,7 +99,7 @@ namespace Base.Editor
         protected override void OnDisable()
         {
             base.OnDisable();
-            
+
             AudioDataContainer.Revert();
         }
 
@@ -138,8 +139,8 @@ namespace Base.Editor
                 AudioDataContainer = result[0];
             }
         }
-        
-        [HorizontalGroup("CoreButton", 150f,PaddingLeft = 0.65f, Gap = 10f), Button("Save", ButtonSizes.Medium), 
+
+        [HorizontalGroup("CoreButton", 150f, PaddingLeft = 0.65f, Gap = 10f), Button("Save", ButtonSizes.Medium),
          GUIColor("green"), PropertySpace(5f, 5f)]
         private void SaveEditor()
         {
@@ -160,12 +161,12 @@ namespace Base.Editor
             }
             AudioDataContainer.Save();
         }
-        
+
         [HorizontalGroup("CoreButton", 150f), Button("Discard", ButtonSizes.Medium), GUIColor("red"), PropertySpace(5f, 5f)]
         private void DiscardEditor()
         {
             AudioDataContainer.Revert();
-            
+
             AudioDataContainer.TryGetData(m_audioType, out AudioAssetData audioAssetData);
 
             if (audioAssetData != null)
@@ -179,9 +180,9 @@ namespace Base.Editor
         private string m_audioType;
 
         [TabGroup("Tab", "Data", Order = 2), HorizontalGroup("Tab/Data/Horizontal2", .5f), OnInspectorGUI(Append = nameof(OnAudioAssetDataGUI))]
-        [OdinSerialize, ShowIf("@m_audioType != null"), InlineProperty, HideLabel]
+        [OdinSerialize, ShowIf("@m_audioType != null"), InlineProperty, HideLabel, PropertySpace(10f)]
         private AudioAssetData m_audioAssetData = null;
-        
+
         [TabGroup("Tab", "Data", Order = 2), HorizontalGroup("Tab/Data/Horizontal2", .45f, MarginLeft = 25f)]
         [OdinSerialize, HideLabel, ShowIf("@this.m_previewAudio != null"), OnInspectorGUI(Append = nameof(AppendPreviewAudioGUI))]
         private AudioClip m_previewAudio;
@@ -216,11 +217,11 @@ namespace Base.Editor
 
             return result;
         }
-        
+
         private void OnAudioAssetDataGUI(InspectorProperty property)
         {
             SirenixEditorGUI.DrawVerticalLineSeperator(property.LastDrawnValueRect.width + 20, property.LastDrawnValueRect.y, property
-            .LastDrawnValueRect.height, 1f);
+                                                                                                                             .LastDrawnValueRect.height, 1f);
         }
 
         private void OnAudioTypeChanged(string value)
@@ -228,7 +229,7 @@ namespace Base.Editor
             if (string.IsNullOrEmpty(value)) return;
             m_audioAssetData = null;
             AudioAssetData audioAssetData = AudioDataContainer.WorkingCopy.Find(item => item.ObjectName.Equals(value));
-            
+
             if (audioAssetData != null)
             {
                 m_audioAssetData = AudioDataContainer.GetDataCopy(audioAssetData);
@@ -260,12 +261,95 @@ namespace Base.Editor
         }
 
 
-        [TabGroup("Tab", "Settings"), Title("Audio Type Settings")]
-        [OdinSerialize, HideLabel, HorizontalGroup("Tab/Settings/Horizontal", .4f)]
+        [TabGroup("Tab", "Settings"), Title("Audio Type")]
+        [OdinSerialize, HideLabel, HorizontalGroup("Tab/Settings/Horizontal", .3f)]
         private List<string> AudioTypeSettings
         {
             get => AudioDataContainer.AudioTypes;
             set => AudioDataContainer.AudioTypes = value;
+        }
+
+        [TabGroup("Tab", "Settings"), Title("Audio Key Settings")]
+        [OdinSerialize, HideLabel, HorizontalGroup("Tab/Settings/Horizontal", .3f, PaddingLeft = 10f),
+         ListItemSelector(nameof(SelectAudioKey))]
+        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(CustomRemoveElementKeySettings), 
+                            OnTitleBarGUI = nameof(DrawCustomTitleBarGUI))]
+        [OnInspectorGUI(nameof(CustomKeySettingGUI)), CustomValueDrawer(nameof(CustomListItemGUI))]
+        private List<string> AudioKeySettings
+        {
+            get => AudioDataContainer.AudioKeySettings;
+            set => AudioDataContainer.AudioKeySettings = value;
+        }
+
+        [TabGroup("Tab", "Settings"), Title("Audio Setting")]
+        [OdinSerialize, HideLabel, HorizontalGroup("Tab/Settings/Horizontal", .3f, PaddingLeft = 10f), ShowIf("@this.AudioSetting != null")]
+        [OnValueChanged(nameof(OnAudioSettingUpdate)), InlineProperty]
+        private AudioSetting AudioSetting { get; set; }
+
+        private int  m_selectedIndex;
+        private bool m_isAddClicked = false;
+
+        private void CustomRemoveElementKeySettings(string removeElement, InspectorProperty property, List<string> list)
+        {
+            list.Remove(removeElement);
+            if (AudioDataContainer.AudioSettingMap.Remove(removeElement))
+            {
+                AudioSetting = null;
+            }
+        }
+
+        private void DrawCustomTitleBarGUI()
+        {
+            GUIContent addContent = new GUIContent("Add");
+            if (SirenixEditorGUI.ToolbarButton(addContent))
+            {
+                m_isAddClicked = !m_isAddClicked;
+            }
+        }
+        
+        private string CustomListItemGUI(string item, GUIContent label)
+        {
+            EditorGUILayout.LabelField(item);
+            return item;
+        }
+
+        private string value = string.Empty;
+        private void CustomKeySettingGUI(InspectorProperty property)
+        {
+            if (m_isAddClicked)
+            {
+                GUIContent addContent = new GUIContent("Add");
+                SirenixEditorGUI.BeginHorizontalPropertyLayout(null);
+                SirenixEditorGUI.BeginBox(null);
+                value = SirenixEditorFields.TextField("Key Name", value);
+                if (GUILayout.Button(addContent))
+                {
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        AudioKeySettings.AddIfNotContains(value);
+                        //SelectAudioKey(AudioKeySettings.Count - 1);
+                        m_isAddClicked = false;
+                    }
+                }
+                SirenixEditorGUI.EndBox();
+                SirenixEditorGUI.EndHorizontalPropertyLayout();
+            }
+        }
+
+        private void SelectAudioKey(int index)
+        {
+            AudioSetting    = null;
+            index           = Mathf.Clamp(index, 0, AudioKeySettings.Count - 1);
+            m_selectedIndex = index;
+            AudioSetting    = AudioDataContainer.GetSetting<AudioSetting>(AudioKeySettings[index]);
+        }
+
+        private void OnAudioSettingUpdate()
+        {
+            if (AudioSetting != null)
+            {
+                AudioDataContainer.AddSetting(AudioKeySettings[m_selectedIndex], AudioSetting);
+            }
         }
     }
     

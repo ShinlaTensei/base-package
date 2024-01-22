@@ -10,7 +10,12 @@ namespace Base.Core
 {
     public interface ISettingAccessor
     {
-        void AddSetting<T>(T setting);
-        T    GetSetting<T>(string id);
+        void AddSetting<T>(string id, T setting) where T : IBaseSetting;
+        T    GetSetting<T>(string id) where T : IBaseSetting;
+    }
+
+    public interface IBaseSetting
+    {
+        
     }
 }

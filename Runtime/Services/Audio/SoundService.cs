@@ -64,11 +64,6 @@ namespace Base.Services
             audioSource.volume = setting.Volume;
             audioSource.loop   = setting.Loop;
 
-            if (setting.Is3DAudio && setting is Audio3DSetting audio3DSetting)
-            {
-                
-            }
-
             if (clip != null)
             {
                 audioSource.clip = clip;
