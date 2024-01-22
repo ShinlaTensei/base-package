@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Base.Core;
+using Base.Helper;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -20,9 +21,10 @@ namespace Base.Services
         /// Backing field for <see cref="AudioTypes"/>
         /// </summary>
         [SerializeField] private List<string> m_audioTypes;
-
+        /// <summary>
+        /// Backing field for <see cref="AudioKeySettings"/>
+        /// </summary>
         [SerializeField] private List<string> m_audioKeySettings;
-
         /// <summary>
         /// Backing field for <see cref="DataCollection"/>
         /// </summary>
@@ -39,6 +41,16 @@ namespace Base.Services
             get => m_audioTypes;
             set => m_audioTypes = value;
         }
+        /// <summary>
+        /// List contains all key settings
+        /// </summary>
+        public List<string> AudioKeySettings
+        {
+            get => m_audioKeySettings;
+            set => m_audioKeySettings = value;
+        }
+
+        public override Dictionary<string, IBaseSetting> AudioSettingMap { get; protected set; }
 
         public override List<AudioAssetData> DataCollection
         {
@@ -86,7 +98,16 @@ namespace Base.Services
                 DataCollection.Add(JsonConvert.DeserializeObject(m_serializedAssets[i], type) as AudioAssetData);
             }
         }
-        
+
+        public override void Save()
+        {
+#if UNITY_EDITOR
+            
+#endif
+            
+            base.Save();
+        }
+
         /// <summary>
         /// Fetches the type from the loaded assemblies based on it's fully qualified name.
         /// </summary>
@@ -111,13 +132,38 @@ namespace Base.Services
 
             return null;
         }
-        public void AddSetting<T>(T setting)
+
+        private void CreateSettingMap()
         {
-            throw new NotImplementedException();
+            if (AudioSettingMap is not {Count: > 0})
+            {
+                AudioSettingMap = new Dictionary<string, IBaseSetting>();
+                for (int i = 0; i < AudioKeySettings.Count; ++i)
+                {
+                    if (!AudioSettingMap.ContainsKey(AudioKeySettings[i]))
+                    {
+                        AudioSettingMap[AudioKeySettings[i]] = new AudioSetting();
+                    }
+                }
+            }
         }
-        public T GetSetting<T>(string id)
+        
+        public void AddSetting<T>(string id, T setting) where T : IBaseSetting
         {
-            throw new NotImplementedException();
+            CreateSettingMap();
+
+            AudioSettingMap[id] = setting;
+        }
+        public T GetSetting<T>(string id) where T : IBaseSetting
+        {
+            CreateSettingMap();
+            
+            if (!AudioSettingMap.TryGetValue(id, out IBaseSetting setting))
+            {
+                AudioSettingMap[id] = setting = new AudioSetting();
+            }
+
+            return (T)setting;
         }
     }
 }

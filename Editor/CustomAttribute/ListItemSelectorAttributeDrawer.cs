@@ -68,7 +68,7 @@ public class ListItemSelectorAttributeDrawer : OdinAttributeDrawer<ListItemSelec
         else
         {
             this.CallNextDrawer(label);
-
+            
             if (Event.current.type != EventType.Layout)
             {
                 var sel = this.globalSelectedProperty.Value;
