@@ -7,18 +7,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Base.Helper;
 using Base.Services;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Serialization;
+using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+using ObjectFieldAlignment = Sirenix.OdinInspector.ObjectFieldAlignment;
 
 namespace Base.Editor
 {
@@ -53,6 +55,8 @@ namespace Base.Editor
             set => m_audioDataContainer = value;
         }
 
+        private IList<string> AudioClipID { get; } = new List<string>();
+
         private List<string> AudioClipEntries { get; set; } = new List<string>();
 
         [BoxGroup("OutputPath", false), HorizontalGroup("OutputPath/Box")]
@@ -79,18 +83,25 @@ namespace Base.Editor
         {
             base.Initialize();
 
-            AddressableAssetSettings     settings = AddressableAssetSettingsDefaultObject.Settings;
-            string[]                     assets   = AssetDatabase.FindAssets("t:audioClip");
-            for (int i = 0; i < assets.Length; ++i)
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            AudioClipID.AddRange(AssetDatabase.FindAssets("t:audioClip"));
+            for (int i = 0; i < AudioClipID.Count; ++i)
             {
-                AddressableAssetEntry entry = settings.FindAssetEntry(assets[i]);
+                AddressableAssetEntry entry = settings.FindAssetEntry(AudioClipID[i]);
                 if (entry != null)
                 {
                     AudioClipEntries.Add(entry.address);
                 }
             }
         }
-        
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            
+            AudioDataContainer.Revert();
+        }
+
         protected override void DeSerializeConfigData(string stringData)
         {
             if (string.IsNullOrEmpty(stringData))
@@ -154,15 +165,46 @@ namespace Base.Editor
         private void DiscardEditor()
         {
             AudioDataContainer.Revert();
+            
+            AudioDataContainer.TryGetData(m_audioType, out AudioAssetData audioAssetData);
+
+            if (audioAssetData != null)
+            {
+                m_audioAssetData.CopyData(audioAssetData);
+            }
         }
 
         [TabGroup("Tab", "Data", Order = 2), OdinSerialize, HorizontalGroup("Tab/Data/Horizontal", .3f)]
         [ValueDropdown(nameof(GetAudioType)), OnValueChanged(nameof(OnAudioTypeChanged))]
         private string m_audioType;
-        
+
         [TabGroup("Tab", "Data", Order = 2), HorizontalGroup("Tab/Data/Horizontal2", .5f), OnInspectorGUI(Append = nameof(OnAudioAssetDataGUI))]
-        [SerializeField, ShowIf("@m_audioType != null"), InlineProperty, HideLabel]
-        private AudioAssetData m_audioAssetData;
+        [OdinSerialize, ShowIf("@m_audioType != null"), InlineProperty, HideLabel]
+        private AudioAssetData m_audioAssetData = null;
+        
+        [TabGroup("Tab", "Data", Order = 2), HorizontalGroup("Tab/Data/Horizontal2", .45f, MarginLeft = 25f)]
+        [OdinSerialize, HideLabel, ShowIf("@this.m_previewAudio != null"), OnInspectorGUI(Append = nameof(AppendPreviewAudioGUI))]
+        private AudioClip m_previewAudio;
+
+        private void AppendPreviewAudioGUI(InspectorProperty property)
+        {
+            SirenixEditorGUI.BeginHorizontalPropertyLayout(null);
+            if (SirenixEditorGUI.IconButton(EditorIcons.Play, 50, 50))
+            {
+                if (AudioEditorUtility.IsPreviewClipPlaying())
+                {
+                    AudioEditorUtility.StopAllClips();
+                }
+                AudioEditorUtility.PlayAudio(m_previewAudio);
+            }
+
+            if (SirenixEditorGUI.IconButton(EditorIcons.Stop, 50, 50))
+            {
+                AudioEditorUtility.StopAllClips();
+            }
+
+            SirenixEditorGUI.EndHorizontalPropertyLayout();
+        }
 
         private IEnumerable GetAudioType()
         {
@@ -184,9 +226,13 @@ namespace Base.Editor
         private void OnAudioTypeChanged(string value)
         {
             if (string.IsNullOrEmpty(value)) return;
-
-            AudioDataContainer.TryGetData(value, out m_audioAssetData);
+            m_audioAssetData = null;
+            AudioAssetData audioAssetData = AudioDataContainer.WorkingCopy.Find(item => item.ObjectName.Equals(value));
             
+            if (audioAssetData != null)
+            {
+                m_audioAssetData = AudioDataContainer.GetDataCopy(audioAssetData);
+            }
             m_audioAssetData?.Remove();
             m_audioAssetData ??= new AudioAssetData(AudioDataContainer.WorkingCopy.Count, value, GUID.Generate().ToString());
             m_audioAssetData.Subscribe(OnSelectClipHandler);
@@ -197,7 +243,20 @@ namespace Base.Editor
 
         private void OnSelectClipHandler(string clipName)
         {
-            
+            AddressableAssetSettings setting = AddressableAssetSettingsDefaultObject.Settings;
+            foreach (var clipId in AudioClipID)
+            {
+                AddressableAssetEntry entry = setting.FindAssetEntry(clipId);
+                if (entry != null && entry.address.Equals(clipName))
+                {
+                    AudioClip clip = AssetDatabaseUtility.LoadAssetFromGuid<AudioClip>(clipId);
+                    if (clip != null)
+                    {
+                        m_previewAudio = clip;
+                        break;
+                    }
+                }
+            }
         }
 
 

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Base.Services
 {
-    public class AudioDataContainer : DataContainer<AudioAssetData>, ISerializationCallbackReceiver
+    public class AudioDataContainer : DataContainer<AudioAssetData>, ISerializationCallbackReceiver, ISettingAccessor
     {
         /// <summary>
         /// The serialized asset types used to fill <see cref="DataCollection"/>
@@ -21,6 +21,8 @@ namespace Base.Services
         /// </summary>
         [SerializeField] private List<string> m_audioTypes;
 
+        [SerializeField] private List<string> m_audioKeySettings;
+
         /// <summary>
         /// Backing field for <see cref="DataCollection"/>
         /// </summary>
@@ -30,7 +32,7 @@ namespace Base.Services
         /// </summary>
         private List<AudioAssetData> m_audioAssetWorkingCopy;
         /// <summary>
-        /// The audio type which is hold a set of clip name
+        /// Backing field of <see cref="AudioSetting"/>
         /// </summary>
         public List<string> AudioTypes
         {
@@ -108,6 +110,14 @@ namespace Base.Services
             }
 
             return null;
+        }
+        public void AddSetting<T>(T setting)
+        {
+            throw new NotImplementedException();
+        }
+        public T GetSetting<T>(string id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
