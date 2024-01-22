@@ -11,9 +11,12 @@ using Base.Core;
 using Base.CustomAttribute;
 using Base.Helper;
 using Cysharp.Threading.Tasks;
+using UnityEditor;
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities.Editor;
 #endif
 using UnityEngine;
 
@@ -25,7 +28,9 @@ namespace Base.Services
         /// <summary>
         /// Backing field for <see cref="Clips"/> used for serialization.
         /// </summary>
-        [SerializeField, ValueDropdown("@this.ClipNameValueDropdown"), ListItemSelector(nameof(OnClipSelectItem))]
+        [SerializeField, ValueDropdown("@this.ClipNameValueDropdown", ExcludeExistingValuesInList = true, DisableGUIInAppendedDrawer = true, 
+        DrawDropdownForListElements = false), 
+        ListItemSelector(nameof(OnClipSelectItem))]
         [Searchable]
         private List<string> m_clips = new List<string>();
         
@@ -57,6 +62,7 @@ namespace Base.Services
 
         private void OnClipSelectItem(int index)
         {
+            index = Mathf.Clamp(index, 0, m_clips.Count - 1);
             m_onClipSelectAction?.Invoke(m_clips[index]);
         }
 #endif

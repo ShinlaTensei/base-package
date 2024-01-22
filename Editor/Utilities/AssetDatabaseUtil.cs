@@ -69,13 +69,19 @@ namespace Base.Editor
             for (int index = 0; index < fileGuids.Length; index++)
             {
                 string guid  = fileGuids[index];
-                string path  = AssetDatabase.GUIDToAssetPath(guid);
-                T      asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                T      asset = LoadAssetFromGuid<T>(guid);
 
                 results[index] = asset;
             }
 
             return results;
+        }
+
+        public static T LoadAssetFromGuid<T>(string guid) where T : Object
+        {
+            string path  = AssetDatabase.GUIDToAssetPath(guid);
+            T      asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            return asset;
         }
 
         public static T LoadOrCreateScriptableObject<T>(string path, string name = "") where T : ScriptableObject
