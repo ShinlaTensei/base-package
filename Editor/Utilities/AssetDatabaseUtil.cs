@@ -103,6 +103,12 @@ namespace Base.Editor
             return asset;
         }
 
+        public static void CreateAsset<T>(T asset, string path) where T : Object
+        {
+            EnsureFolderExits(ref path);
+            AssetDatabase.CreateAsset(asset, path);
+        }
+
         public static T LoadAssetOfType<T>(string path, string name = "") where T : UnityEngine.Object
         {
             try

@@ -60,7 +60,7 @@ namespace Base.Services
                                             .AttachExternalCancellation(TaskRunner.GetCancellationTokenForType(nameof(SoundService)));
             AudioSource audioSource = GetAudioSourceByType(audioType);
             
-            AudioSetting setting = ServiceLocator.Get<ISettingAccessor>().GetSetting<AudioSetting>(settingKey);
+            AudioSetting setting = m_audioDataContainer.GetSetting<AudioSetting>(settingKey);
             audioSource.volume = setting.Volume;
             audioSource.loop   = setting.Loop;
 

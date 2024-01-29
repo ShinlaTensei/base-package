@@ -7,6 +7,7 @@ using System.Text;
 using Base.Logging;
 using Base.Module;
 using Google.Protobuf;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Base.Helper
@@ -54,7 +55,7 @@ namespace Base.Helper
         {
             try
             {
-                MessageParser<T> parser = (MessageParser<T>)typeof(T).GetProperty("Parser").GetValue(null, null);
+                MessageParser<T> parser = (MessageParser<T>)typeof(T).GetProperty("Parser")?.GetValue(null, null);
                 return parser.ParseJson(rawData);
             }
             catch (Exception e)
@@ -82,8 +83,7 @@ namespace Base.Helper
         
         public static void ReadBlueprint(this IBlueprint blueprint, byte[] rawData)
         {
-            BlueprintReaderAttribute att = blueprint.GetType().GetCustomAttribute(typeof(BlueprintReaderAttribute)) 
-                    as BlueprintReaderAttribute;
+            BlueprintReaderAttribute att = blueprint.GetType().GetCustomAttribute<BlueprintReaderAttribute>();
 
             if (att is null || att.IsIgnore) return;
             blueprint.LoadDummy = att.IsLocal;

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -24,6 +25,17 @@ namespace Base.Helper
         public static string GetCurrencySymbol(string source)
         {
             return Regex.Replace(source, "[ ,.0123456789]+", "");
+        }
+
+        public static string ConvertToPrettyTitle(this string source)
+        {
+            Regex           regex         = new Regex(@"[-+_+\s+]");
+            MatchCollection matches       = regex.Matches(source);
+            string          resultString  = regex.Replace(source, " ");
+            StringBuilder   stringBuilder = new StringBuilder(resultString);
+            stringBuilder.Replace(resultString[0], char.ToUpperInvariant(resultString[0]), 0, 1);
+
+            return stringBuilder.ToString();
         }
 
         /// <summary>

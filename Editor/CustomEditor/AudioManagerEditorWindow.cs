@@ -21,7 +21,6 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
-using ObjectFieldAlignment = Sirenix.OdinInspector.ObjectFieldAlignment;
 
 namespace Base.Editor
 {
