@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Base.Helper;
-using Base.Pattern;
+﻿using System.Collections.Generic;
+using Base.Core;
 using UnityEngine;
 
 namespace Base

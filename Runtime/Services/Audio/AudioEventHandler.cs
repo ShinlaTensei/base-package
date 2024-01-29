@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     public class AudioEventHandler : SerializedMonoBehaviour
     {

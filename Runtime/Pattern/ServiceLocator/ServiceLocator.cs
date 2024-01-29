@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Base.Helper;
-using Base.Services;
+using Base.Core;
 using UnityEngine;
 
 namespace Base.Pattern

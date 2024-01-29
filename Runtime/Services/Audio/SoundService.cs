@@ -8,7 +8,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     /// <summary>
     /// This class is used to control the global sound of the project. For individual sound, please use another approach

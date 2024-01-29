@@ -13,7 +13,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Base.Services
+namespace Base.Core
 {
     [Serializable]
     public class AudioEvent

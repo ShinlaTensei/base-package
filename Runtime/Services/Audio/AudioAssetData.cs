@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Base.Core;
+using Base.Pattern;
 using Base.CustomAttribute;
 using Base.Helper;
 using Cysharp.Threading.Tasks;
@@ -20,7 +21,7 @@ using Sirenix.Utilities.Editor;
 #endif
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     [Serializable]
     public class AudioAssetData : ReferenceData, ISearchFilterable

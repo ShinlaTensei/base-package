@@ -4,7 +4,7 @@
 // File name: ISettingAcessor.cs
 #endregion
 
-using Base.Services;
+using Base.Core;
 
 namespace Base.Core
 {

@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Base.Core;
 using Base.Logging;
-using Base.Pattern;
-using UnityEngine;
 
 namespace Base.Cheat
 {

@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Base
 {
-    public class TimingService : Service
+    public class TimingService :Core.Service
     {
         private DateTime m_lastFetchTime = DateTime.MinValue;
         private float    m_realTimeSinceStartUpBase;
