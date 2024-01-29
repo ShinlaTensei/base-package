@@ -10,7 +10,7 @@ using Base.Pattern;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     [Serializable]
     public class AudioEvent

@@ -6,7 +6,7 @@ using Base.Logging;
 using NLog;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     public interface ISignal
     {

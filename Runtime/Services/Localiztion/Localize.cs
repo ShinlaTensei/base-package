@@ -5,7 +5,7 @@ using System;
 using System.Text;
 using Base.Logging;
 
-namespace Base.Services
+namespace Base.Core
 {
     public class LanguageChangedRequestSignal : Signal<string> {}
 

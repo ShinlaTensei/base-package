@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using Base.Helper;
 
-namespace Base.Pattern
+namespace Base.Core
 {
     public interface IService : IDisposable
     {

@@ -9,7 +9,7 @@ using Base.Helper;
 using Base.Pattern;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     public class CameraInstance : BaseMono
     {

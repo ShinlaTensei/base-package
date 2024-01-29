@@ -6,10 +6,10 @@
 
 using System;
 using System.Globalization;
-using Base.Pattern;
+using Base.Core;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     public class FormatProviderService : Service
     {

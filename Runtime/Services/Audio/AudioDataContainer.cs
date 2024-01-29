@@ -5,7 +5,7 @@ using Base.Helper;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Base.Services
+namespace Base.Core
 {
     public class AudioDataContainer : DataContainer<AudioAssetData>, ISerializationCallbackReceiver, ISettingAccessor
     {

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using System;
 using System.Collections.Concurrent;
-using Base.Pattern;
+using Base.Core;
 
 public interface IMainThreadDispatcher : IService
 {
