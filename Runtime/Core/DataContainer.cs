@@ -27,8 +27,6 @@ namespace Base.Core
         /// The working copy data to freely modified.
         /// </summary>
         public abstract List<T> WorkingCopy { get; protected set; }
-        
-        public abstract Dictionary<string, IBaseSetting> AudioSettingMap { get; protected set; }
 
         /// <summary>
         /// The dictionary of all data keyed to their names for quick consecutive access.
