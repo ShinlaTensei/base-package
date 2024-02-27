@@ -25,6 +25,12 @@ namespace Base.Editor
         /// </summary>
         private static readonly Color32 m_separatorColorLightGrey = new Color32(255, 255, 255, 50);
 
+        private static readonly Color m_backgroundRedColor = new Color(1f, 0, 0, 1f);
+
+        private static readonly Color m_backgroundGreenDark = new Color(0.1f, 0.75f, 0.03f, 1f);
+
+        private static readonly Color m_defaultBackgroundColor = new Color(1f, 1f, 1f, 1f);
+
         /// <summary>
         /// Grey Color, mostly used for Window Manager Backgrounds.
         /// </summary>
@@ -39,5 +45,11 @@ namespace Base.Editor
         /// Black Color, mostly used in combination with <see cref="SeparatorColorBlack"/> to show a shadowed separation line.
         /// </summary>
         public static Color32 SeparatorColorLightGrey => m_separatorColorLightGrey;
+
+        public static Color BackgroundRedColor => m_backgroundRedColor;
+
+        public static Color BackgroundGreenDarkColor => m_backgroundGreenDark;
+
+        public static Color DefaultBackgroundColor => m_defaultBackgroundColor;
     }
 }

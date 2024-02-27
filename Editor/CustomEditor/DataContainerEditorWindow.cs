@@ -25,7 +25,9 @@ namespace Base.Editor
         private const float HEADER_HEIGHT       = 70f;
         private const float FOLDER_BUTTON_SIZE  = 25f;
         private const float HEADER_BUTTON_WIDTH = 60f;
-        
+        private const float CORE_BUTTON_WIDTH   = 80f;
+        private const float CORE_BUTTON_HEIGHT  = 30f;
+
         private GUITabGroup      m_tabGroup;
         private DataContainer<T> m_dataContainer;
 
@@ -35,6 +37,8 @@ namespace Base.Editor
             get => m_dataContainer;
             private set => m_dataContainer = value;
         }
+
+        protected GUITabGroup TabGroup => m_tabGroup;
 
         private void DrawOutputPath()
         {  
@@ -102,7 +106,25 @@ namespace Base.Editor
 
         private void DrawCoreButtons()
         {
+            SirenixEditorGUI.BeginHorizontalPropertyLayout(GUIContent.none);
+            GUI.backgroundColor = PEditorStyles.BackgroundGreenDarkColor;
+            GUI.contentColor    = SirenixGUIStyles.GreenValidColor;
+            Rect saveButtonRect = new Rect(position.width - 230f, 80f, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
+            if (GUI.Button(saveButtonRect, "Save"))
+            {
+                DataContainer.Save();
+            }
+            GUI.backgroundColor = PEditorStyles.BackgroundRedColor;
+            GUI.contentColor    = SirenixGUIStyles.RedErrorColor;
+            Rect discardBtnRect = new Rect(saveButtonRect.x + CORE_BUTTON_WIDTH + 10f, saveButtonRect.y, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
+            if (GUI.Button(discardBtnRect, "Discard"))
+            {
+                DataContainer.Revert();
+            }
+            GUI.backgroundColor = Color.white;
+            GUI.contentColor    = Color.white;
             
+            SirenixEditorGUI.EndHorizontalPropertyLayout();
         }
 
         private void DrawTabs()
