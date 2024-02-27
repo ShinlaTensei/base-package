@@ -150,14 +150,15 @@ namespace Base.Editor
             return guid.Length > 0;
         }
 
-        public static void DeleteAsset<T>()
+        public static bool DeleteAsset<T>(ref T asset) where T : ScriptableObject
         {
-            string[] guid = AssetDatabase.FindAssets("t:" + typeof(T).Name);
-            if (guid.Length > 0)
+            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out string guid, out long localId))
             {
-                string assetPath = AssetDatabase.GUIDToAssetPath(guid[0]);
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
                 AssetDatabase.DeleteAsset(assetPath);
             }
+
+            return asset != null;
         }
     }
 }
