@@ -4,6 +4,7 @@
 // File name: AudioManagerEditorWindow.cs
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Base.Core;
@@ -23,9 +24,11 @@ namespace Base.Editor
             window.minSize = new Vector2(500f, 500f);
         }
 
-        private GenericMenu m_audioTypesMenu;
-        private List<string> m_audioTypes = new List<string>();
-        private int m_typeIndexSelected = 0;
+        private GenericMenu  m_audioTypesMenu;
+        private List<string> m_audioTypes            = new List<string>();
+        private int          m_typeIndexSelected     = 0;
+        private bool         m_isAddTypes            = false;
+        private string       m_audioTypesAddTemplate = string.Empty;
 
         private const float DEFAULT_BUTTON_HEIGHT = 20f;
 
@@ -132,15 +135,62 @@ namespace Base.Editor
             Rect areRect = new Rect(5f, 5f, TabGroup.InnerRect.width / 3f, TabGroup.InnerRect.height);
             
             GUILayout.BeginArea(areRect);
-            SirenixEditorGUI.BeginVerticalList();
-            for (int i = 0; i < 5; i++)
+            // Start header
+            SirenixEditorGUI.BeginBox();
+            SirenixEditorGUI.BeginToolbarBoxHeader(EditorConstant.TOOLBAR_BOX_HEADER_HEIGHT);
+            EditorGUI.LabelField(new Rect(areRect.x + 10f, 0, 100f, 
+                                          EditorConstant.TOOLBAR_BOX_HEADER_HEIGHT), "Audio Types");
+
+            GUIStyle italicStyle = new GUIStyle(GUI.skin.label)
+                                   {
+                                           fontStyle = FontStyle.Italic,
+                                           fontSize = 10
+                                   };
+            EditorGUI.LabelField(new Rect(areRect.width - 120f, 0, 100f, 
+                                          EditorConstant.TOOLBAR_BOX_HEADER_HEIGHT),$"{AudioDataContainer.AudioTypes.Count} items", italicStyle);
+
+            GUILayout.Space(areRect.width - 75f);
+            
+            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Refresh))
             {
-                SirenixEditorGUI.BeginListItem(true, SirenixGUIStyles.ListItem);
-                GUILayout.Label("Test");
-                SirenixEditorGUI.EndListItem();
+                
             }
-            SirenixEditorGUI.EndVerticalList();
+
+            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
+            {
+                m_isAddTypes = !m_isAddTypes;
+            }
+            SirenixEditorGUI.EndToolbarBoxHeader();
+            if (SirenixEditorGUI.BeginFadeGroup("Audio Types Add", m_isAddTypes))
+            {
+                SirenixEditorGUI.BeginBox();
+                EditorGUI.indentLevel++;
+                m_audioTypesAddTemplate = EditorGUILayout.TextField("Audio Types", m_audioTypesAddTemplate);
+                EditorGUI.indentLevel--;
+
+                if (GUILayout.Button("Add"))
+                {
+                    AudioDataContainer.AudioTypes.AddIfNotContains(m_audioTypesAddTemplate);
+                    m_audioTypesAddTemplate = string.Empty;
+                    m_isAddTypes            = false;
+                }
+                SirenixEditorGUI.EndBox();
+            }
+            SirenixEditorGUI.EndFadeGroup();
+            SirenixEditorGUI.EndBox();
+            // End header
+
             GUILayout.EndArea();
+        }
+        
+        private void DrawAddStringGUI()
+        {
+            
+        }
+
+        private void DrawListItem()
+        {
+            
         }
     }
 }

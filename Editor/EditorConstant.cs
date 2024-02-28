@@ -9,5 +9,8 @@ namespace Base.Editor
     public static class EditorConstant
     {
         public const string EDITOR_CONFIG_PATH = "_Config";
+
+        public const float LIST_ITEM_HEIGHT          = 50f;
+        public const float TOOLBAR_BOX_HEADER_HEIGHT = 30f;
     }
 }
