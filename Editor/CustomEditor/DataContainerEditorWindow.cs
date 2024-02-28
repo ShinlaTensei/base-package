@@ -5,7 +5,9 @@
 #endregion
 
 using System;
+using System.IO;
 using Base.Core;
+using Base.Helper;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
@@ -47,8 +49,8 @@ namespace Base.Editor
             
             // Draw the output path
             GUILayout.BeginArea(new Rect(0f, 0, position.width, HEADER_HEIGHT));
-            SirenixEditorGUI.BeginVerticalPropertyLayout(null);
-            SirenixEditorGUI.BeginHorizontalPropertyLayout(null);
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginHorizontal();
             Rect outputPathRect = new Rect(5f, 15f, position.width - 25f, 20f);
             EditorGUI.BeginChangeCheck();
             string path = SirenixEditorFields.FolderPathField(outputPathRect, new GUIContent("Output Path"), OutputPath, 
@@ -60,13 +62,14 @@ namespace Base.Editor
                 if (!string.IsNullOrEmpty(OutputPath) && LoadDataContainer(OutputPath, out DataContainer<T> dataContainer))
                 {
                     DataContainer = dataContainer;
+                    SaveOutputPathToText(OutputPath);
                 }
                 GUIHelper.ExitGUI(false);
             }
-            SirenixEditorGUI.EndHorizontalPropertyLayout();
+            EditorGUILayout.EndHorizontal();
             
             // Draw the asset reference
-            SirenixEditorGUI.BeginHorizontalPropertyLayout(null);
+            EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
             Rect unityObjectFieldRect = new Rect(outputPathRect.x, outputPathRect.y + 25f, 100f, 20f);
             EditorGUI.LabelField(unityObjectFieldRect, new GUIContent("Data Container"));
@@ -98,9 +101,9 @@ namespace Base.Editor
             }
             GUI.enabled = true;
             
-            SirenixEditorGUI.EndHorizontalPropertyLayout();
+            EditorGUILayout.EndHorizontal();
             
-            SirenixEditorGUI.EndVerticalPropertyLayout();
+            EditorGUILayout.EndVertical();
             GUILayout.EndArea();
         }
 
@@ -127,32 +130,23 @@ namespace Base.Editor
             SirenixEditorGUI.EndHorizontalPropertyLayout();
         }
 
-        private void DrawTabs()
-        {
-            GUITabPage dataTab    = m_tabGroup.RegisterTab("Data");
-            GUITabPage settingTab = m_tabGroup.RegisterTab("Setting");
-            m_tabGroup.BeginGroup(style: SirenixGUIStyles.BoxContainer);
-            {
-                if (dataTab.BeginPage())
-                {
-                    
-                }
-                dataTab.EndPage();
-                if (settingTab.BeginPage())
-                {
-                     
-                }
-                settingTab.EndPage();
-            }
-            m_tabGroup.EndGroup();
-        }
+        protected abstract void DrawTabs();
 
         protected override void Initialize()
         {
-            base.Initialize();
-
             m_tabGroup              = SirenixEditorGUI.CreateAnimatedTabGroup("DataContainer");
             m_tabGroup.TabLayouting = TabLayouting.MultiRow;
+            m_tabGroup.ExpandHeight = true;
+
+            if (string.IsNullOrEmpty(OutputPath))
+            {
+                OutputPath = LoadOutputPathFromText();
+            }
+
+            if (!string.IsNullOrEmpty(OutputPath) && LoadDataContainer(OutputPath, out DataContainer<T> dataContainer) && DataContainer == null)
+            {
+                DataContainer = dataContainer;
+            }
         }
 
         protected override void OnImGUI()
@@ -166,5 +160,8 @@ namespace Base.Editor
 
         protected abstract DataContainer<T> CreateDataContainer(string path);
         protected abstract bool LoadDataContainer(string path, out DataContainer<T> dataContainer);
+
+        protected abstract void SaveOutputPathToText(string content);
+        protected abstract string LoadOutputPathFromText();
     }
 }

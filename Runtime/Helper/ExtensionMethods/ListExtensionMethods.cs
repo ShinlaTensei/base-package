@@ -231,10 +231,7 @@ namespace Base.Helper
             if (list.Count < 2)
                 throw new ArgumentException("List count should be at least 2 for a swap.");
             
-            T firstValue = list[firstIndex];
-            
-            list[firstIndex] = list[secondIndex];
-            list[secondIndex] = firstValue;
+            (list[firstIndex], list[secondIndex]) = (list[secondIndex], list[firstIndex]);
         }
 
         /// <summary>

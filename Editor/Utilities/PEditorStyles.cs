@@ -31,6 +31,8 @@ namespace Base.Editor
 
         private static readonly Color m_defaultBackgroundColor = new Color(1f, 1f, 1f, 1f);
 
+        private static readonly Color32 m_defaultCollectionHeaderColor = new Color32(61, 61, 61, 255);
+
         /// <summary>
         /// Grey Color, mostly used for Window Manager Backgrounds.
         /// </summary>
@@ -51,5 +53,7 @@ namespace Base.Editor
         public static Color BackgroundGreenDarkColor => m_backgroundGreenDark;
 
         public static Color DefaultBackgroundColor => m_defaultBackgroundColor;
+
+        public static Color32 DefaultCollectionHeaderColor => m_defaultCollectionHeaderColor;
     }
 }

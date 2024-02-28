@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 namespace Base
 {
+    [CreateAssetMenu(menuName = "Test")]
     public class AudioDataContainer : DataContainer<AudioAssetData>, ISerializationCallbackReceiver
     {
         /// <summary>

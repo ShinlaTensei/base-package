@@ -8,6 +8,6 @@ namespace Base.Editor
 {
     public static class EditorConstant
     {
-        public const string EDITOR_CONFIG_PATH = "Editor/_Config";
+        public const string EDITOR_CONFIG_PATH = "_Config";
     }
 }
