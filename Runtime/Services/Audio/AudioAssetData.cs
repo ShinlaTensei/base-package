@@ -30,11 +30,19 @@ namespace Base
         /// Backing field of <see cref="CachedClips"/>
         /// </summary>
         private Dictionary<string, AudioClip> m_cachedClips;
-        
+
+        private bool m_isOneShot = false;
+
         /// <summary>
         /// A key-value mapping container that holds reference to the audio clip has been loaded
         /// </summary>
         public Dictionary<string, AudioClip> CachedClips => LazyInitializer.EnsureInitialized(ref m_cachedClips);
+
+        public bool IsOneShot
+        {
+            set => m_isOneShot = value;
+            get => m_isOneShot;
+        }
         
         /// <summary>
         /// Empty constructor with default member value

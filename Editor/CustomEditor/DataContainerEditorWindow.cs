@@ -5,6 +5,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Base.Core;
 using Base.Helper;
@@ -12,6 +13,7 @@ using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -39,6 +41,8 @@ namespace Base.Editor
             get => m_dataContainer;
             private set => m_dataContainer = value;
         }
+        
+        protected ReorderableList DataReorderableList { get; set; }
 
         protected GUITabGroup TabGroup => m_tabGroup;
 
@@ -74,7 +78,7 @@ namespace Base.Editor
             Rect unityObjectFieldRect = new Rect(outputPathRect.x, outputPathRect.y + 25f, 100f, 20f);
             EditorGUI.LabelField(unityObjectFieldRect, new GUIContent("Data Container"));
             GUI.enabled = false;
-            Rect   unityObjectRefRect = new Rect(unityObjectFieldRect.x + unityObjectFieldRect.width + 53f, unityObjectFieldRect.y, 650f, 20f);
+            Rect   unityObjectRefRect = new Rect(unityObjectFieldRect.x + unityObjectFieldRect.width + 53f, unityObjectFieldRect.y, position.width-400f, 20f);
             Object objectField        = SirenixEditorFields.UnityObjectField(unityObjectRefRect, DataContainer, typeof(ScriptableObject), false);
             GUI.enabled = true;
             if (EditorGUI.EndChangeCheck())
@@ -112,7 +116,7 @@ namespace Base.Editor
             SirenixEditorGUI.BeginHorizontalPropertyLayout(GUIContent.none);
             GUI.backgroundColor = PEditorStyles.BackgroundGreenDarkColor;
             GUI.contentColor    = SirenixGUIStyles.GreenValidColor;
-            Rect saveButtonRect = new Rect(position.width - 230f, 80f, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
+            Rect saveButtonRect = new Rect(position.width - 230f, HEADER_HEIGHT + 40f, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
             if (GUI.Button(saveButtonRect, "Save"))
             {
                 DataContainer.Save();

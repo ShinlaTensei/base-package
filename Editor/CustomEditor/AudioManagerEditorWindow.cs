@@ -4,13 +4,14 @@
 // File name: AudioManagerEditorWindow.cs
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Base.Core;
 using Base.Helper;
+using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Base.Editor
@@ -23,42 +24,46 @@ namespace Base.Editor
             window         = GetWindow<AudioManagerEditorWindow>("Audio Manager");
             window.minSize = new Vector2(500f, 500f);
         }
-
-        private GenericMenu  m_audioTypesMenu;
-        private List<string> m_audioTypes            = new List<string>();
-        private int          m_typeIndexSelected     = 0;
+        
         private bool         m_isAddTypes            = false;
         private string       m_audioTypesAddTemplate = string.Empty;
+        private List<string> m_audioTypeDeletion = new List<string>();
 
         private const float DEFAULT_BUTTON_HEIGHT = 20f;
 
         private AudioDataContainer AudioDataContainer => DataContainer as AudioDataContainer;
+        
+        private ReorderableList AudioTypeReorderableList { get; set; }
 
         protected override void Initialize()
         {
             base.Initialize();
+
+            if (AudioDataContainer != null)
+            {
+                AudioTypeReorderableList = new ReorderableList(AudioDataContainer.AudioTypes, typeof(string), true, false,
+                    false, false)
+                {
+                    drawElementCallback = DrawAudioTypeCallback,
+                    multiSelect = false,
+                    onSelectCallback = OnSelectAudioTypeElementCallback 
+                };
+            }
         }
 
         protected override void DrawTabs()
         {
             GUITabPage audioPage = TabGroup.RegisterTab("Audio List");
-            GUITabPage settingPage = TabGroup.RegisterTab("Setting");
-            
+
             TabGroup.BeginGroup();
             if (audioPage.BeginPage())
             {
                 if (AudioDataContainer != null)
                 {
-                    DrawAudioTypeSelection();
+                    DrawAudioTypeSetting();
                 }
             }
             audioPage.EndPage();
-
-            if (settingPage.BeginPage())
-            {
-                DrawAudioTypeSetting();
-            }
-            settingPage.EndPage();
             TabGroup.EndGroup();
         }
 
@@ -96,36 +101,6 @@ namespace Base.Editor
                 return string.Empty;
             }
             return FileUtilities.LoadTextFile(Path.GetFullPath(EditorConstant.EDITOR_CONFIG_PATH) + $"/{nameof(AudioDataContainer)}.txt");
-        }
-
-        private void DrawAudioTypeSelection()
-        {
-            m_audioTypesMenu = new GenericMenu();
-            m_audioTypes.Clear();
-            m_audioTypes.Add("Empty");
-            m_audioTypes.AddRange(AudioDataContainer.AudioTypes);
-            
-            for (int i = 0; i < m_audioTypes.Count; i++)
-            {
-                string type = m_audioTypes[i];
-                bool on = m_typeIndexSelected == i;
-                m_audioTypesMenu.AddItem(new GUIContent(type), on, () => SelectAudioType(type));
-            }
-            
-            Rect audioTypeDropdownRect = new Rect(5f, 5f, 150f, DEFAULT_BUTTON_HEIGHT);
-            if (EditorGUI.DropdownButton(audioTypeDropdownRect, new GUIContent(m_audioTypes[m_typeIndexSelected]), FocusType.Passive))
-            {
-                m_audioTypesMenu.DropDown(audioTypeDropdownRect);
-            }
-        }
-
-        private void SelectAudioType(string type)
-        {
-            int index = m_audioTypes.IndexOf(type);
-            if (index >= 0)
-            {
-                m_typeIndexSelected = index;
-            }
         }
 
         private void DrawAudioTypeSetting()
@@ -177,20 +152,63 @@ namespace Base.Editor
                 SirenixEditorGUI.EndBox();
             }
             SirenixEditorGUI.EndFadeGroup();
+            using (new EditorGUILayout.VerticalScope())
+            {
+                if (AudioTypeReorderableList != null && AudioDataContainer.AudioTypes.Count > 0)
+                {
+                    AudioTypeReorderableList.DoLayoutList();
+                }
+            }
             SirenixEditorGUI.EndBox();
-            // End header
 
             GUILayout.EndArea();
-        }
-        
-        private void DrawAddStringGUI()
-        {
-            
+            int count = m_audioTypeDeletion.Count;
+            for (int i = 0; i < count; i++)
+            {
+                string deleteType = m_audioTypeDeletion[i];
+                if (AudioDataContainer.AudioTypes.Contains(deleteType))
+                {
+                    AudioDataContainer.AudioTypes.Remove(deleteType);
+                }
+            }
+            m_audioTypeDeletion.Clear();
         }
 
-        private void DrawListItem()
+        private void DrawAudioTypeCallback(Rect rect, int index, bool isActive, bool isFocus)
         {
+            if (AudioDataContainer == null || index < 0 || index >= AudioDataContainer.AudioTypes.Count)
+            {
+                return;
+            }
             
+            rect.y += EditorGUIUtility.standardVerticalSpacing;
+            rect.height = EditorGUIUtility.singleLineHeight;
+
+            Rect label = new Rect(rect)
+            {
+                width = rect.width - 15.0f
+            };
+
+            string audioType = AudioDataContainer.AudioTypes[index];
+            EditorGUI.LabelField(label, audioType);
+            if (SirenixEditorGUI.IconButton(rect.AlignRight(25f), EditorIcons.X))
+            {
+                m_audioTypeDeletion.AddIfNotContains(audioType);
+            }
+        }
+
+        private void OnSelectAudioTypeElementCallback(ReorderableList list)
+        {
+            int selectedIndex = list.selectedIndices[0];
+
+            if (AudioDataContainer.TryGetData(AudioDataContainer.AudioTypes[selectedIndex], out AudioAssetData assetData))
+            {
+                
+            }
+            else
+            {
+                //SirenixEditorGUI.Message
+            }
         }
     }
 }
