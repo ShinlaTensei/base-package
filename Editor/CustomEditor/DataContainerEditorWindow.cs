@@ -34,12 +34,19 @@ namespace Base.Editor
 
         private GUITabGroup      m_tabGroup;
         private DataContainer<T> m_dataContainer;
+        private T                m_dataObject;
 
         protected string           OutputPath    { get; private set; }
         protected DataContainer<T> DataContainer
         {
             get => m_dataContainer;
             private set => m_dataContainer = value;
+        }
+
+        protected T DataObject
+        {
+            get => m_dataObject;
+            set => m_dataObject = value;
         }
         
         protected ReorderableList DataReorderableList { get; set; }
@@ -67,6 +74,7 @@ namespace Base.Editor
                 {
                     DataContainer = dataContainer;
                     SaveOutputPathToText(OutputPath);
+                    InitAfterLoadReference();
                 }
                 GUIHelper.ExitGUI(false);
             }
@@ -92,6 +100,7 @@ namespace Base.Editor
             if (GUI.Button(headerCreateBtnRect, "Create"))
             {
                 DataContainer = CreateDataContainer(OutputPath);
+                InitAfterLoadReference();
             }
             Rect headerDeleteBtnRect = new Rect(headerCreateBtnRect.x + headerCreateBtnRect.width + 10f, headerCreateBtnRect.y,
                                                 HEADER_BUTTON_WIDTH, 20f);
@@ -167,5 +176,7 @@ namespace Base.Editor
 
         protected abstract void SaveOutputPathToText(string content);
         protected abstract string LoadOutputPathFromText();
+        
+        protected virtual void InitAfterLoadReference() {}
     }
 }

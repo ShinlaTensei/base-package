@@ -11,6 +11,8 @@ using Base.Helper;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -25,9 +27,11 @@ namespace Base.Editor
             window.minSize = new Vector2(500f, 500f);
         }
         
-        private bool         m_isAddTypes            = false;
-        private string       m_audioTypesAddTemplate = string.Empty;
-        private List<string> m_audioTypeDeletion = new List<string>();
+        private bool         m_isAddTypes             = false;
+        private string       m_audioTypesAddTemplate  = string.Empty;
+        private List<string> m_audioTypeDeletion      = new List<string>();
+        private int          m_selectedAudioTypeIndex = 0;
+        private Vector2      m_currentScrollPosition  = Vector2.zero;
 
         private const float DEFAULT_BUTTON_HEIGHT = 20f;
 
@@ -38,16 +42,32 @@ namespace Base.Editor
         protected override void Initialize()
         {
             base.Initialize();
+            
+            InitAfterLoadReference();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
 
             if (AudioDataContainer != null)
             {
+                AudioDataContainer.WorkingCopy.Clear();
+            }
+        }
+
+        protected override void InitAfterLoadReference()
+        {
+            if (AudioDataContainer != null)
+            {
                 AudioTypeReorderableList = new ReorderableList(AudioDataContainer.AudioTypes, typeof(string), true, false,
-                    false, false)
-                {
-                    drawElementCallback = DrawAudioTypeCallback,
-                    multiSelect = false,
-                    onSelectCallback = OnSelectAudioTypeElementCallback 
-                };
+                                                               false, false)
+                                           {
+                                                   drawElementCallback = DrawAudioTypeCallback,
+                                                   multiSelect         = false,
+                                                   onSelectCallback    = OnSelectAudioTypeElementCallback,
+                                                   index = m_selectedAudioTypeIndex
+                                           };
             }
         }
 
@@ -60,7 +80,8 @@ namespace Base.Editor
             {
                 if (AudioDataContainer != null)
                 {
-                    DrawAudioTypeSetting();
+                    Rect areRect = DrawAudioTypeSetting();
+                    DrawDataObject(areRect);
                 }
             }
             audioPage.EndPage();
@@ -102,10 +123,14 @@ namespace Base.Editor
             }
             return FileUtilities.LoadTextFile(Path.GetFullPath(EditorConstant.EDITOR_CONFIG_PATH) + $"/{nameof(AudioDataContainer)}.txt");
         }
-
-        private void DrawAudioTypeSetting()
+        
+        /// <summary>
+        /// Draw Audio Type
+        /// </summary>
+        /// <returns>The Rect of AudioType GUI</returns>
+        private Rect DrawAudioTypeSetting()
         {
-            if (AudioDataContainer == null) return;
+            if (AudioDataContainer == null) return new Rect();
 
             Rect areRect = new Rect(5f, 5f, TabGroup.InnerRect.width / 3f, TabGroup.InnerRect.height);
             
@@ -172,6 +197,33 @@ namespace Base.Editor
                 }
             }
             m_audioTypeDeletion.Clear();
+
+            return areRect;
+        }
+        
+        private void DrawDataObject(in Rect previousRect)
+        {
+            if (DataObject == null)
+                return;
+
+            Rect dataObjectRect = previousRect.AddX(previousRect.width + 10f).SetWidth(TabGroup.InnerRect.width - previousRect.width - 20f);
+            GUILayout.BeginArea(dataObjectRect);
+            SirenixEditorGUI.BeginBox(GUILayout.MinHeight(dataObjectRect.height - 250f));
+            EditorGUILayout.BeginVertical();
+            GUILayout.Space(5f);
+            EditorGUILayout.LabelField("AssetID", DataObject.Guid, SirenixGUIStyles.BoldLabel);
+            EditorGUILayout.Toggle("Is One Shot", DataObject.IsOneShot);
+            GUILayout.Space(10f);
+            if (DataReorderableList != null)
+            {
+                m_currentScrollPosition = EditorGUILayout.BeginScrollView(m_currentScrollPosition);
+                DataReorderableList.DoLayoutList();
+                EditorGUILayout.EndScrollView();
+            }
+
+            EditorGUILayout.EndVertical();
+            SirenixEditorGUI.EndBox();
+            GUILayout.EndArea();
         }
 
         private void DrawAudioTypeCallback(Rect rect, int index, bool isActive, bool isFocus)
@@ -199,16 +251,52 @@ namespace Base.Editor
 
         private void OnSelectAudioTypeElementCallback(ReorderableList list)
         {
-            int selectedIndex = list.selectedIndices[0];
+            m_selectedAudioTypeIndex = list.selectedIndices[0];
 
-            if (AudioDataContainer.TryGetData(AudioDataContainer.AudioTypes[selectedIndex], out AudioAssetData assetData))
+            if (AudioDataContainer.TryGetData(AudioDataContainer.AudioTypes[m_selectedAudioTypeIndex], out AudioAssetData assetData))
             {
-                
+                DataObject = assetData;
             }
             else
             {
-                //SirenixEditorGUI.Message
+                DataObject = new AudioAssetData(AudioDataContainer.WorkingCopy.Count, AudioDataContainer.AudioTypes[m_selectedAudioTypeIndex],
+                                                GUID.Generate().ToString());
             }
+            AudioDataContainer.WorkingCopy.AddIfNotContainsT(DataObject);
+
+            DataReorderableList = new ReorderableList(DataObject.ClipAssetKeys, typeof(string), true, true, true, true)
+                                  {
+                                          onAddCallback      = OnAddAudioAssetKeyCallback,
+                                          onRemoveCallback   = OnRemoveAudioAssetKeyCallback,
+                                          drawHeaderCallback = DrawAudioAssetHeaderCallback,
+                                  };
+        }
+
+        private void DrawAudioAssetHeaderCallback(Rect rect)
+        {
+            EditorGUI.LabelField(rect.SetWidth(100f).SetHeight(20f), nameof(DataObject.ClipAssetKeys));
+        }
+
+        private void OnAddAudioAssetKeyCallback(ReorderableList list)
+        {
+            AddressableAssetSettings settings    = AddressableAssetSettingsDefaultObject.Settings;
+            string[]                 audioClipId = AssetDatabase.FindAssets("t:audioClip");
+            GenericMenu              genericMenu = new GenericMenu();
+            for (int i = 0; i < audioClipId.Length; ++i)
+            {
+                AddressableAssetEntry entry = settings.FindAssetEntry(audioClipId[i]);
+                if (entry != null && !DataObject.ClipAssetKeys.Contains(entry.address))
+                {
+                    genericMenu.AddItem(new GUIContent(entry.address), false, () => DataObject.ClipAssetKeys.Add(entry.address));
+                }
+            }
+            
+            genericMenu.ShowAsContext();
+        }
+        
+        private void OnRemoveAudioAssetKeyCallback(ReorderableList list)
+        {
+            
         }
     }
 }
