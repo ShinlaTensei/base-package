@@ -23,42 +23,55 @@ namespace Base.Helper
         
         #region Position
 
-        public static void SetPosX(this Transform target, float xPos)
+        public static Transform SetPosX(this Transform target, float xPos)
         {
             Vector3 position = target.position;
             target.position = new Vector3(xPos, position.y, position.z);
+            return target;
         }
 
-        public static void SetPosY(this Transform target, float yPos)
+        public static Transform SetPosY(this Transform target, float yPos)
         {
             Vector3 position = target.position;
             target.position = new Vector3(position.x, yPos, position.z);
+            return target;
         }
 
-        public static void SetPosZ(this Transform target, float zPos)
+        public static Transform SetPosZ(this Transform target, float zPos)
         {
             Vector3 position = target.position;
             target.position = new Vector3(position.x, position.y, zPos);
+            return target;
         }
 
-        public static void SetPosition(this Transform target, Vector3 position)
+        public static Transform SetPosition(this Transform target, Vector3 position)
         {
             target.position = position;
+            return target;
         }
 
-        public static void SetPosition(this Transform target, float x, float y, float z)
+        public static Transform SetPosition(this Transform target, float x, float y, float z)
         { 
             target.SetPosition(new Vector3(x, y, z));
+            return target;
         }
 
-        public static void SetLocalPosition(this Transform target, Vector3 newLocalPos)
+        public static Transform SetLocalPosition(this Transform target, Vector3 newLocalPos)
         {
             target.localPosition = newLocalPos;
+            return target;
         }
         
-        public static void SetLocalPosition(this Transform target, float x, float y, float z)
+        public static Transform SetLocalPosition(this Transform target, float x, float y, float z)
         {
             target.SetLocalPosition(new Vector3(x, y, z));
+            return target;
+        }
+
+        public static Transform SetRotation(this Transform target, Quaternion value)
+        {
+            target.rotation = new Quaternion(value.x, value.y, value.z, value.w);
+            return target;
         }
 
         #endregion
@@ -187,6 +200,12 @@ namespace Base.Helper
         }
 
         #endregion
+
+        public static Transform SetParent(this Transform root, Transform parent, bool useWorldPos = false)
+        {
+            root.SetParent(parent, useWorldPos);
+            return root;
+        }
 
     }
 }

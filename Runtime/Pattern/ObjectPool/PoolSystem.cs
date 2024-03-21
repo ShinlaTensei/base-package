@@ -10,9 +10,9 @@ using UniRx.Toolkit;
 
 namespace Base.Pattern
 {
-    public interface IPoolUnit
+    public interface IPoolUnit : IDisposable
     {
-        void Dispose();
+       
     }
     public class PoolSystem : SingletonMono<PoolSystem>
     {
@@ -121,15 +121,12 @@ namespace Base.Pattern
             if (parent)
             {
                 Transform transform = instance.transform;
-                transform.SetParent(parent, useWorldPos);
-                transform.position = initialPosition;
-                transform.rotation = rotation;
+                transform.SetParent(parent, useWorldPos: useWorldPos).SetPosition(initialPosition).SetRotation(rotation);
             }
             else
             {
                 Transform transform = instance.transform;
-                transform.position = initialPosition;
-                transform.rotation = rotation;
+                transform.SetPosition(initialPosition).SetRotation(rotation);
             }
 
             return instance;
@@ -138,8 +135,7 @@ namespace Base.Pattern
         protected override void OnBeforeReturn(T instance)
         {
             instance.transform.RemoveFromParent();
-            instance.transform.position = Vector3.zero;
-            instance.transform.rotation = Quaternion.identity;
+            instance.transform.SetPosition(Vector3.zero).SetRotation(Quaternion.identity);
             base.OnBeforeReturn(instance);
         }
     }
