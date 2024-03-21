@@ -1,6 +1,6 @@
 {
     "name": "com.paidrubik.baseframework",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "displayName": "Base Framework",
     "description": "This is a framework",
     "unity": "2021.3",
@@ -12,7 +12,6 @@
         "com.unity.addressables": "1.19.19",
         "com.unity.device-simulator.devices": "1.0.0",
         "com.cysharp.unitask": "2.5.0",
-        "com.dbrizov.naughtyattributes": "2.1.4",
         "com.neuecc.unirx": "7.1.0"
     }
 }
