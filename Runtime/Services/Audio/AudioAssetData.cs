@@ -16,7 +16,9 @@ namespace Base
         /// Backing field of <see cref="ClipAssetKeys"/>
         /// </summary>
         private List<string> m_clipAssetKeys;
-        
+
+        private Dictionary<string, AudioSettingData> m_settingDataMap;
+
         /// <summary>
         /// A list contains all the audio clip addressable keys
         /// </summary>
@@ -25,25 +27,19 @@ namespace Base
             get => LazyInitializer.EnsureInitialized(ref m_clipAssetKeys);
             set => m_clipAssetKeys = value;
         }
-        
+
+        public Dictionary<string, AudioSettingData> SettingDataMap => LazyInitializer.EnsureInitialized(ref m_settingDataMap);
+
         /// <summary>
         /// Backing field of <see cref="CachedClips"/>
         /// </summary>
         private Dictionary<string, AudioClip> m_cachedClips;
-
-        private bool m_isOneShot = false;
 
         /// <summary>
         /// A key-value mapping container that holds reference to the audio clip has been loaded
         /// </summary>
         public Dictionary<string, AudioClip> CachedClips => LazyInitializer.EnsureInitialized(ref m_cachedClips);
 
-        public bool IsOneShot
-        {
-            set => m_isOneShot = value;
-            get => m_isOneShot;
-        }
-        
         /// <summary>
         /// Empty constructor with default member value
         /// </summary>
@@ -63,6 +59,16 @@ namespace Base
         public AudioAssetData(AudioAssetData original) : base(original)
         {
             CopyData(original);
+        }
+
+        public AudioSettingData CreateOrGetSettingData(string key)
+        {
+            if (!SettingDataMap.ContainsKey(key))
+            {
+                SettingDataMap[key] = new AudioSettingData();
+            }
+
+            return SettingDataMap[key];
         }
 
         public async UniTask<AudioClip> Evaluate(AddressableManager addressableService, string clipId)
@@ -94,6 +100,12 @@ namespace Base
                 m_clipAssetKeys.AddRange(audioAssetData.ClipAssetKeys);
             }
         }
+    }
+
+    public sealed class AudioSettingData
+    {
+        private float m_volume    = 1f;
+        private bool  m_isOneShot = false;
     }
 }
 

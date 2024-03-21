@@ -61,7 +61,11 @@ namespace Base.Module
             return provider;
         }
     }
-
+    
+    /// <summary>
+    /// Struct for change the ingame data therefore notify the subscriber for changes
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public struct LazyInlet<T> : IDataInlet<T>
     {
         private DataBindingReactive<T> Provider { get; set; }

@@ -59,33 +59,6 @@ namespace Base.Pattern
             return result as T;
         }
 
-        #region Camera
-
-        private IDictionary<CameraInstance.CameraKey, CameraInstance> m_cameraMap =
-            new Dictionary<CameraInstance.CameraKey, CameraInstance>();
-
-        public static CameraInstance GetCamera(string sceneName, CameraInstance.CameraType type = CameraInstance.CameraType.SideCamera)
-        {
-            CameraInstance.CameraKey searchKey = new CameraInstance.CameraKey(type, sceneName);
-            if (Instance.m_cameraMap.TryGetValue(searchKey, out CameraInstance instance))
-            {
-                return instance;
-            }
-
-            return null;
-        }
-
-        public static void SetCamera(CameraInstance camInstance, string sceneName, CameraInstance.CameraType type = CameraInstance.CameraType.SideCamera)
-        {
-            CameraInstance.CameraKey searchKey = new CameraInstance.CameraKey(type, sceneName);
-            if (!Instance.m_cameraMap.TryGetValue(searchKey, out CameraInstance instance))
-            {
-                Instance.m_cameraMap[searchKey] = camInstance;
-            }
-        }
-
-        #endregion
-
         public static IList<T> GetAll<T>() where T : class
         {
             IList<T> types = new List<T>();

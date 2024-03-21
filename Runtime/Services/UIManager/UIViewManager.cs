@@ -30,7 +30,7 @@ namespace Base
     {
     }
 
-    public class UIViewManager : BaseMono, IService
+    public class UIViewManager : MonoService
     {
         [SerializeField] private GameObject m_blurObj;
         [SerializeField] private GameObject m_transparentObj;
@@ -348,26 +348,6 @@ namespace Base
 
         private Dictionary<string, Transform> m_uiCanvasPool = new Dictionary<string, Transform>();
 
-        public Transform GetCanvasWithTag(UICanvasType enumTag)
-        {
-            string newTag = !(enumTag is UICanvasType.None) ? enumTag.ToString() : UICanvasType.RootCanvas.ToString();
-
-            if (m_uiCanvasPool.TryGetValue(newTag, out Transform value))
-            {
-                return value;
-            }
-
-            GameObject obj = GameObject.FindGameObjectWithTag(newTag);
-            if (obj != null)
-            {
-                m_uiCanvasPool.TryAdd(newTag, obj.transform);
-
-                return obj.transform;
-            }
-
-            return null;
-        }
-
         public Transform GetCanvasWithTag(UICanvasType enumTag, string sceneName)
         {
             string newTag = !(enumTag is UICanvasType.None) ? enumTag.ToString() : UICanvasType.RootCanvas.ToString();
@@ -398,21 +378,21 @@ namespace Base
             return null;
         }
 
-        public void Remove(UICanvasType canvasType)
-        {
-            string key = canvasType.ToString();
-            if (m_uiCanvasPool.ContainsKey(key))
-            {
-                m_uiCanvasPool.Remove(key);
-            }
-        }
-
         public void Remove(UICanvasType canvasType, string sceneName)
         {
             string key = $"{canvasType.ToString()}-{sceneName}";
             if (m_uiCanvasPool.ContainsKey(key))
             {
                 m_uiCanvasPool.Remove(key);
+            }
+        }
+
+        public void RegisterCanvas(CanvasRegister canvas)
+        {
+            string key = $"{canvas.CacheGameObject.tag}-{canvas.CacheGameObject.scene.name}";
+            if (!m_uiCanvasPool.ContainsKey(key))
+            {
+                m_uiCanvasPool[key] = canvas.CacheTransform;
             }
         }
 
@@ -430,11 +410,6 @@ namespace Base
             m_uiCanvasPool.Clear();
             m_uiViewPool.Clear();
             m_stackUI.Clear();
-        }
-
-        public void Dispose()
-        {
-            m_addressableManager.Dispose();
         }
     }
 }

@@ -28,10 +28,6 @@ namespace Base
         /// </summary>
         [SerializeField] private List<string> m_audioTypes;
         /// <summary>
-        /// Backing field for <see cref="AudioKeySettings"/>
-        /// </summary>
-        [SerializeField] private List<string> m_audioKeySettings;
-        /// <summary>
         /// Backing field for <see cref="DataCollection"/>
         /// </summary>
         private List<AudioAssetData> m_audioAssets;
@@ -46,14 +42,6 @@ namespace Base
         {
             get => m_audioTypes;
             set => m_audioTypes = value;
-        }
-        /// <summary>
-        /// List contains all key settings
-        /// </summary>
-        public List<string> AudioKeySettings
-        {
-            get => m_audioKeySettings;
-            set => m_audioKeySettings = value;
         }
 
         public override List<AudioAssetData> DataCollection
