@@ -19,7 +19,7 @@ namespace Base.Helper
 
 		private static object Copy(this object originalObject)
 		{
-			return InternalCopy(originalObject, new Dictionary<object, object>(new ReferenceEqualityComparer()));
+			return InternalCopy(originalObject, new Dictionary<object, object>(new ReferenceEqualityComparer<object>()));
 		}
 
 		private static object InternalCopy(object originalObject, IDictionary<object, object> visited)

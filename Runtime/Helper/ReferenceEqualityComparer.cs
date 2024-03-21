@@ -2,14 +2,14 @@ using System.Collections.Generic;
 
 namespace Base.Helper
 {
-    public class ReferenceEqualityComparer : EqualityComparer<object>
+    public sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
     {
-        public override bool Equals(object x, object y)
+        public bool Equals(T x, T y)
         {
             return x == y;
         }
 
-        public override int GetHashCode(object obj)
+        public int GetHashCode(T obj)
         {
             return obj?.GetHashCode() ?? 0;
         }

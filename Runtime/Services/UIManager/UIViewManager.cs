@@ -8,6 +8,7 @@ using Base.Logging;
 using Base.Pattern;
 using Base.Core;
 using Cysharp.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
