@@ -1,6 +1,6 @@
 {
     "name": "com.paidrubik.baseframework",
-    "version": "1.2.6",
+    "version": "1.2.7",
     "displayName": "Base Framework",
     "description": "This is a framework",
     "unity": "2021.3",

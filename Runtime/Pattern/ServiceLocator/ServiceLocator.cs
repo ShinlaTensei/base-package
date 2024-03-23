@@ -1,20 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Base.Helper;
-using Base.Core;
 using UnityEngine;
 
 namespace Base.Pattern
 {
-    public class ServiceLocator : SingletonNonMono<ServiceLocator>
+    public class ServiceLocator : SingletonMono<ServiceLocator>
     {
-        private IDictionary<Type, object> m_class;
-
-        public ServiceLocator()
-        {
-            LazyInitializer.EnsureInitialized(ref m_class, () => new Dictionary<Type, object>());
-        }
+        private IDictionary<Type, object> m_class = new Dictionary<Type, object>();
 
         public static T Get<T>() where T : class
         {
@@ -30,6 +23,7 @@ namespace Base.Pattern
                     GameObject inst = new GameObject();
                     item      = inst.AddComponent(typeof(T)) as T;
                     inst.name = $"{typeof(T).Name}-Singleton";
+                    inst.transform.SetParent(CacheTransform, useWorldPos: false).SetLocalPosition(Vector3.zero);
                 }
                 else
                 {
