@@ -53,7 +53,7 @@ namespace Base
             GC.SuppressFinalize(this);
         }
         
-        public virtual void DisposeOnInheritance() {}
+        protected virtual void DisposeOnInheritance() {}
     }
 }
 

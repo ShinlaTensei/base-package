@@ -98,6 +98,8 @@ namespace Base
             {
                 m_clipAssetKeys = new List<string>();
                 m_clipAssetKeys.AddRange(audioAssetData.ClipAssetKeys);
+
+                m_settingDataMap = new Dictionary<string, AudioSettingData>(audioAssetData.m_settingDataMap);
             }
         }
     }
@@ -106,6 +108,18 @@ namespace Base
     {
         private float m_volume    = 1f;
         private bool  m_isOneShot = false;
+
+        public float Volume
+        {
+            get => m_volume;
+            set => m_volume = value;
+        }
+
+        public bool PlayOneShot
+        {
+            get => m_isOneShot;
+            set => m_isOneShot = value;
+        }
     }
 }
 
