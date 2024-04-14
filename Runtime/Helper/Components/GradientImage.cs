@@ -7,7 +7,7 @@ namespace Base.Helper
     /// <summary>
     /// Draws a Image, similar to the regular Images. You can set four corner colors to have a nice gradient.
     /// </summary>
-    [AddComponentMenu("UI/GradientImage", 14)]
+    [AddComponentMenu("Base Component/GradientImage", 14)]
     public class GradientImage : Image
     {
         // Notice:

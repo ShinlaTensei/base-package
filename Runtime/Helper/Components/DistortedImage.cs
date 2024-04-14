@@ -12,7 +12,7 @@ namespace Base.Helper
     /// <summary>
     /// Draws a Image, similar to the regular Images. It has offsets for each corner, so more complex, distorted images are possible, without adding new graphics.
     /// </summary>
-    [AddComponentMenu("UI/DistortedImage", 13)]
+    [AddComponentMenu("Base Component/DistortedImage", 13)]
     public class DistortedImage : Image
     {
         // Notice:

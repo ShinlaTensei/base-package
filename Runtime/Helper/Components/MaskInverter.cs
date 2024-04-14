@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 
 namespace Base.Helper
 {
-    [AddComponentMenu("Base/UI/Mask Inverter")]
+    [AddComponentMenu("Base Component/Mask Inverter")]
     public sealed class MaskInverter : MonoBehaviour, IMaterialModifier
     {
         private static readonly int _stencilComp = Shader.PropertyToID("_StencilComp");

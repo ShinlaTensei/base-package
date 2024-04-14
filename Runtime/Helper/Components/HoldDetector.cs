@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace Base.Helper
 {
+    [AddComponentMenu("Base Component/Hold Detector")]
     public class HoldDetector : BaseMono, IPointerDownHandler, IPointerUpHandler
     {
         /// <summary>
