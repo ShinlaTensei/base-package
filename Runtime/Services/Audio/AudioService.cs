@@ -1,7 +1,9 @@
 #region Header
+
 // Date: 18/02/2024
 // Created by: Huynh Phong Tran
 // File name: AudioService.cs
+
 #endregion
 
 using System;
@@ -20,20 +22,17 @@ namespace Base
     {
         private AudioDataContainer AudioDataContainer { get; set; }
         private AddressableManager AddressableManager { get; set; }
-        
-        private AudioSource AudioSource { get; set; }
-        
-        private CancellationTokenSource CancellationToken { get; set; } 
+        private IDictionary<string, AudioSource> MapAudioSource { get; set; }
+
+        private CancellationTokenSource CancellationToken { get; set; }
 
         public void Init(AudioDataContainer dataContainer)
         {
             Init();
             AudioDataContainer = dataContainer;
             AddressableManager = ServiceLocator.Get<AddressableManager>();
-            
-            AudioSource        = new GameObject("AudioSource").AddComponent<AudioSource>();
-            AudioSource.transform.SetParent(CacheTransform);
-            AudioSource.playOnAwake = false;
+
+            MapAudioSource = new Dictionary<string, AudioSource>();
 
             CancellationToken = new CancellationTokenSource();
         }
@@ -53,84 +52,103 @@ namespace Base
 
             if (!AudioDataContainer.TryGetData(audioKey, out AudioAssetData audioAssetData))
             {
-                
             }
 
-            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey).AttachExternalCancellation(CancellationToken.Token);
+            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey)
+                .AttachExternalCancellation(CancellationToken.Token);
 
             AudioSettingData settingData = audioAssetData.CreateOrGetSettingData(audioKey);
 
-            AudioSource.volume = settingData.Volume;
-            AudioSource.clip   = clip;
+            AudioSource audioSource = GetOrCreateAudioSource(audioKey);
+
+            audioSource.volume = settingData.Volume;
+            audioSource.clip = clip;
 
             if (settingData.PlayOneShot)
             {
-                AudioSource.PlayOneShot(clip);
+                audioSource.PlayOneShot(clip);
                 return;
             }
 
             if (delay > 0f)
             {
-                AudioSource.PlayDelayed(delay);
+                audioSource.PlayDelayed(delay);
             }
             else
             {
-                AudioSource.Play();
+                audioSource.Play();
             }
         }
 
         private async UniTask PauseAsync(string audioKey, float delayPause)
         {
-            if (!AudioSource.isPlaying) return;
-            
+            AudioSource audioSource = GetOrCreateAudioSource(audioKey);
+            if (!audioSource.isPlaying) return;
+
             if (!AudioDataContainer.TryGetData(audioKey, out AudioAssetData audioAssetData))
             {
-                
             }
 
-            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey).AttachExternalCancellation(CancellationToken.Token);
+            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey)
+                .AttachExternalCancellation(CancellationToken.Token);
 
-            if (AudioSource.clip == null || AudioSource.clip != clip) return;
+            if (audioSource.clip == null || audioSource.clip != clip) return;
 
             await UniTask.Delay(TimeSpan.FromSeconds(delayPause));
-            
-            AudioSource.Pause();
+
+            audioSource.Pause();
         }
-        
+
         private async UniTask ResumeAsync(string audioKey, float delay)
         {
-            if (!AudioSource.isPlaying) return;
-            
+            AudioSource audioSource = GetOrCreateAudioSource(audioKey);
+            if (!audioSource.isPlaying) return;
+
             if (!AudioDataContainer.TryGetData(audioKey, out AudioAssetData audioAssetData))
             {
-                
             }
 
-            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey).AttachExternalCancellation(CancellationToken.Token);
+            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey)
+                .AttachExternalCancellation(CancellationToken.Token);
 
-            if (AudioSource.clip == null || AudioSource.clip != clip) return;
+            if (audioSource.clip == null || audioSource.clip != clip) return;
 
             await UniTask.Delay(TimeSpan.FromSeconds(delay));
-            
-            AudioSource.Play();
+
+            audioSource.Play();
         }
-        
+
         private async UniTask StopAsync(string audioKey, float delay)
         {
-            if (!AudioSource.isPlaying) return;
-            
+            AudioSource audioSource = GetOrCreateAudioSource(audioKey);
+            if (!audioSource.isPlaying) return;
+
             if (!AudioDataContainer.TryGetData(audioKey, out AudioAssetData audioAssetData))
             {
-                
             }
 
-            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey).AttachExternalCancellation(CancellationToken.Token);
+            AudioClip clip = await audioAssetData.Evaluate(AddressableManager, audioKey)
+                .AttachExternalCancellation(CancellationToken.Token);
 
-            if (AudioSource.clip == null || AudioSource.clip != clip) return;
+            if (audioSource.clip == null || audioSource.clip != clip) return;
 
             await UniTask.Delay(TimeSpan.FromSeconds(delay));
-            
-            AudioSource.Stop();
+
+            audioSource.Stop();
+        }
+
+        private AudioSource GetOrCreateAudioSource(string key)
+        {
+            if (!MapAudioSource.TryGetValue(key, out AudioSource source))
+            {
+                GameObject go = new GameObject(key);
+                source = go.AddComponent<AudioSource>();
+                source.playOnAwake = false;
+                go.transform.SetParent(CacheTransform);
+                MapAudioSource[key] = source;
+            }
+
+            return source;
         }
 
         public void Play(string audioKey, float delay = 0f)
