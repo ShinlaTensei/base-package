@@ -12,7 +12,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Base
+namespace Base.Core
 {
     public enum UICanvasType
     {
@@ -30,7 +30,7 @@ namespace Base
     {
     }
 
-    public class UIViewManager : MonoService
+    public class UIViewManager : BaseMono
     {
         [SerializeField] private GameObject m_blurObj;
         [SerializeField] private GameObject m_transparentObj;
@@ -54,8 +54,13 @@ namespace Base
         {
             base.Start();
 
-            ServiceLocator.Set(this);
-            Init();
+            m_addressableManager = ServiceLocator.Get<AddressableManager>();
+            IsInitialize = true;
+        }
+
+        private void OnDestroy()
+        {
+            IsInitialize = false;
         }
 
         /// <summary>
@@ -397,19 +402,5 @@ namespace Base
         }
 
         #endregion
-
-        public void Init()
-        {
-            m_addressableManager = ServiceLocator.Get<AddressableManager>();
-            IsInitialize = true;
-        }
-        
-
-        public void DeInit()
-        {
-            m_uiCanvasPool.Clear();
-            m_uiViewPool.Clear();
-            m_stackUI.Clear();
-        }
     }
 }

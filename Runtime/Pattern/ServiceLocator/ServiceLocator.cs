@@ -1,13 +1,35 @@
 using System;
 using System.Collections.Generic;
+using Base.Core;
 using Base.Helper;
+using Base.Logging;
 using UnityEngine;
 
 namespace Base.Pattern
 {
+    /// <summary>
+    /// This singleton class hold all the reference to non-mono service derived from <see cref="Base.Core.IService"/> and <see cref="Base.Core.ISignal"/>
+    /// </summary>
     public class ServiceLocator : SingletonMono<ServiceLocator>
     {
-        private IDictionary<Type, object> m_class = new Dictionary<Type, object>();
+        private IDictionary<Type, IService> m_services = new Dictionary<Type, IService>();
+        private IDictionary<Type, ISignal> m_signals = new Dictionary<Type, ISignal>();
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            foreach (var service in m_services)
+            {
+                if (service.Value.IsInitialize)
+                {
+                    service.Value.Dispose();
+                }
+            }
+            
+            m_services.Clear();
+            m_signals.Clear();
+        }
 
         public static T Get<T>() where T : class
         {
@@ -16,57 +38,47 @@ namespace Base.Pattern
 
         private T Set<T>() where T : class
         {
-            if (!m_class.TryGetValue(typeof(T), out object item))
+            object result = null;
+            if (!m_services.TryGetValue(typeof(T), out IService item))
             {
-                if (typeof(T).IsSubclassOf(typeof(MonoBehaviour)))
-                {
-                    GameObject inst = new GameObject();
-                    item      = inst.AddComponent(typeof(T)) as T;
-                    inst.name = $"{typeof(T).Name}-Singleton";
-                    inst.transform.SetParent(CacheTransform, useWorldPos: false).SetLocalPosition(Vector3.zero);
-                }
-                else
-                {
-                    item = Activator.CreateInstance<T>();
-                }
+                item = Activator.CreateInstance<T>() as IService;
 
-                m_class[typeof(T)] = item;
+                m_services[typeof(T)] = item;
+                result = item;
+            }
+            
+            if (!m_signals.TryGetValue(typeof(T), out ISignal signal))
+            {
+                signal = Activator.CreateInstance<T>() as ISignal;
+                result = signal;
             }
 
-            return item as T;
-        }
-
-        public static T Set<T>(T inst) where T : class
-        {
-            if (!Instance.m_class.ContainsKey(inst.GetType()))
+            if (result == null)
             {
-                Instance.m_class[inst.GetType()] = inst;
+                throw new Exception($"ServiceLocator has no services or signals name {typeof(T)}");
             }
-
-            return inst;
-        }
-
-        private T Resolve<T>() where T : class
-        {
-            object result = m_class.TryGetValue(typeof(T), out object item) ? item : Set<T>();
 
             return result as T;
         }
 
-        public static IList<T> GetAll<T>() where T : class
+        public static void Set<T>(T inst) where T : class
         {
-            IList<T> types = new List<T>();
-            foreach (var service in Instance.m_class)
+            if (!Instance.m_services.ContainsKey(inst.GetType()))
             {
-                Type t = service.Key;
-                object ins = service.Value;
-                if (ins is T obj)
-                {
-                    types.AddIfNotContains(obj);
-                }
+                Instance.m_services[inst.GetType()] = inst as IService;
             }
+            else if (!Instance.m_signals.ContainsKey(inst.GetType()))
+            {
+                Instance.m_signals[inst.GetType()] = inst as ISignal;
+            }
+        }
 
-            return types;
+        private T Resolve<T>() where T : class
+        {
+            object result = m_services.TryGetValue(typeof(T), out IService item) ? item :
+                m_signals.TryGetValue(typeof(T), out ISignal signal) ? signal : Set<T>();
+
+            return result as T;
         }
 
     }

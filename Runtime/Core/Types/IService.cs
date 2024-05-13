@@ -18,8 +18,11 @@ namespace Base.Core
         {
             IsInitialize = true;
         }
-        
-        public virtual void Dispose() {}
+
+        public virtual void Dispose()
+        {
+            IsInitialize = false;
+        }
     }
     
     public abstract class Service<T> : IService<T>
@@ -31,20 +34,11 @@ namespace Base.Core
         {
             IsInitialize = true;
         }
-        
-        public virtual void Dispose() {}
-    }
 
-    public abstract class MonoService : BaseMono, IService
-    {
-        public bool IsInitialize { get; protected set; } = false;
-
-        public virtual void Init()
+        public virtual void Dispose()
         {
-            IsInitialize = true;
+            IsInitialize = false;
         }
-        
-        public virtual void Dispose() {}
     }
 
     public interface IService<T> : IService

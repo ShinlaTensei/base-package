@@ -7,6 +7,7 @@
 using System;
 using Base.Cheat;
 using Base.Pattern;
+using Base.Core;
 
 namespace Base.Helper
 {

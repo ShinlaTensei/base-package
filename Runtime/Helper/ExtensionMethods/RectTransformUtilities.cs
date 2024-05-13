@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Base.Helper
 {
-    public static class RectTransformUtils
+    public static class RectTransformUtilities
     {
         public static float GetCanvasScaleOnWidth(float crrWidth, Canvas canvas)
         {
