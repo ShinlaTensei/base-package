@@ -25,7 +25,7 @@ namespace Base.Core
 
             return context;
         }
-        
+
         public static DependencyContext TryGetOrCreateContext(Enum enumValue)
         {
             return TryGetOrCreateContext(Convert.ToInt32(enumValue));

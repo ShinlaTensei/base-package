@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Collections.Concurrent;
 using Base.Core;
+using Base.Helper;
 
 public interface IMainThreadDispatcher : IService
 {
@@ -26,7 +27,7 @@ public interface IMainThreadDispatcher : IService
     void Dispatch(float delay, Action action);
 }
 
-public class UnityMainThreadDispatcher : MonoBehaviour, IMainThreadDispatcher
+public class UnityMainThreadDispatcher : BaseMono
 {
     readonly ConcurrentQueue<Action> _executionQueue = new ConcurrentQueue<Action>();
 
@@ -115,47 +116,13 @@ public class UnityMainThreadDispatcher : MonoBehaviour, IMainThreadDispatcher
         yield return null;
     }
 
-    static UnityMainThreadDispatcher _instance = null;
-
-    public static bool Exists()
+    protected override void Start()
     {
-        return _instance != null;
-    }
-
-    public static UnityMainThreadDispatcher Instance()
-    {
-        if (!Exists())
-        {
-            throw new Exception("UnityMainThreadDispatcher could not find the UnityMainThreadDispatcher object. Please ensure you have added the MainThreadExecutor Prefab to your scene.");
-        }
-        return _instance;
-    }
-
-    void Awake()
-    {
-        if (_instance == null)
-        {
-            _instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
+        BaseContextRegistry.TryGetOrCreateContext(0).Register(this);
     }
 
     void OnDestroy()
     {
-        _instance = null;
-    }
-
-    public void Init()
-    {
-        
-    }
-
-    public void DeInit()
-    {
-        
-    }
-
-    public void Dispose()
-    {
+        BaseContextRegistry.TryGetOrCreateContext(0).UnRegister(this);
     }
 }

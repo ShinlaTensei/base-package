@@ -17,8 +17,30 @@ namespace Base
 {
     public partial class AddressableManager : Service
     {
-        public static float RETRY_DELAY_TIMER = 2f;
+        public float RETRY_DELAY_TIMER = 2f;
         public bool IsReadyToGetBundle { get; set; }
+
+        private UnityMainThreadDispatcher m_mainThreadDispatcher;
+
+        private UnityMainThreadDispatcher MainThreadDispatcher
+        {
+            get
+            {
+                if (m_mainThreadDispatcher == null)
+                {
+                    BaseContextRegistry.TryGetOrCreateContext(0).TryGet(out m_mainThreadDispatcher);
+
+                    if (m_mainThreadDispatcher == null)
+                    {
+                        GameObject go = new GameObject("MainThreadDispatcher");
+                        m_mainThreadDispatcher = go.AddComponent<UnityMainThreadDispatcher>();
+                        m_mainThreadDispatcher.Parent = BaseContextRegistry.Instance.CacheTransform;
+                    }
+                }
+
+                return m_mainThreadDispatcher;
+            }
+        }
 
         #region Tracking Asset
 
@@ -101,7 +123,7 @@ namespace Base
             }
         }
 
-        public static string GetError(Exception e)
+        public string GetError(Exception e)
         {
             while (e != null)
             {
@@ -254,12 +276,12 @@ namespace Base
 
         #endregion
 
-        public static void Dispatch(float delay, Action action)
+        public void Dispatch(float delay, Action action)
         {
-            UnityMainThreadDispatcher.Instance().Dispatch(delay, action, WaitForNetwork);
+            MainThreadDispatcher.Dispatch(delay, action, WaitForNetwork);
         }
 
-        static IEnumerator WaitForNetwork()
+        IEnumerator WaitForNetwork()
         {
             if (Application.internetReachability == NetworkReachability.NotReachable)
             {
