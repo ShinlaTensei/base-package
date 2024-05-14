@@ -1,4 +1,5 @@
 ﻿using System;
+using Base.Core;
 using Base.Logging;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -7,9 +8,6 @@ namespace Base.Helper
 {
     public class BaseMono : MonoBehaviour
     {
-        [SerializeField] [ReadOnly] private bool isMissingReference;
-        
-        
         private RectTransform m_rectTransform;
         private Transform m_transform;
         private GameObject m_gameObject;
@@ -54,8 +52,6 @@ namespace Base.Helper
             }
         }
 
-        public bool IsMissingReference => isMissingReference;
-
         public bool Active
         {
             get => CacheGameObject.activeSelf;
@@ -92,15 +88,7 @@ namespace Base.Helper
             set => CacheTransform.localScale = value;
         }
 
-        // protected virtual void OnValidate()
-        // {
-        //     isMissingReference = this.CheckNullAllSerializedFields();
-        // }
-
-        protected virtual void Start()
-        {
-            //if (isMissingReference) return;
-        }
+        protected virtual void Start() { }
 
         public GameObject CacheInstantiate()
         {
@@ -124,6 +112,16 @@ namespace Base.Helper
         {
             var obj = Instantiate(prefab, parent.TransformPoint(pos), rotate, parent);
             return obj;
+        }
+
+        public void RegisterContext(int contextId)
+        {
+            BaseContextRegistry.TryGetOrCreateContext(contextId).Register(this);
+        }
+
+        public void UnRegisterContext(int contextId)
+        {
+            BaseContextRegistry.TryGetOrCreateContext(contextId).UnRegister(this);
         }
     }
 }

@@ -55,11 +55,13 @@ namespace Base.Core
             base.Start();
 
             m_addressableManager = ServiceLocator.Get<AddressableManager>();
+            RegisterContext(0);
             IsInitialize = true;
         }
 
         private void OnDestroy()
         {
+            UnRegisterContext(0);
             IsInitialize = false;
         }
 

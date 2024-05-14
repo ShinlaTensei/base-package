@@ -110,7 +110,7 @@ namespace Base.Module
         /// </summary>
         static InputLocker()
         {
-            ServiceLocator.Get<OnForceSetTouch>()?.Subscribe(ForceSetTouch);
+            ServiceLocator.Get<OnForceSetTouch>().Subscribe(ForceSetTouch);
         }
 
         /// <summary>

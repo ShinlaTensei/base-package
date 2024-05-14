@@ -12,10 +12,10 @@ namespace Base
     {
         [SerializeField] private bool isPersistent;
         // Check to see if we're about to be destroyed.
-        protected static bool m_ShuttingDown = false;
+        private static bool m_ShuttingDown = false;
 
         private static object m_Lock = new object();
-        protected static T m_Instance;
+        private static T m_Instance;
 
         public static bool ShuttingDown => m_ShuttingDown;
 

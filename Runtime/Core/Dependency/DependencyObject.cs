@@ -6,13 +6,13 @@ using Object = UnityEngine.Object;
 
 namespace Base.Core
 {
-    public record DependencyObject
+    public record UnityDependencyObject
     {
         public Type Type { get; private set; }
         public object Target { get; private set; }
         public Object UnityObject { get; private set; }
 
-        public DependencyObject(Type type, object target, Object unityObject)
+        public UnityDependencyObject(Type type, object target, Object unityObject)
         {
             Type = type;
             Target = target;

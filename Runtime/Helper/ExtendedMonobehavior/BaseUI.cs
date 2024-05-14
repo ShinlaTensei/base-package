@@ -4,6 +4,7 @@
 // File name: BaseUI.cs
 #endregion
 
+using Base.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -102,6 +103,16 @@ namespace Base.Helper
         public virtual void Hide()
         {
             Active = false;
+        }
+        
+        public void RegisterContext(int contextId)
+        {
+            BaseContextRegistry.TryGetOrCreateContext(contextId).Register(this);
+        }
+
+        public void UnRegisterContext(int contextId)
+        {
+            BaseContextRegistry.TryGetOrCreateContext(contextId).UnRegister(this);
         }
     }
 }
