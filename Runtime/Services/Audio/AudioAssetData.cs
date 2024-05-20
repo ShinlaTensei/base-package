@@ -17,8 +17,6 @@ namespace Base
         /// </summary>
         private List<string> m_clipAssetKeys;
 
-        private Dictionary<string, AudioSettingData> m_settingDataMap;
-
         /// <summary>
         /// A list contains all the audio clip addressable keys
         /// </summary>
@@ -27,8 +25,6 @@ namespace Base
             get => LazyInitializer.EnsureInitialized(ref m_clipAssetKeys);
             set => m_clipAssetKeys = value;
         }
-
-        public Dictionary<string, AudioSettingData> SettingDataMap => LazyInitializer.EnsureInitialized(ref m_settingDataMap);
 
         /// <summary>
         /// Backing field of <see cref="CachedClips"/>
@@ -61,16 +57,6 @@ namespace Base
             CopyData(original);
         }
 
-        public AudioSettingData CreateOrGetSettingData(string key)
-        {
-            if (!SettingDataMap.ContainsKey(key))
-            {
-                SettingDataMap[key] = new AudioSettingData();
-            }
-
-            return SettingDataMap[key];
-        }
-
         public async UniTask<AudioClip> Evaluate(AddressableManager addressableService, string clipId)
         {
             if (!ClipAssetKeys.Contains(clipId))
@@ -88,37 +74,6 @@ namespace Base
             }
 
             return clip;
-        }
-        
-        public override void CopyData(StringData data)
-        {
-            base.CopyData(data);
-
-            if (data is AudioAssetData audioAssetData)
-            {
-                m_clipAssetKeys = new List<string>();
-                m_clipAssetKeys.AddRange(audioAssetData.ClipAssetKeys);
-
-                m_settingDataMap = new Dictionary<string, AudioSettingData>(audioAssetData.m_settingDataMap);
-            }
-        }
-    }
-
-    public sealed class AudioSettingData
-    {
-        private float m_volume    = 1f;
-        private bool  m_isOneShot = false;
-
-        public float Volume
-        {
-            get => m_volume;
-            set => m_volume = value;
-        }
-
-        public bool PlayOneShot
-        {
-            get => m_isOneShot;
-            set => m_isOneShot = value;
         }
     }
 }

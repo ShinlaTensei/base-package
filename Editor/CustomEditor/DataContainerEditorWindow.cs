@@ -26,11 +26,11 @@ namespace Base.Editor
         /// </summary>
         protected static DataContainerEditorWindow<T> window;
         
-        private const float HEADER_HEIGHT       = 70f;
-        private const float FOLDER_BUTTON_SIZE  = 25f;
-        private const float HEADER_BUTTON_WIDTH = 60f;
-        private const float CORE_BUTTON_WIDTH   = 80f;
-        private const float CORE_BUTTON_HEIGHT  = 30f;
+        protected const float OUTPUT_PATH_HEADER       = 70f;
+        protected const float FOLDER_BUTTON_SIZE  = 25f;
+        protected const float HEADER_BUTTON_WIDTH = 60f;
+        protected const float CORE_BUTTON_WIDTH   = 80f;
+        protected const float CORE_BUTTON_HEIGHT  = 30f;
 
         private GUITabGroup      m_tabGroup;
         private DataContainer<T> m_dataContainer;
@@ -51,15 +51,19 @@ namespace Base.Editor
         
         protected ReorderableList DataReorderableList { get; set; }
 
-        protected GUITabGroup TabGroup => m_tabGroup;
+        protected GUITabGroup TabGroup
+        {
+            get => m_tabGroup;
+            set => m_tabGroup = value;
+        }
 
         private void DrawOutputPath()
         {  
-            SirenixEditorGUI.DrawSolidRect(new Rect(0, 0, position.width, HEADER_HEIGHT), PEditorStyles.BackgroundColorGrey);
-            SirenixEditorGUI.DrawSolidRect(new Rect(0, HEADER_HEIGHT, position.width, 1), PEditorStyles.SeparatorColorBlack);
+            SirenixEditorGUI.DrawSolidRect(new Rect(0, 0, position.width, OUTPUT_PATH_HEADER), PEditorStyles.BackgroundColorGrey);
+            SirenixEditorGUI.DrawSolidRect(new Rect(0, OUTPUT_PATH_HEADER, position.width, 1), PEditorStyles.SeparatorColorBlack);
             
             // Draw the output path
-            GUILayout.BeginArea(new Rect(0f, 0, position.width, HEADER_HEIGHT));
+            GUILayout.BeginArea(new Rect(0f, 0, position.width, OUTPUT_PATH_HEADER));
             EditorGUILayout.BeginVertical();
             EditorGUILayout.BeginHorizontal();
             Rect outputPathRect = new Rect(5f, 15f, position.width - 25f, 20f);
@@ -69,11 +73,11 @@ namespace Base.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 OutputPath = path;
-
+                EditorPrefs.SetString(nameof(OutputPath), path);
                 if (!string.IsNullOrEmpty(OutputPath) && LoadDataContainer(OutputPath, out DataContainer<T> dataContainer))
                 {
                     DataContainer = dataContainer;
-                    SaveOutputPathToText(OutputPath);
+                    SaveOutputPath(OutputPath);
                     InitAfterLoadReference();
                 }
                 GUIHelper.ExitGUI(false);
@@ -125,7 +129,7 @@ namespace Base.Editor
             SirenixEditorGUI.BeginHorizontalPropertyLayout(GUIContent.none);
             GUI.backgroundColor = PEditorStyles.BackgroundGreenDarkColor;
             GUI.contentColor    = SirenixGUIStyles.GreenValidColor;
-            Rect saveButtonRect = new Rect(position.width - 230f, HEADER_HEIGHT + 40f, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
+            Rect saveButtonRect = new Rect(position.width - 230f, OUTPUT_PATH_HEADER + 40f, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
             if (GUI.Button(saveButtonRect, "Save"))
             {
                 DataContainer.Save();
@@ -147,13 +151,9 @@ namespace Base.Editor
 
         protected override void Initialize()
         {
-            m_tabGroup              = SirenixEditorGUI.CreateAnimatedTabGroup("DataContainer");
-            m_tabGroup.TabLayouting = TabLayouting.MultiRow;
-            m_tabGroup.ExpandHeight = true;
-
             if (string.IsNullOrEmpty(OutputPath))
             {
-                OutputPath = LoadOutputPathFromText();
+                OutputPath = LoadOutputPath();
             }
 
             if (!string.IsNullOrEmpty(OutputPath) && LoadDataContainer(OutputPath, out DataContainer<T> dataContainer) && DataContainer == null)
@@ -165,17 +165,15 @@ namespace Base.Editor
         protected override void OnImGUI()
         {
             base.OnImGUI();
-
             DrawOutputPath();
-            DrawCoreButtons();
             DrawTabs();
         }
 
         protected abstract DataContainer<T> CreateDataContainer(string path);
         protected abstract bool LoadDataContainer(string path, out DataContainer<T> dataContainer);
 
-        protected abstract void SaveOutputPathToText(string content);
-        protected abstract string LoadOutputPathFromText();
+        protected abstract void SaveOutputPath(string content);
+        protected abstract string LoadOutputPath();
         
         protected virtual void InitAfterLoadReference() {}
     }

@@ -55,5 +55,7 @@ namespace Base.Editor
         public static Color DefaultBackgroundColor => m_defaultBackgroundColor;
 
         public static Color32 DefaultCollectionHeaderColor => m_defaultCollectionHeaderColor;
+
+        public static Color32 DefaultEditorDarkColor { get; } = new Color32(56, 56, 56, 255);
     }
 }
