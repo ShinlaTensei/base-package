@@ -36,7 +36,27 @@ namespace Base.Editor
         private const float SPACE = 60f;
         private const float CONTENT_HEADER = 40f;
         
+        private Rect TabContentRect { get; set; }
+        private Rect TabHeaderRect { get; set; }
+
+        private int m_crrTabIndex = 0;
+        
         // -------------------- Private Method ---------------------------------
+
+        private void ShowTabContent(in int tabIndex)
+        {
+            GUILayout.BeginArea(TabContentRect);
+            switch (tabIndex)
+            {
+                case 0:
+                    EditorGUI.LabelField(new Rect(0, 0, TabContentRect.width, 25f), "test");
+                    break;
+                case 1:
+                    EditorGUI.LabelField(new Rect(0, 0, TabContentRect.width, 25f), "test test ");
+                    break;
+            }
+            GUILayout.EndArea();
+        }
 
         // ------------------- Inherited method -------------------------------------
 
@@ -45,6 +65,12 @@ namespace Base.Editor
             base.Initialize();
 
             window = this;
+            
+            TabContentRect = new (0, OUTPUT_PATH_HEADER + SPACE + CONTENT_HEADER, window.minSize.x ,
+                window.position.height - OUTPUT_PATH_HEADER - SPACE - CONTENT_HEADER);
+            
+            TabHeaderRect =  new Rect(0, OUTPUT_PATH_HEADER + SPACE, window.minSize.x, CONTENT_HEADER);
+            
         }
 
         protected override void OnDestroy()
@@ -54,37 +80,25 @@ namespace Base.Editor
 
         protected override void DrawTabs()
         {
-            Rect contentRect = new Rect(0, OUTPUT_PATH_HEADER + SPACE, window.position.width, window.position.height - OUTPUT_PATH_HEADER - SPACE);
-            SirenixEditorGUI.DrawSolidRect(contentRect, PEditorStyles.BackgroundColorGrey);
-
-            bool isShow1 = false, isShow2 = false;
-            Rect headerRect = new Rect(0, contentRect.y, contentRect.width, CONTENT_HEADER);
-            using (new GUILayout.AreaScope(headerRect))
+            SirenixEditorGUI.DrawSolidRect(TabContentRect, PEditorStyles.BackgroundColorGrey);
+            
+            
+            using (new GUILayout.AreaScope(TabHeaderRect))
             {
                 using (new GUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Tab 1", GUILayout.MinHeight(headerRect.height)))
+                    if (GUILayout.Button("Tab 1", GUILayout.MinHeight(TabHeaderRect.height)))
                     {
-                        isShow1 = true;
-                        isShow2 = false;
+                        m_crrTabIndex = 0;
                     }
-                    else if (GUILayout.Button("Tab 2", GUILayout.MinHeight(headerRect.height)))
+                    else if (GUILayout.Button("Tab 2", GUILayout.MinHeight(TabHeaderRect.height)))
                     {
-                        isShow1 = false;
-                        isShow2 = true;
+                        m_crrTabIndex = 1;
                     }
                 }
             }
-
-            if (isShow1)
-            {
-                EditorGUI.LabelField(new Rect(0, headerRect.y + 10f, contentRect.width, contentRect.height), "test");
-            }
-
-            if (isShow2)
-            {
-                EditorGUI.LabelField(new Rect(0, headerRect.y + 20f, contentRect.width, contentRect.height), "test test ");
-            }
+            
+            ShowTabContent(m_crrTabIndex);
         }
 
         protected override DataContainer<AudioAssetData> CreateDataContainer(string path)
