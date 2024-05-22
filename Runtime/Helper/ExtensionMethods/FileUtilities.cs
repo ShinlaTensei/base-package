@@ -347,7 +347,7 @@ namespace Base.Helper
         public static string GetSystemPath()
         {
 #if (UNITY_EDITOR || UNITY_STANDALONE || UNITY_STANDALONE_WIN) && !UNITY_EDITOR_OSX
-            return Environment.GetEnvironmentVariable("USERPROFILE") + "\\";
+            return Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
 #elif UNITY_ANDROID || !DEBUG || UNITY_EDITOR_OSX
             return Application.persistentDataPath + "/";
 #endif

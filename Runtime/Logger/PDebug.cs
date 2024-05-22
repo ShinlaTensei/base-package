@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Base.Helper;
 using Base.Module;
 using NLog;
 using NLog.Targets;
@@ -19,13 +20,26 @@ namespace Base.Logging
             Target.Register<UnityDebugTarget>("UnityDebugLog");
             // Init configuration
             var config = new NLog.Config.LoggingConfiguration();
-            
+
             var logConsole = new UnityDebugTarget()
             {
                 Name = "UnityDebugLog",
                 Layout = "[${level}]---${message}---${callsite:captureStackTrace=true:skipFrames=1:fileName=true}"
             };
+
+            var logFile = new FileTarget("File")
+            {
+                FileName = FileUtilities.GetSystemPath() + Path.DirectorySeparatorChar + "${shortdate}_debug.log",
+                CreateDirs = true,
+                KeepFileOpen = true,
+                ConcurrentWrites = false,
+                ArchiveNumbering = ArchiveNumberingMode.Date,
+                ArchiveEvery = FileArchivePeriod.Day,
+                MaxArchiveFiles = 10,
+                DeleteOldFileOnStartup = true,
+            };
             config.AddRule(LogLevel.Trace, LogLevel.Fatal, logConsole);
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, logFile);
 
             LogManager.Configuration = config;
 

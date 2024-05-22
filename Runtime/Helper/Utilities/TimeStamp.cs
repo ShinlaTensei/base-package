@@ -19,7 +19,7 @@ namespace Base.Helper
         }
         
         /// <summary>
-        /// Get time UTC in seconds
+        /// Get time UTC in seconds from epoch
         /// </summary>
         /// <param name="dateTime">input date time</param>
         /// <returns></returns>
@@ -29,7 +29,7 @@ namespace Base.Helper
         }
         
         /// <summary>
-        /// Get time UTC in milliseconds
+        /// Get time UTC in milliseconds from epoch
         /// </summary>
         /// <returns> milliseconds </returns>
         public static long MillisecondsUtc()
@@ -38,7 +38,7 @@ namespace Base.Helper
         }
         
         /// <summary>
-        /// Get time local in seconds.
+        /// Get time local in seconds from epoch
         /// </summary>
         /// <returns></returns>
         public static long TimeLocal()
