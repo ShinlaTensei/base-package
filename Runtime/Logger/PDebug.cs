@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Base.Module;
 using NLog;
+using NLog.Targets;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Logger = NLog.Logger;
@@ -15,6 +16,7 @@ namespace Base.Logging
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         public static void SetupLogSystem()
         {
+            Target.Register<UnityDebugTarget>("UnityDebugLog");
             // Init configuration
             var config = new NLog.Config.LoggingConfiguration();
             
@@ -23,12 +25,12 @@ namespace Base.Logging
                 Name = "UnityDebugLog",
                 Layout = "[${level}]---${message}---${callsite:captureStackTrace=true:skipFrames=1:fileName=true}"
             };
-            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logConsole);
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, logConsole);
 
             LogManager.Configuration = config;
-            
+
 #if !LOG_ENABLE
-            LogManager.Shutdown();
+            Shutdown();
 #endif
         }
 
@@ -38,6 +40,11 @@ namespace Base.Logging
         }
 
         #region Log function
+
+        public static void Trace(string message)
+        {
+            if (GetLogger().IsTraceEnabled) GetLogger().Trace(message);
+        }
 
         public static void Info(string message)
         {
@@ -141,6 +148,11 @@ namespace Base.Logging
             StringBuilder stringBuilder = new StringBuilder(format.Length + args.Length * 8);
             stringBuilder.AppendFormat(provider, format, args);
             return stringBuilder.ToString();
+        }
+
+        public static void Shutdown()
+        {
+            LogManager.Shutdown();
         }
     }
 }
