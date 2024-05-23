@@ -80,6 +80,11 @@ namespace Base.Logging
             if (GetLogger().IsErrorEnabled) GetLogger().Error(message);
         }
 
+        public static void Trace(Color color, string message)
+        {
+            if (GetLogger().IsTraceEnabled) Trace(Format(null, "<color=#{0}>{1}</color>", ToHtmlStringRGBA(color), message));
+        }
+
         public static void Info(Color color, string message)
         {
             if (GetLogger().IsInfoEnabled) Info(Format(null, "<color=#{0}>{1}</color>", ToHtmlStringRGBA(color), message));
@@ -100,6 +105,11 @@ namespace Base.Logging
             if (GetLogger().IsErrorEnabled) Error(Format(null, "<color=#{0}>{1}</color>", ToHtmlStringRGBA(color), message));
         }
 
+        public static void TraceFormat(string format, params object[] args)
+        {
+            GetLogger().Trace(format, args);
+        }
+
         public static void InfoFormat(string format, params object[] args)
         {
             GetLogger().Info(format, args);
@@ -114,10 +124,15 @@ namespace Base.Logging
         {
             GetLogger().Warn(format, args);
         }
-        
+
         public static void ErrorFormat(string format, params object[] args)
         {
             GetLogger().Error(format, args);
+        }
+        
+        public static void TraceFormat(Color color, string format, params object[] args)
+        {
+            TraceFormat(Format(null, "<color=#{0}>{1}</color> ", ToHtmlStringRGBA(color), format), args);
         }
 
         public static void InfoFormat(Color color, string format, params object[] args)

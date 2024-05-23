@@ -35,11 +35,18 @@ namespace Base.Editor
 
         private const float SPACE = 60f;
         private const float CONTENT_HEADER = 40f;
+        private const int AMOUNT_TO_SCROLLABLE = 15;
+        private const string ALL = "All";
         
         private Rect TabContentRect { get; set; }
         private Rect TabHeaderRect { get; set; }
+        private AudioDataContainer AudioContainer => DataContainer as AudioDataContainer;
 
         private int m_crrTabIndex = 0;
+        private string m_crrSelectedAudioType = string.Empty;
+        private AudioAssetData m_crrSelectedAudioAsset = null;
+
+        private ReorderableList m_audioNameList;
         
         // -------------------- Private Method ---------------------------------
 
@@ -49,13 +56,104 @@ namespace Base.Editor
             switch (tabIndex)
             {
                 case 0:
-                    EditorGUI.LabelField(new Rect(0, 0, TabContentRect.width, 25f), "test");
+                    DrawAudioAsset();
                     break;
                 case 1:
                     EditorGUI.LabelField(new Rect(0, 0, TabContentRect.width, 25f), "test test ");
                     break;
             }
             GUILayout.EndArea();
+        }
+
+        private void DrawAudioAsset()
+        {
+            if (AudioContainer == null) return;
+            
+            List<string> audioTypes = new List<string>();
+            audioTypes.AddIfNotContains(ALL);
+            foreach (var audioType in AudioContainer.AudioTypes)
+            {
+                audioTypes.AddIfNotContains(audioType);
+            }
+            
+            if (string.IsNullOrEmpty(m_crrSelectedAudioType))
+            {
+                m_crrSelectedAudioType = audioTypes[0];
+            }
+
+            Rect audioTypeSelectRect = new Rect(10f, 10f, 125f, 25f);
+            string newAudioType = SirenixEditorFields.Dropdown(audioTypeSelectRect, GUIContent.none, m_crrSelectedAudioType, audioTypes);
+            if (!m_crrSelectedAudioType.Equals(newAudioType))
+            {
+                m_crrSelectedAudioType = newAudioType;
+            }
+
+            List<string> audioNames = new List<string>();
+            foreach (var audioAsset in AudioContainer.WorkingCopy)
+            {
+                audioNames.AddIfNotContains(audioAsset.ObjectName);
+            }
+
+            ReorderableList audioNameList = new ReorderableList(audioNames, typeof(string), true, false, true, true)
+            {
+                multiSelect = false,
+                draggable = true,
+                onAddCallback = OnAddAudioAssetCallback,
+                onSelectCallback = OnSelectAudioAssetCallback,
+                drawElementBackgroundCallback = OnDrawElementBackgroundCallback,
+            };
+
+            if (audioNames.Count >= AMOUNT_TO_SCROLLABLE)
+            {
+                
+            }
+            else
+            {
+                audioNameList.DoList(audioTypeSelectRect.AddY(50f).SetWidth(250f));
+            }
+            
+        }
+
+        private void OnAddAudioAssetCallback(ReorderableList list)
+        {
+            AudioAssetData assetData = new AudioAssetData()
+            {
+                Type = string.Empty,
+                Guid = GUID.Generate().ToString(),
+                Index = list.count,
+                ObjectName = string.Empty
+            };
+            AudioContainer.WorkingCopy.AddIfNotContainsT(assetData);
+        }
+
+        private void OnSelectAudioAssetCallback(ReorderableList list)
+        {
+            int crrSelectedIndex = list.selectedIndices[0];
+
+            m_crrSelectedAudioAsset = AudioContainer.WorkingCopy[crrSelectedIndex];
+        }
+
+        private void OnDrawElementBackgroundCallback(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            if (Event.current.type != EventType.Repaint)
+            {
+                return;
+            }
+            bool isSelected = m_crrSelectedAudioAsset != null && m_crrSelectedAudioAsset.Index == index;
+            
+            GUIStyle HeaderBackground = new GUIStyle("RL Header");
+
+            Color[] pix = new Color[Mathf.FloorToInt(rect.width * rect.height)];
+          
+            for (int i = 0; i < pix.Length; i++)
+                pix[i] = isSelected ? Color.blue : index % 2 == 0 ? Color.cyan : Color.yellow;
+          
+            Texture2D result = new Texture2D((int)rect.width, (int)5);
+            result.SetPixels(pix);
+            result.Apply();
+          
+            HeaderBackground.normal.background = result;
+            EditorGUI.LabelField(rect, "", HeaderBackground);
         }
 
         // ------------------- Inherited method -------------------------------------
@@ -65,12 +163,6 @@ namespace Base.Editor
             base.Initialize();
 
             window = this;
-            
-            TabContentRect = new (0, OUTPUT_PATH_HEADER + SPACE + CONTENT_HEADER, window.minSize.x ,
-                window.position.height - OUTPUT_PATH_HEADER - SPACE - CONTENT_HEADER);
-            
-            TabHeaderRect =  new Rect(0, OUTPUT_PATH_HEADER + SPACE, window.minSize.x, CONTENT_HEADER);
-            
         }
 
         protected override void OnDestroy()
@@ -80,6 +172,11 @@ namespace Base.Editor
 
         protected override void DrawTabs()
         {
+            TabContentRect = new (0, OUTPUT_PATH_HEADER + SPACE + CONTENT_HEADER, window.minSize.x ,
+                window.position.height - OUTPUT_PATH_HEADER - SPACE - CONTENT_HEADER);
+            
+            TabHeaderRect =  new Rect(0, OUTPUT_PATH_HEADER + SPACE, window.minSize.x, CONTENT_HEADER);
+            
             SirenixEditorGUI.DrawSolidRect(TabContentRect, PEditorStyles.BackgroundColorGrey);
             
             

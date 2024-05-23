@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Sirenix.Utilities;
@@ -25,6 +26,14 @@ namespace Base.Helper
         //     }
         // }
 
+        public static void AddIfNotContains(this IList list, object value)
+        {
+            if (!list.Contains(value))
+            {
+                list.Add(value);
+            }
+        }
+        
         public static void AddIfNotContains<T>(this IList<T> list, T value)
         {
             if (!list.Contains(value))
