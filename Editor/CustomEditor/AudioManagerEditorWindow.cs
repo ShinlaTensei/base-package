@@ -94,13 +94,14 @@ namespace Base.Editor
                 audioNames.AddIfNotContains(audioAsset.ObjectName);
             }
 
-            ReorderableList audioNameList = new ReorderableList(audioNames, typeof(string), true, false, true, true)
+            ReorderableList audioNameList = new ReorderableList(audioNames, typeof(string), true, true, true, true)
             {
                 multiSelect = false,
-                draggable = true,
+                draggable = false,
                 onAddCallback = OnAddAudioAssetCallback,
                 onSelectCallback = OnSelectAudioAssetCallback,
                 drawElementBackgroundCallback = OnDrawElementBackgroundCallback,
+                drawHeaderCallback = OnDrawHeaderCallback
             };
 
             if (audioNames.Count >= AMOUNT_TO_SCROLLABLE)
@@ -144,9 +145,9 @@ namespace Base.Editor
             GUIStyle HeaderBackground = new GUIStyle("RL Header");
 
             Color[] pix = new Color[Mathf.FloorToInt(rect.width * rect.height)];
-          
+
             for (int i = 0; i < pix.Length; i++)
-                pix[i] = isSelected ? Color.blue : index % 2 == 0 ? Color.cyan : Color.yellow;
+                pix[i] = isSelected ? PEditorStyles.SelectedDarkGreyColor : PEditorStyles.DefaultEditorDarkColor;
           
             Texture2D result = new Texture2D((int)rect.width, (int)5);
             result.SetPixels(pix);
@@ -154,6 +155,16 @@ namespace Base.Editor
           
             HeaderBackground.normal.background = result;
             EditorGUI.LabelField(rect, "", HeaderBackground);
+        }
+
+        private void OnDrawHeaderCallback(Rect rect)
+        {
+            if (Event.current.type != EventType.Repaint)
+            {
+                return;
+            }
+            
+            GUI.Label(rect.AddX(10f), "Audio Assets");
         }
 
         // ------------------- Inherited method -------------------------------------
