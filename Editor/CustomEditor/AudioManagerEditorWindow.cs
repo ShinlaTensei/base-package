@@ -175,7 +175,7 @@ namespace Base.Editor
 
             window = this;
         }
-
+        
         protected override void OnDestroy()
         {
             base.OnDestroy();
