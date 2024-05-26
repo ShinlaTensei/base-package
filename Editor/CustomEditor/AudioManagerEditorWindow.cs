@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Base.Core;
 using Base.Helper;
 using Sirenix.OdinInspector;
@@ -35,6 +36,7 @@ namespace Base.Editor
 
         private const float SPACE = 60f;
         private const float CONTENT_HEADER = 40f;
+        private const float NAME_LIST_HEADER_SIZE = 22f;
         private const int AMOUNT_TO_SCROLLABLE = 15;
         private const string ALL = "All";
         
@@ -65,10 +67,8 @@ namespace Base.Editor
             GUILayout.EndArea();
         }
 
-        private void DrawAudioAsset()
+        private void DrawAudioTypeSelect(Rect rect, ref string crrValue)
         {
-            if (AudioContainer == null) return;
-            
             List<string> audioTypes = new List<string>();
             audioTypes.AddIfNotContains(ALL);
             foreach (var audioType in AudioContainer.AudioTypes)
@@ -76,62 +76,120 @@ namespace Base.Editor
                 audioTypes.AddIfNotContains(audioType);
             }
             
-            if (string.IsNullOrEmpty(m_crrSelectedAudioType))
+            if (string.IsNullOrEmpty(crrValue))
             {
-                m_crrSelectedAudioType = audioTypes[0];
+                crrValue = audioTypes[0];
             }
+            
+            string newAudioType = SirenixEditorFields.Dropdown(rect, GUIContent.none, crrValue, audioTypes);
+            if (!crrValue.Equals(newAudioType))
+            {
+                crrValue = newAudioType;
+            }
+        }
 
+        private void DrawAudioAsset()
+        {
+            if (AudioContainer == null) return;
             Rect audioTypeSelectRect = new Rect(10f, 10f, 125f, 25f);
-            string newAudioType = SirenixEditorFields.Dropdown(audioTypeSelectRect, GUIContent.none, m_crrSelectedAudioType, audioTypes);
-            if (!m_crrSelectedAudioType.Equals(newAudioType))
-            {
-                m_crrSelectedAudioType = newAudioType;
-            }
-
+            
+            DrawAudioTypeSelect(audioTypeSelectRect, ref m_crrSelectedAudioType);
+            
             List<string> audioNames = new List<string>();
             foreach (var audioAsset in AudioContainer.WorkingCopy)
             {
-                audioNames.AddIfNotContains(audioAsset.ObjectName);
+                if (audioAsset.Type.Equals(m_crrSelectedAudioType) || m_crrSelectedAudioType.Equals(ALL))
+                {
+                    audioNames.AddIfNotContains(audioAsset.ObjectName);
+                }
             }
 
-            ReorderableList audioNameList = new ReorderableList(audioNames, typeof(string), true, true, true, true)
+            ReorderableList audioNameList = new ReorderableList(audioNames, typeof(string), false, false, false, false)
             {
                 multiSelect = false,
-                draggable = false,
-                onAddCallback = OnAddAudioAssetCallback,
                 onSelectCallback = OnSelectAudioAssetCallback,
                 drawElementBackgroundCallback = OnDrawElementBackgroundCallback,
-                drawHeaderCallback = OnDrawHeaderCallback
             };
 
+            Rect audioNameListRect = audioTypeSelectRect.AddY(50f).SetWidth(250f);
             if (audioNames.Count >= AMOUNT_TO_SCROLLABLE)
             {
                 
             }
             else
             {
-                audioNameList.DoList(audioTypeSelectRect.AddY(50f).SetWidth(250f));
+                audioNameList.DoList(audioNameListRect);
             }
             
+            // Draw Audio Name list
+            // Draw header
+            GUILayout.BeginArea(audioNameListRect.SubY(NAME_LIST_HEADER_SIZE));
+            SirenixEditorGUI.BeginToolbarBoxHeader(NAME_LIST_HEADER_SIZE);
+            GUILayout.Label("Audio Assets");
+            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
+            {
+                AudioAssetData assetData = new AudioAssetData()
+                {
+                    Type = m_crrSelectedAudioType.Equals(ALL) ? string.Empty : m_crrSelectedAudioType,
+                    Guid = GUID.Generate().ToString(),
+                    Index = audioNames.Count,
+                    ObjectName = string.Empty
+                };
+                AudioContainer.WorkingCopy.AddIfNotContainsT(assetData);
+            }
+
+            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Minus))
+            {
+                
+            }
+            SirenixEditorGUI.EndToolbarBoxHeader();
+            GUILayout.EndArea();
+            
+            // Draw audio asset data detail
+            DrawAssetDataDetail();
         }
 
-        private void OnAddAudioAssetCallback(ReorderableList list)
+        private AudioClip m_selectClip = null;
+        private void DrawAssetDataDetail()
         {
-            AudioAssetData assetData = new AudioAssetData()
+            if (m_crrSelectedAudioAsset == null) return;
+            
+            Rect detailAreaRect = new Rect(270f, 30f, TabContentRect.width - 270f, TabContentRect.height - 30f);
+            GUILayout.BeginArea(detailAreaRect);
+            
+            EditorGUI.DrawRect(detailAreaRect.SetWidth(2f).SetX(0).SetY(-10f), PEditorStyles.SeparatorColorBlack);
+            Rect detailHeaderRect = new Rect(10f, 5f, detailAreaRect.width - 20f, 60f);
+            EditorGUI.DrawRect(detailHeaderRect, PEditorStyles.DefaultCollectionHeaderColor);
+            // Name
+            EditorGUI.LabelField(detailHeaderRect.AddX(15f).AddY(15f).SetWidth(50f).SetHeight(25f), "Name");
+            Rect nameRect = detailHeaderRect.AddX(70f).AddY(15f).SetWidth(75f).SetHeight(25f);
+            string newName = SirenixEditorFields.TextField(detailHeaderRect.AddX(70f).AddY(15f).SetWidth(75f).SetHeight(25f),
+                m_crrSelectedAudioAsset.ObjectName);
+            if (!m_crrSelectedAudioAsset.ObjectName.Equals(newName))
             {
-                Type = string.Empty,
-                Guid = GUID.Generate().ToString(),
-                Index = list.count,
-                ObjectName = string.Empty
-            };
-            AudioContainer.WorkingCopy.AddIfNotContainsT(assetData);
+                m_crrSelectedAudioAsset.ObjectName = newName;
+            }
+            // Type
+            EditorGUI.LabelField(nameRect.AddX(125f).SetWidth(50f).SetHeight(25f), "Type");
+            string audioType = m_crrSelectedAudioAsset.Type;
+            Rect typeRect = nameRect.AddX(165f).SetWidth(150f).SetHeight(25f).AddY(5f);
+            DrawAudioTypeSelect(nameRect.AddX(165f).SetWidth(150f).SetHeight(25f).AddY(5f), ref audioType);
+            m_crrSelectedAudioAsset.Type = audioType;
+            // GUID
+            EditorGUI.LabelField(typeRect.AddX(typeRect.width + 50f).SetY(20f), "GUID:");
+            EditorGUI.LabelField(typeRect.AddX(typeRect.width + 85f).SubY(5f).SetWidth(250f), m_crrSelectedAudioAsset.Guid);
+            
+            GUILayout.EndArea();
         }
 
         private void OnSelectAudioAssetCallback(ReorderableList list)
         {
             int crrSelectedIndex = list.selectedIndices[0];
+            if (list.list is not List<string> nameList) return;
+            
+            string assetName = nameList[crrSelectedIndex];
 
-            m_crrSelectedAudioAsset = AudioContainer.WorkingCopy[crrSelectedIndex];
+            m_crrSelectedAudioAsset = AudioContainer.WorkingCopy.Find(item => item.ObjectName.Equals(assetName));
         }
 
         private void OnDrawElementBackgroundCallback(Rect rect, int index, bool isActive, bool isFocused)
@@ -157,16 +215,6 @@ namespace Base.Editor
             EditorGUI.LabelField(rect, "", HeaderBackground);
         }
 
-        private void OnDrawHeaderCallback(Rect rect)
-        {
-            if (Event.current.type != EventType.Repaint)
-            {
-                return;
-            }
-            
-            GUI.Label(rect.AddX(10f), "Audio Assets");
-        }
-
         // ------------------- Inherited method -------------------------------------
 
         protected override void Initialize()
@@ -174,6 +222,7 @@ namespace Base.Editor
             base.Initialize();
 
             window = this;
+            m_crrSelectedAudioAsset = null;
         }
 
         protected override void OnDestroy()

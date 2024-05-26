@@ -26,13 +26,12 @@ namespace Base.Editor
         /// </summary>
         protected static DataContainerEditorWindow<T> window;
         
-        protected const float OUTPUT_PATH_HEADER       = 70f;
+        protected const float OUTPUT_PATH_HEADER  = 70f;
         protected const float FOLDER_BUTTON_SIZE  = 25f;
         protected const float HEADER_BUTTON_WIDTH = 60f;
         protected const float CORE_BUTTON_WIDTH   = 80f;
         protected const float CORE_BUTTON_HEIGHT  = 30f;
-
-        private GUITabGroup      m_tabGroup;
+        
         private DataContainer<T> m_dataContainer;
         private T                m_dataObject;
 
@@ -47,14 +46,6 @@ namespace Base.Editor
         {
             get => m_dataObject;
             set => m_dataObject = value;
-        }
-        
-        protected ReorderableList DataReorderableList { get; set; }
-
-        protected GUITabGroup TabGroup
-        {
-            get => m_tabGroup;
-            set => m_tabGroup = value;
         }
 
         private void DrawOutputPath()
