@@ -13,28 +13,40 @@ namespace Base
     public class AudioAssetData : ReferenceData
     {
         /// <summary>
-        /// Backing field of <see cref="ClipAssetKeys"/>
+        /// Backing field of <see cref="ClipAssetKey"/>
         /// </summary>
-        private List<string> m_clipAssetKeys;
+        private string m_clipAssetKey;
 
         /// <summary>
-        /// A list contains all the audio clip addressable keys
+        /// The addressable key for the audio
         /// </summary>
-        public List<string> ClipAssetKeys
+        public string ClipAssetKey
         {
-            get => LazyInitializer.EnsureInitialized(ref m_clipAssetKeys);
-            set => m_clipAssetKeys = value;
+            get => m_clipAssetKey;
+            set => m_clipAssetKey = value;
         }
 
         /// <summary>
         /// Backing field of <see cref="CachedClips"/>
         /// </summary>
-        private Dictionary<string, AudioClip> m_cachedClips;
+        private AudioClip m_cachedClip;
 
         /// <summary>
         /// A key-value mapping container that holds reference to the audio clip has been loaded
         /// </summary>
-        public Dictionary<string, AudioClip> CachedClips => LazyInitializer.EnsureInitialized(ref m_cachedClips);
+        public AudioClip CacheClip => m_cachedClip;
+
+        private float m_volume;
+
+        public float Volume
+        {
+            get => m_volume;
+            set => m_volume = value;
+        }
+
+        private string m_assetGuid;
+
+        public string AssetGuid => m_assetGuid;
 
         /// <summary>
         /// Empty constructor with default member value
@@ -57,23 +69,18 @@ namespace Base
             CopyData(original);
         }
 
-        public async UniTask<AudioClip> Evaluate(AddressableManager addressableService, string clipId)
+        public async UniTask<AudioClip> Evaluate(AddressableManager addressableService)
         {
-            if (!ClipAssetKeys.Contains(clipId))
+            if (string.IsNullOrEmpty(ClipAssetKey))
             {
-                throw new NullReferenceException($"NullReference: There is no asset with ID {clipId} in data of type {Type}");
+                throw new NullReferenceException($"NullReference: There is no asset with ID {ClipAssetKey} in audio data {ObjectName}");
             }
-            if (!CachedClips.TryGetValue(clipId, out AudioClip clip))
+            if (!CacheClip)
             {
-                clip = await addressableService.LoadAsset<AudioClip>(clipId, 3);
-
-                if (clip != null)
-                {
-                    CachedClips[clipId] = clip;
-                }
+                m_cachedClip = await addressableService.LoadAsset<AudioClip>(ClipAssetKey, 3);
             }
 
-            return clip;
+            return CacheClip;
         }
     }
 }

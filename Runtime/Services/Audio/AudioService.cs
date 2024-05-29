@@ -18,20 +18,23 @@ using UnityEngine;
 
 namespace Base
 {
-    public class AudioService : Service
+    public class AudioService : Service<AudioDataContainer>
     {
         private AudioDataContainer AudioDataContainer { get; set; }
         private AddressableManager AddressableManager { get; set; }
 
         private CancellationTokenSource CancellationToken { get; set; }
 
-        public void Init(AudioDataContainer dataContainer)
+        public override void Init()
         {
-            Init();
-            AudioDataContainer = dataContainer;
             AddressableManager = ServiceLocator.Get<AddressableManager>();
 
             CancellationToken = new CancellationTokenSource();
+        }
+
+        public override void UpdateData(AudioDataContainer data)
+        {
+            AudioDataContainer = data;
         }
 
         public override void Dispose()

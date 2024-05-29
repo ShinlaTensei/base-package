@@ -12,6 +12,7 @@ using Base.Core;
 using Base.Helper;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
+using Sirenix.OdinInspector.Editor.Drawers;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
@@ -19,6 +20,7 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Base.Editor
 {
@@ -48,7 +50,7 @@ namespace Base.Editor
         private string m_crrSelectedAudioType = string.Empty;
         private AudioAssetData m_crrSelectedAudioAsset = null;
 
-        private ReorderableList m_audioNameList;
+        private Dictionary<string, AssetReferenceT<AudioClip>> m_assetClipMaps = new Dictionary<string, AssetReferenceT<AudioClip>>();
         
         // -------------------- Private Method ---------------------------------
 
@@ -126,6 +128,7 @@ namespace Base.Editor
             GUILayout.BeginArea(audioNameListRect.SubY(NAME_LIST_HEADER_SIZE));
             SirenixEditorGUI.BeginToolbarBoxHeader(NAME_LIST_HEADER_SIZE);
             GUILayout.Label("Audio Assets");
+            SirenixEditorGUI.ToolbarSearchField(string.Empty, true);
             if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
             {
                 AudioAssetData assetData = new AudioAssetData()
@@ -148,8 +151,7 @@ namespace Base.Editor
             // Draw audio asset data detail
             DrawAssetDataDetail();
         }
-
-        private AudioClip m_selectClip = null;
+        
         private void DrawAssetDataDetail()
         {
             if (m_crrSelectedAudioAsset == null) return;
@@ -158,13 +160,12 @@ namespace Base.Editor
             GUILayout.BeginArea(detailAreaRect);
             
             EditorGUI.DrawRect(detailAreaRect.SetWidth(2f).SetX(0).SetY(-10f), PEditorStyles.SeparatorColorBlack);
-            Rect detailHeaderRect = new Rect(10f, 5f, detailAreaRect.width - 20f, 60f);
+            Rect detailHeaderRect = new Rect(10f, 5f, detailAreaRect.width - 20f, SPACE);
             EditorGUI.DrawRect(detailHeaderRect, PEditorStyles.DefaultCollectionHeaderColor);
             // Name
             EditorGUI.LabelField(detailHeaderRect.AddX(15f).AddY(15f).SetWidth(50f).SetHeight(25f), "Name");
-            Rect nameRect = detailHeaderRect.AddX(70f).AddY(15f).SetWidth(75f).SetHeight(25f);
-            string newName = SirenixEditorFields.TextField(detailHeaderRect.AddX(70f).AddY(15f).SetWidth(75f).SetHeight(25f),
-                m_crrSelectedAudioAsset.ObjectName);
+            Rect nameRect = detailHeaderRect.AddX(70f).AddY(15f).SetWidth(90f).SetHeight(25f);
+            string newName = SirenixEditorFields.TextField(nameRect, m_crrSelectedAudioAsset.ObjectName);
             if (!m_crrSelectedAudioAsset.ObjectName.Equals(newName))
             {
                 m_crrSelectedAudioAsset.ObjectName = newName;
@@ -178,6 +179,12 @@ namespace Base.Editor
             // GUID
             EditorGUI.LabelField(typeRect.AddX(typeRect.width + 50f).SetY(20f), "GUID:");
             EditorGUI.LabelField(typeRect.AddX(typeRect.width + 85f).SubY(5f).SetWidth(250f), m_crrSelectedAudioAsset.Guid);
+
+            if (m_assetClipMaps.ContainsKey(m_crrSelectedAudioAsset.ClipAssetKey) 
+                && !m_assetClipMaps.TryGetValue(m_crrSelectedAudioAsset.ClipAssetKey, out var assetRef))
+            {
+                AssetDatabaseUtility.LoadAssetFromGuid<AudioClip>()
+            }
             
             GUILayout.EndArea();
         }
