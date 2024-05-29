@@ -49,8 +49,7 @@ namespace Base.Editor
         private int m_crrTabIndex = 0;
         private string m_crrSelectedAudioType = string.Empty;
         private AudioAssetData m_crrSelectedAudioAsset = null;
-
-        private Dictionary<string, AssetReferenceT<AudioClip>> m_assetClipMaps = new Dictionary<string, AssetReferenceT<AudioClip>>();
+        private GUIStyle m_dropAreaStyle;
         
         // -------------------- Private Method ---------------------------------
 
@@ -159,7 +158,9 @@ namespace Base.Editor
             Rect detailAreaRect = new Rect(270f, 30f, TabContentRect.width - 270f, TabContentRect.height - 30f);
             GUILayout.BeginArea(detailAreaRect);
             
+            // Draw separator
             EditorGUI.DrawRect(detailAreaRect.SetWidth(2f).SetX(0).SetY(-10f), PEditorStyles.SeparatorColorBlack);
+            
             Rect detailHeaderRect = new Rect(10f, 5f, detailAreaRect.width - 20f, SPACE);
             EditorGUI.DrawRect(detailHeaderRect, PEditorStyles.DefaultCollectionHeaderColor);
             // Name
@@ -179,14 +180,69 @@ namespace Base.Editor
             // GUID
             EditorGUI.LabelField(typeRect.AddX(typeRect.width + 50f).SetY(20f), "GUID:");
             EditorGUI.LabelField(typeRect.AddX(typeRect.width + 85f).SubY(5f).SetWidth(250f), m_crrSelectedAudioAsset.Guid);
-
-            if (m_assetClipMaps.ContainsKey(m_crrSelectedAudioAsset.ClipAssetKey) 
-                && !m_assetClipMaps.TryGetValue(m_crrSelectedAudioAsset.ClipAssetKey, out var assetRef))
-            {
-                AssetDatabaseUtility.LoadAssetFromGuid<AudioClip>()
-            }
             
+            DrawAssetList();
+
             GUILayout.EndArea();
+        }
+
+        private void DrawAssetList()
+        {
+            Rect dropArea = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight * 4f, EditorStyles.helpBox,
+                GUILayout.MaxWidth(TabContentRect.width - 300f)).AddY(70f).AddX(15f);
+            DrawClipDropArea(dropArea);
+        }
+        
+        /// <summary>
+        /// Draws the area to drag and drop clips to.
+        /// </summary>
+        /// <param name="dropArea">The area to draw the drop box in.</param>
+        private void DrawClipDropArea(Rect dropArea)
+        {
+            if (m_dropAreaStyle == null)
+            {
+                m_dropAreaStyle = new GUIStyle(EditorStyles.helpBox)
+                {
+                    alignment = TextAnchor.MiddleCenter
+                };
+            }
+
+            Color col = GUI.backgroundColor;
+            GUI.backgroundColor = Color.white;
+            GUI.Box(dropArea, "Drag any clip(s) here to add them to this AudioAsset", m_dropAreaStyle);
+            GUI.backgroundColor = col;
+
+            HandleClipUserInput(dropArea);
+        }
+
+        /// <summary>
+        /// Handles the drag and drop user input within the specified rectangle.
+        /// </summary>
+        /// <param name="dropArea">The screen area to use as drop area.</param>
+        private void HandleClipUserInput(Rect dropArea)
+        {
+            Event evt = Event.current;
+            if (evt.type != EventType.DragUpdated && evt.type != EventType.DragPerform
+                || !dropArea.Contains(evt.mousePosition))
+            {
+                return;
+            }
+
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+            if (evt.type != EventType.DragPerform)
+            {
+                return;
+            }
+
+            DragAndDrop.AcceptDrag();
+            foreach (UnityEngine.Object droppedObject in DragAndDrop.objectReferences)
+            {
+                // Handle dropped object here
+                Debug.Log("test");
+            }
+
+            evt.Use();
         }
 
         private void OnSelectAudioAssetCallback(ReorderableList list)

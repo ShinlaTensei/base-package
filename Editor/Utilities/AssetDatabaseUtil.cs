@@ -50,6 +50,16 @@ namespace Base.Editor
             }
         }
 
+        public static string GetAssetGuid(string assetPath)
+        {
+            return AssetDatabase.AssetPathToGUID(assetPath);
+        }
+
+        public static string GetAssetGuid(Object asset)
+        {
+            return GetAssetGuid(AssetDatabase.GetAssetPath(asset));
+        }
+
         public static T[] LoadAssetsAtPath<T>(string directory, string assetFilter = "") where T : Object
         {
             if (!directory.Contains("Assets/"))
