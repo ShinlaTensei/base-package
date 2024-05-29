@@ -95,4 +95,5 @@ namespace Base.Editor
             return assetEntry?.address;
         }
     }
+
 }

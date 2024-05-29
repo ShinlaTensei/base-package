@@ -7,20 +7,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Base.Core;
 using Base.Helper;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.OdinInspector.Editor.Drawers;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+using Object = UnityEngine.Object;
 
 namespace Base.Editor
 {
@@ -238,11 +232,26 @@ namespace Base.Editor
             DragAndDrop.AcceptDrag();
             foreach (UnityEngine.Object droppedObject in DragAndDrop.objectReferences)
             {
-                // Handle dropped object here
-                Debug.Log("test");
+                HandleDroppedObject(droppedObject);
             }
 
             evt.Use();
+        }
+
+        private void HandleDroppedObject(Object droppedObject)
+        {
+            AudioClip clip = droppedObject as AudioClip;
+
+            if (clip == null || !AddressableUtility.IsAddressable(clip))
+            {
+                return;
+            }
+
+            string address = AddressableUtility.GetAddressFromObject(droppedObject);
+            string guild = AssetDatabaseUtility.GetAssetGuid(clip);
+
+            m_crrSelectedAudioAsset.AssetGuid = guild;
+            m_crrSelectedAudioAsset.ClipAssetKey = address;
         }
 
         private void OnSelectAudioAssetCallback(ReorderableList list)

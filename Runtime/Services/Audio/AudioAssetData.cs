@@ -43,10 +43,20 @@ namespace Base
             get => m_volume;
             set => m_volume = value;
         }
-
+        
+        /// <summary>
+        /// Backing field of <see cref="AssetGuid"/>
+        /// </summary>
         private string m_assetGuid;
 
-        public string AssetGuid => m_assetGuid;
+        /// <summary>
+        /// The GUID of the audio clip that this asset holds the addressable key in <see cref="ClipAssetKey"/>
+        /// </summary>
+        public string AssetGuid
+        {
+            get => m_assetGuid;
+            set => m_assetGuid = value;
+        }
 
         /// <summary>
         /// Empty constructor with default member value
