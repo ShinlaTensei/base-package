@@ -64,11 +64,10 @@ namespace Base.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 OutputPath = path;
-                EditorPrefs.SetString(nameof(OutputPath), path);
+                EditorPrefs.SetString(EditorConstant.EDITOR_OUTPUT_PATH_KEY, path);
                 if (!string.IsNullOrEmpty(OutputPath) && LoadDataContainer(OutputPath, out DataContainer<T> dataContainer))
                 {
                     DataContainer = dataContainer;
-                    SaveOutputPath(OutputPath);
                     InitAfterLoadReference();
                 }
                 GUIHelper.ExitGUI(false);
@@ -162,8 +161,6 @@ namespace Base.Editor
 
         protected abstract DataContainer<T> CreateDataContainer(string path);
         protected abstract bool LoadDataContainer(string path, out DataContainer<T> dataContainer);
-
-        protected abstract void SaveOutputPath(string content);
         protected abstract string LoadOutputPath();
         
         protected virtual void InitAfterLoadReference() {}

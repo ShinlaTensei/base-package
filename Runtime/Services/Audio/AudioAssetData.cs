@@ -76,7 +76,9 @@ namespace Base
 
         public AudioAssetData(AudioAssetData original) : base(original)
         {
-            CopyData(original);
+            ClipAssetKey = original.ClipAssetKey;
+            AssetGuid = original.AssetGuid;
+            Volume = original.Volume;
         }
 
         public async UniTask<AudioClip> Evaluate(AddressableManager addressableService)

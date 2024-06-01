@@ -47,7 +47,7 @@ namespace Base.Pattern
                 result = item;
             }
             
-            if (!m_signals.TryGetValue(typeof(T), out ISignal signal))
+            if (!m_signals.TryGetValue(typeof(T), out ISignal signal) && result == null)
             {
                 signal = Activator.CreateInstance<T>() as ISignal;
                 result = signal;
