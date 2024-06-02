@@ -153,22 +153,16 @@ namespace Base
         
         #region Init & Update
 
-        public void Init()
+        public override void Init()
         {
             Initialize();
         }
-
-        public void DeInit()
+        
+        public override void Dispose()
         {
             ClearAtlases();
             ReleaseTracked();
-        }
-        
-        
-        public void Dispose()
-        {
-            ClearAtlases();
-            ReleaseTracked();
+            m_mainThreadDispatcher = null;
         }
 
         public void Initialize(Action<bool> callback = null, int retryCount = 0, int retry = 0)

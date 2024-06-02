@@ -20,7 +20,24 @@ namespace Base
         public string AudioType => m_audioType;
 
         public string AudioKey => m_audioKey;
-        
+
+
+        private string GetSaveStringInEditor(string key)
+        {
+            #if UNITY_EDITOR
+            return EditorPrefs.GetString(key, string.Empty);
+            #endif
+
+            return string.Empty;
+        }
+
+        private AudioDataContainer LoadAssetAtPath(string path)
+        {
+#if UNITY_EDITOR
+            return AssetDatabase.LoadAssetAtPath<AudioDataContainer>(path);
+#endif
+            return null;
+        }
         
 #if ODIN_INSPECTOR
 
@@ -30,13 +47,13 @@ namespace Base
         {
             if (m_audioDataContainer == null)
             {
-                string path = EditorPrefs.GetString("OutputPath", string.Empty);
+                string path = GetSaveStringInEditor("OutputPath");
                 if (string.IsNullOrEmpty(path))
                 {
                     return null;
                 }
                 string fullPath = $"Assets{Path.DirectorySeparatorChar}{path}{Path.DirectorySeparatorChar}{nameof(AudioDataContainer)}.asset";
-                m_audioDataContainer = AssetDatabase.LoadAssetAtPath<AudioDataContainer>(fullPath);
+                m_audioDataContainer = LoadAssetAtPath(fullPath);
             }
 
             return m_audioDataContainer;

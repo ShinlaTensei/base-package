@@ -12,7 +12,7 @@ namespace Base.Pattern
 {
     public interface IPoolUnit : IDisposable
     {
-       
+        object GetUnit(Vector3 initialPosition, Quaternion rotation, Transform parent = null, bool useWorldPos = false);
     }
     public class PoolSystem : SingletonMono<PoolSystem>
     {
@@ -52,7 +52,7 @@ namespace Base.Pattern
         {
             if (Instance.PoolDictionary.TryGetValue(typeof(T).Name, out IPoolUnit poolUnit))
             {
-                if (poolUnit is PoolUnit<T> pool) return pool.GetUnit(initialPosition, rotation, parent, useWorldPos);
+                return poolUnit.GetUnit(initialPosition, rotation, parent, useWorldPos) as T;
             }
 
             return null;
@@ -114,7 +114,7 @@ namespace Base.Pattern
             return Object.Instantiate(m_prefab);
         }
 
-        public T GetUnit(Vector3 initialPosition, Quaternion rotation, Transform parent = null, bool useWorldPos = false)
+        public object GetUnit(Vector3 initialPosition, Quaternion rotation, Transform parent = null, bool useWorldPos = false)
         {
             T instance = Rent();
 

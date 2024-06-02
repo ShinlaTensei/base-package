@@ -114,29 +114,6 @@ namespace Base.Editor
             GUILayout.EndArea();
         }
 
-        private void DrawCoreButtons()
-        {
-            SirenixEditorGUI.BeginHorizontalPropertyLayout(GUIContent.none);
-            GUI.backgroundColor = PEditorStyles.BackgroundGreenDarkColor;
-            GUI.contentColor    = SirenixGUIStyles.GreenValidColor;
-            Rect saveButtonRect = new Rect(position.width - 230f, OUTPUT_PATH_HEADER + 40f, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
-            if (GUI.Button(saveButtonRect, "Save"))
-            {
-                DataContainer.Save();
-            }
-            GUI.backgroundColor = PEditorStyles.BackgroundRedColor;
-            GUI.contentColor    = SirenixGUIStyles.RedErrorColor;
-            Rect discardBtnRect = new Rect(saveButtonRect.x + CORE_BUTTON_WIDTH + 10f, saveButtonRect.y, CORE_BUTTON_WIDTH, CORE_BUTTON_HEIGHT);
-            if (GUI.Button(discardBtnRect, "Discard"))
-            {
-                DataContainer.Revert();
-            }
-            GUI.backgroundColor = Color.white;
-            GUI.contentColor    = Color.white;
-            
-            SirenixEditorGUI.EndHorizontalPropertyLayout();
-        }
-
         protected abstract void DrawTabs();
 
         protected override void Initialize()

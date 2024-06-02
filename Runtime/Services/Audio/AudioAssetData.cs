@@ -29,12 +29,23 @@ namespace Base
         /// <summary>
         /// Backing field of <see cref="CachedClips"/>
         /// </summary>
-        private AudioClip m_cachedClip;
+        [NonSerialized] private WeakReference<AudioClip> m_cachedClip;
 
         /// <summary>
         /// A key-value mapping container that holds reference to the audio clip has been loaded
         /// </summary>
-        public AudioClip CacheClip => m_cachedClip;
+        public WeakReference<AudioClip> CacheClip
+        {
+            get
+            {
+                if (m_cachedClip == null)
+                {
+                    m_cachedClip = new WeakReference<AudioClip>(null);
+                }
+
+                return m_cachedClip;
+            }
+        }
 
         private float m_volume;
 
@@ -56,6 +67,18 @@ namespace Base
         {
             get => m_assetGuid;
             set => m_assetGuid = value;
+        }
+        /// <summary>
+        /// Backing field of <see cref="SourceObject"/>
+        /// </summary>
+        private AudioClip m_sourceObject;
+        /// <summary>
+        /// A prefab contain Audio Source component to play this asset
+        /// </summary>
+        public AudioClip SourceObject
+        {
+            get => m_sourceObject;
+            set => m_sourceObject = value;
         }
 
         /// <summary>
@@ -87,12 +110,13 @@ namespace Base
             {
                 throw new NullReferenceException($"NullReference: There is no asset with ID {ClipAssetKey} in audio data {ObjectName}");
             }
-            if (!CacheClip)
+            if (!CacheClip.TryGetTarget(out AudioClip clip))
             {
-                m_cachedClip = await addressableService.LoadAsset<AudioClip>(ClipAssetKey, 3);
+                clip = await addressableService.LoadAsset<AudioClip>(ClipAssetKey, 3);
+                m_cachedClip.SetTarget(clip);
             }
 
-            return CacheClip;
+            return clip;
         }
     }
 }

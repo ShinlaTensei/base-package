@@ -23,16 +23,15 @@ namespace Base
         private AudioDataContainer AudioDataContainer { get; set; }
         private AddressableManager AddressableManager { get; set; }
 
+        private IDictionary<string, AudioSource> AudioSourceMap { get; set; } = new Dictionary<string, AudioSource>();
+
         private CancellationTokenSource CancellationToken { get; set; }
-        
-        private AudioSource AudioSource { get; set; }
 
         public override void Init()
         {
             AddressableManager = ServiceLocator.Get<AddressableManager>();
 
             CancellationToken = new CancellationTokenSource();
-            AudioSource = BaseContextRegistry.TryGetOrCreateContext(0).Get<AudioSource>();
         }
 
         public override void UpdateData(AudioDataContainer data)
@@ -55,21 +54,56 @@ namespace Base
             TaskRunner.Start(PlayAsync(audioAssetData).AsTask());
         }
 
+        public void Pause(AudioAssetData audioAssetData)
+        {
+            if (AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
+            {
+                source.Pause();
+            }
+        }
+
+        public void Resume(AudioAssetData audioAssetData)
+        {
+            if (AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
+            {
+                source.Play();
+            }
+        }
+
+        public void Stop(AudioAssetData audioAssetData)
+        {
+            if (AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
+            {
+                source.Stop();
+            }
+        }
+
         private async UniTask PlayAsync(AudioAssetData audioAssetData)
         {
             AudioClip clip = await audioAssetData.Evaluate(AddressableManager);
 
-            AudioSource.clip = clip;
-            AudioSource.volume = audioAssetData.Volume;
-            AudioSource.Play();
+            if (!AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
+            {
+                source = PoolSystem.Rent<AudioSource>(Vector3.zero, Quaternion.identity, PoolSystem.Instance.CacheTransform);
+                AudioSourceMap[audioAssetData.ObjectName] = source;
+            }
+            source.clip = clip;
+            source.volume = audioAssetData.Volume;
+            source.Play();
         }
         
         private async UniTask PlayOneshotAsync(AudioAssetData audioAssetData)
         {
             AudioClip clip = await audioAssetData.Evaluate(AddressableManager);
             
-            AudioSource.volume = audioAssetData.Volume;
-            AudioSource.PlayOneShot(clip);
+            if (!AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
+            {
+                source = PoolSystem.Rent<AudioSource>(Vector3.zero, Quaternion.identity, PoolSystem.Instance.CacheTransform);
+                AudioSourceMap[audioAssetData.ObjectName] = source;
+            }
+            
+            source.volume = audioAssetData.Volume;
+            source.PlayOneShot(clip);
         }
 
         public override void Dispose()
@@ -79,6 +113,10 @@ namespace Base
                 CancellationToken.Cancel();
                 CancellationToken.Dispose();
             }
+            
+            AddressableManager = null;
+            AudioDataContainer = null;
+            AudioSourceMap.Clear();
         }
     }
 }
