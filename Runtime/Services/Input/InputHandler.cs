@@ -75,20 +75,6 @@ namespace Base
 
             return false;
         }
-
-        public void Init()
-        {
-            
-        }
-
-        public void DeInit()
-        {
-            
-        }
-
-        public void Dispose()
-        {
-        }
     }
 }
 

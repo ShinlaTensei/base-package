@@ -33,7 +33,7 @@ namespace Base.Editor
         private const float SPACE = 60f;
         private const float CONTENT_HEADER = 40f;
         private const float NAME_LIST_HEADER_SIZE = 22f;
-        private const int AMOUNT_TO_SCROLLABLE = 15;
+        private const int AMOUNT_TO_SCROLLABLE = 12;
         private const string ALL = "All";
         private const float MIN_VOLUME = 0;
         private const float MAX_VOLUME = 1;
@@ -42,11 +42,13 @@ namespace Base.Editor
         private Rect TabHeaderRect { get; set; }
         private AudioDataContainer AudioContainer => DataContainer as AudioDataContainer;
 
+        private Vector2 m_scrollPosition;
         private int m_crrTabIndex = 0;
         private string m_crrSelectedAudioType = string.Empty;
         private AudioAssetData m_crrSelectedAudioAsset = null;
         private GUIStyle m_dropAreaStyle;
         private AudioClip m_selectedAudioClip;
+        private string m_audioNameSearchString = string.Empty;
         
         // -------------------- Private Method ---------------------------------
 
@@ -98,7 +100,10 @@ namespace Base.Editor
             {
                 if (audioAsset.Type.Equals(m_crrSelectedAudioType) || m_crrSelectedAudioType.Equals(ALL))
                 {
-                    audioNames.AddIfNotContains(audioAsset.ObjectName);
+                    if (string.IsNullOrEmpty(m_audioNameSearchString) || audioAsset.ObjectName.Contains(m_audioNameSearchString))
+                    {
+                        audioNames.AddIfNotContains(audioAsset.ObjectName);
+                    }
                 }
             }
 
@@ -109,10 +114,14 @@ namespace Base.Editor
                 drawElementBackgroundCallback = OnDrawElementBackgroundCallback,
             };
 
-            Rect audioNameListRect = audioTypeSelectRect.AddY(50f).SetWidth(250f);
+            Rect audioNameListRect = audioTypeSelectRect.AddY(50f).SetWidth(250f).SetHeight(TabContentRect.height - audioTypeSelectRect.y - 100f);
             if (audioNames.Count >= AMOUNT_TO_SCROLLABLE)
             {
-                
+                GUILayout.BeginArea(audioNameListRect);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition, false, true, GUILayout.Height(audioNameListRect.height));
+                audioNameList.DoLayoutList();
+                EditorGUILayout.EndScrollView();
+                GUILayout.EndArea();
             }
             else
             {
@@ -124,7 +133,7 @@ namespace Base.Editor
             GUILayout.BeginArea(audioNameListRect.SubY(NAME_LIST_HEADER_SIZE));
             SirenixEditorGUI.BeginToolbarBoxHeader(NAME_LIST_HEADER_SIZE);
             GUILayout.Label("Audio Assets");
-            SirenixEditorGUI.ToolbarSearchField(string.Empty, false);
+            m_audioNameSearchString = SirenixEditorGUI.ToolbarSearchField(m_audioNameSearchString, false);
             if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
             {
                 AudioAssetData assetData = new AudioAssetData()
@@ -135,6 +144,7 @@ namespace Base.Editor
                     ObjectName = string.Empty
                 };
                 AudioContainer.WorkingCopy.AddIfNotContainsT(assetData);
+                m_crrSelectedAudioAsset = assetData;
             }
 
             GUI.enabled = m_crrSelectedAudioAsset != null;
@@ -358,7 +368,6 @@ namespace Base.Editor
             GUI.backgroundColor = Color.green;
             if (GUI.Button(new Rect(700f, OUTPUT_PATH_HEADER + 20f, 125f, 25f), "Save"))
             {
-                AudioContainer.WorkingCopy[m_crrSelectedAudioAsset.Index - 1] = m_crrSelectedAudioAsset;
                 AudioContainer.Save();
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
