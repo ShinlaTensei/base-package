@@ -49,6 +49,7 @@ namespace Base.Editor
         private GUIStyle m_dropAreaStyle;
         private AudioClip m_selectedAudioClip;
         private string m_audioNameSearchString = string.Empty;
+        private bool m_isFade = true;
         
         // -------------------- Private Method ---------------------------------
 
@@ -61,7 +62,7 @@ namespace Base.Editor
                     DrawAudioAsset();
                     break;
                 case 1:
-                    EditorGUI.LabelField(new Rect(0, 0, TabContentRect.width, 25f), "test test ");
+                    DrawSettings();
                     break;
             }
             GUILayout.EndArea();
@@ -86,6 +87,43 @@ namespace Base.Editor
             {
                 crrValue = newAudioType;
             }
+        }
+
+        private void DrawAddAudioTypeGroup()
+        {
+            //GUILayout.BeginArea(new Rect(0, NAME_LIST_HEADER_SIZE, 300f, NAME_LIST_HEADER_SIZE));
+            if (SirenixEditorGUI.BeginFadeGroup("Fade", m_isFade))
+            {
+                EditorGUILayout.LabelField("Test lable");
+            }
+            SirenixEditorGUI.EndFadeGroup();
+            //GUILayout.EndArea();
+        }
+
+        private void DrawSettings()
+        {
+            GUILayout.BeginArea(TabContentRect.AddX(15f).SetY(15f));
+            EditorGUILayout.BeginVertical(GUILayout.Width(300f), GUILayout.MaxHeight(TabContentRect.height - 100f));
+            SirenixEditorGUI.BeginToolbarBoxHeader(NAME_LIST_HEADER_SIZE);
+            GUILayout.Label("Audio Types");
+
+            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
+            {
+
+            }
+
+            GUI.enabled = m_crrSelectedAudioAsset != null;
+            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Minus))
+            {
+                
+            }
+            GUI.enabled = true;
+            SirenixEditorGUI.EndToolbarBoxHeader();
+            
+            ReorderableList audioTypeList = new ReorderableList(AudioContainer.AudioTypes, typeof(string), true, false, false, false);
+            audioTypeList.DoLayoutList();
+            EditorGUILayout.EndVertical();
+            GUILayout.EndArea();
         }
 
         private void DrawAudioAsset()
@@ -397,11 +435,11 @@ namespace Base.Editor
             {
                 using (new GUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Tab 1", GUILayout.MinHeight(TabHeaderRect.height)))
+                    if (GUILayout.Button("Audio Asset", GUILayout.MinHeight(TabHeaderRect.height)))
                     {
                         m_crrTabIndex = 0;
                     }
-                    else if (GUILayout.Button("Tab 2", GUILayout.MinHeight(TabHeaderRect.height)))
+                    else if (GUILayout.Button("Settings", GUILayout.MinHeight(TabHeaderRect.height)))
                     {
                         m_crrTabIndex = 1;
                     }
