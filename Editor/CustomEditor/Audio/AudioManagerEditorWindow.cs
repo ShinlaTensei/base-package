@@ -49,7 +49,6 @@ namespace Base.Editor
         private GUIStyle m_dropAreaStyle;
         private AudioClip m_selectedAudioClip;
         private string m_audioNameSearchString = string.Empty;
-        private bool m_isFade = true;
         
         // -------------------- Private Method ---------------------------------
 
@@ -89,17 +88,6 @@ namespace Base.Editor
             }
         }
 
-        private void DrawAddAudioTypeGroup()
-        {
-            //GUILayout.BeginArea(new Rect(0, NAME_LIST_HEADER_SIZE, 300f, NAME_LIST_HEADER_SIZE));
-            if (SirenixEditorGUI.BeginFadeGroup("Fade", m_isFade))
-            {
-                EditorGUILayout.LabelField("Test lable");
-            }
-            SirenixEditorGUI.EndFadeGroup();
-            //GUILayout.EndArea();
-        }
-
         private void DrawSettings()
         {
             GUILayout.BeginArea(TabContentRect.AddX(15f).SetY(15f));
@@ -109,9 +97,9 @@ namespace Base.Editor
 
             if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
             {
-
+                AudioContainer.AudioTypes.Add(string.Empty);
             }
-
+            
             GUI.enabled = m_crrSelectedAudioAsset != null;
             if (SirenixEditorGUI.ToolbarButton(EditorIcons.Minus))
             {
@@ -119,11 +107,21 @@ namespace Base.Editor
             }
             GUI.enabled = true;
             SirenixEditorGUI.EndToolbarBoxHeader();
-            
-            ReorderableList audioTypeList = new ReorderableList(AudioContainer.AudioTypes, typeof(string), true, false, false, false);
+
+            ReorderableList audioTypeList = new ReorderableList(AudioContainer.AudioTypes, typeof(string), true, false, false, false)
+            {
+                drawElementCallback = OnDrawTypeElementCallback,
+                drawElementBackgroundCallback = OnDrawElementBackgroundCallback,
+            };
             audioTypeList.DoLayoutList();
             EditorGUILayout.EndVertical();
             GUILayout.EndArea();
+        }
+
+        private void OnDrawTypeElementCallback(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            string value = AudioContainer.AudioTypes[index];
+            AudioContainer.AudioTypes[index] = EditorGUI.TextField(rect, value);
         }
 
         private void DrawAudioAsset()
