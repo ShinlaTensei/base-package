@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using Base.Core;
 using Base.Helper;
+using Newtonsoft.Json;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
@@ -88,49 +89,90 @@ namespace Base.Editor
             }
         }
 
+        private string m_typeEdit = string.Empty;
+        private int m_editTypeIndex = -1;
         private void DrawSettings()
         {
             GUILayout.BeginArea(TabContentRect.AddX(15f).SetY(15f));
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical(GUILayout.Width(300f), GUILayout.MaxHeight(TabContentRect.height - 100f));
             SirenixEditorGUI.BeginToolbarBoxHeader(NAME_LIST_HEADER_SIZE);
             GUILayout.Label("Audio Types");
-
+            
             if (SirenixEditorGUI.ToolbarButton(EditorIcons.Plus))
             {
                 AudioContainer.AudioTypes.Add(string.Empty);
             }
             
-            GUI.enabled = m_crrSelectedAudioAsset != null;
-            if (SirenixEditorGUI.ToolbarButton(EditorIcons.Minus))
-            {
-                
-            }
-            GUI.enabled = true;
             SirenixEditorGUI.EndToolbarBoxHeader();
 
-            ReorderableList audioTypeList = new ReorderableList(AudioContainer.AudioTypes, typeof(string), true, false, false, false)
+            SirenixEditorGUI.BeginVerticalList(true, true, GUILayout.MaxWidth(310f));
+            int count = AudioContainer.AudioTypes.Count;
+            IList<string> pendingRemove = new List<string>();
+            for (int i = 0; i < count; ++i)
             {
-                drawElementCallback = OnDrawTypeElementCallback,
-                drawElementBackgroundCallback = OnDrawElementBackgroundCallback,
-            };
-            audioTypeList.DoLayoutList();
-            EditorGUILayout.EndVertical();
-            GUILayout.EndArea();
-        }
+                string type = AudioContainer.AudioTypes[i];
+                SirenixEditorGUI.BeginListItem(true, SirenixGUIStyles.ListItem, GUILayout.Width(300f), GUILayout.Height(25f));
+                SirenixEditorGUI.BeginHorizontalPropertyLayout(GUIContent.none);
+                
+                if (m_editTypeIndex != i)
+                {
+                    EditorGUILayout.LabelField(type);
+                }
+                else
+                {
+                    AudioContainer.AudioTypes[m_editTypeIndex] = GUILayout.TextField(type);
+                }
+                if (m_editTypeIndex != i)
+                {
+                    if (SirenixEditorGUI.IconButton(EditorIcons.Pen))
+                    {
+                        m_editTypeIndex = i;
+                    }
 
-        private void OnDrawTypeElementCallback(Rect rect, int index, bool isActive, bool isFocused)
-        {
-            string value = AudioContainer.AudioTypes[index];
-            AudioContainer.AudioTypes[index] = EditorGUI.TextField(rect, value);
+                    if (SirenixEditorGUI.IconButton(EditorIcons.X))
+                    {
+                        pendingRemove.Add(type);
+                    }
+                }
+                else
+                {
+                    if (SirenixEditorGUI.IconButton(EditorIcons.Checkmark))
+                    {
+                        m_editTypeIndex = -1;
+                    }
+                }
+                SirenixEditorGUI.EndHorizontalPropertyLayout();
+                SirenixEditorGUI.EndListItem();
+            }
+
+            for (int i = 0; i < pendingRemove.Count; i++)
+            {
+                AudioContainer.AudioTypes.Remove(pendingRemove[i]);
+            }
+
+
+            SirenixEditorGUI.EndVerticalList();
+            
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(100f);
+
+            AudioContainer.AudioSourcePrefab = (AudioSource) SirenixEditorFields.UnityObjectField(AudioContainer.AudioSourcePrefab, typeof(AudioSource), 
+                    false, GUILayout.MaxWidth(200f));
+            
+            EditorGUILayout.EndHorizontal();
+            GUILayout.EndArea();
         }
 
         private void DrawAudioAsset()
         {
             if (AudioContainer == null) return;
             Rect audioTypeSelectRect = new Rect(10f, 10f, 125f, 25f);
-            
+            if (AudioContainer.WorkingCopy.Count == 0)
+            {
+                AudioContainer.CreateWorkingCopy();
+            }
             DrawAudioTypeSelect(audioTypeSelectRect, ref m_crrSelectedAudioType, true);
-            
             List<string> audioNames = new List<string>();
             foreach (var audioAsset in AudioContainer.WorkingCopy)
             {
@@ -138,7 +180,7 @@ namespace Base.Editor
                 {
                     if (string.IsNullOrEmpty(m_audioNameSearchString) || audioAsset.ObjectName.Contains(m_audioNameSearchString))
                     {
-                        audioNames.AddIfNotContains(audioAsset.ObjectName);
+                        audioNames.Add(audioAsset.ObjectName);
                     }
                 }
             }

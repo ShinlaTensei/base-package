@@ -35,6 +35,15 @@ namespace Base
         /// Backing field for <see cref="WorkingCopy"/>
         /// </summary>
         private List<AudioAssetData> m_audioAssetWorkingCopy;
+
+        private AudioSource m_audioSourcePrefab;
+
+        public AudioSource AudioSourcePrefab
+        {
+            get => m_audioSourcePrefab;
+            set => m_audioSourcePrefab = value;
+        }
+        
         /// <summary>
         /// Backing field of <see cref="AudioSetting"/>
         /// </summary>

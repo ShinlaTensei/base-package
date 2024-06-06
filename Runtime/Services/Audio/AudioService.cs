@@ -37,6 +37,8 @@ namespace Base
         public override void UpdateData(AudioDataContainer data)
         {
             AudioDataContainer = data;
+            
+            PoolSystem.CreatePool(AudioDataContainer.AudioSourcePrefab);
         }
 
         public void Play(AudioEventBase eventBase)
