@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Text;
 using Base.Logging;
+using Base.Module;
 
 namespace Base.Core
 {
@@ -11,7 +12,7 @@ namespace Base.Core
 
     public enum LanguageCode {En, Vi}
     
-    public interface IBlueprintLocalization
+    public interface IBlueprintLocalization : IBlueprint
     {
         public string GetTextByKey(string key);
     }
@@ -68,7 +69,7 @@ namespace Base.Core
 
                 try
                 {
-                    ServiceLocator.Get<LanguageChangedRequestSignal>()?.Dispatch(_currentLang.ToString());
+                    SignalLocator.Get<LanguageChangedRequestSignal>().Dispatch(_currentLang.ToString());
                 }
                 catch (Exception e)
                 {
@@ -86,7 +87,7 @@ namespace Base.Core
     {
         private static string GetLocalizeText(string key)
         {
-            IBlueprintLocalization blueprint = ServiceLocator.Get<IBlueprintLocalization>();
+            IBlueprintLocalization blueprint = BlueprintLocator.Get<IBlueprintLocalization>();
             string                 text      = blueprint?.GetTextByKey(key) ?? string.Empty;
             
             return !string.IsNullOrEmpty(text) ? text : key;

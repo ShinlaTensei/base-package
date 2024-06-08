@@ -1146,6 +1146,19 @@ namespace EnhancedUI.EnhancedScroller
             return null;
         }
 
+        public EnhancedScrollerCellView GetCellViewAtCellIndex(int cellIndex)
+        {
+            for (var i = 0; i < _activeCellViews.Count; i++)
+            {
+                if (_activeCellViews[i].cellIndex == cellIndex)
+                {
+                    return _activeCellViews[i];
+                }
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region Private

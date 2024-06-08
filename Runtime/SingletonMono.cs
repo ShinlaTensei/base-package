@@ -37,16 +37,13 @@ namespace Base
                 {
                     if (m_Instance == null)
                     {
-                        if (m_Instance == null)
-                        {
-                            // Need to create a new GameObject to attach the singleton to.
-                            var singletonObject = new GameObject();
-                            m_Instance = singletonObject.AddComponent<T>();
-                            singletonObject.name = typeof(T).ToString() + " (Singleton)";
+                        // Need to create a new GameObject to attach the singleton to.
+                        var singletonObject = new GameObject();
+                        m_Instance = singletonObject.AddComponent<T>();
+                        singletonObject.name = typeof(T).ToString() + " (Singleton)";
 
-                            // Make instance persistent.
-                            DontDestroyOnLoad(singletonObject);
-                        }
+                        // Make instance persistent.
+                        DontDestroyOnLoad(singletonObject);
                     }
 
                     return m_Instance;

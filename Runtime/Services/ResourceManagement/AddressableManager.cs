@@ -28,7 +28,7 @@ namespace Base
             {
                 if (m_mainThreadDispatcher == null)
                 {
-                    BaseContextRegistry.TryGetOrCreateContext(0).TryGet(out m_mainThreadDispatcher);
+                    BaseContextRegistry.TryGetOrCreateContext(CoreContext.GLOBAL_CONTEXT).TryGet(out m_mainThreadDispatcher);
 
                     if (m_mainThreadDispatcher == null)
                     {

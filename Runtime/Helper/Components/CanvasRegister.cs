@@ -15,7 +15,7 @@ namespace Base.Helper
     {
         protected override void Start()
         {
-            UIViewManager viewManager = ServiceLocator.Get<UIViewManager>();
+            UIViewManager viewManager = BaseContextRegistry.TryGetOrCreateContext(CoreContext.GLOBAL_CONTEXT).Get<UIViewManager>();
             if (viewManager != null && viewManager.IsInitialize)
             {
                 viewManager.RegisterCanvas(this);

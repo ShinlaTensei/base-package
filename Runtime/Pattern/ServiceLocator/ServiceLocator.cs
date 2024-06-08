@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Base.Core;
 using Base.Helper;
 using Base.Logging;
+using Base.Module;
 using UnityEngine;
 
 namespace Base.Pattern
@@ -13,7 +14,6 @@ namespace Base.Pattern
     public class ServiceLocator : SingletonMono<ServiceLocator>
     {
         private IDictionary<Type, IService> m_services = new Dictionary<Type, IService>();
-        private IDictionary<Type, ISignal> m_signals = new Dictionary<Type, ISignal>();
 
         protected override void OnDestroy()
         {
@@ -28,17 +28,17 @@ namespace Base.Pattern
             }
             
             m_services.Clear();
-            m_signals.Clear();
         }
 
-        public static T Get<T>() where T : class
+        public static T Get<T>() where T : class, IService
         {
             return Instance.Resolve<T>();
         }
 
-        private T Set<T>() where T : class
+        private T Set<T>() where T : class, IService
         {
             object result = null;
+            
             if (!m_services.TryGetValue(typeof(T), out IService item))
             {
                 item = Activator.CreateInstance<T>() as IService;
@@ -46,39 +46,26 @@ namespace Base.Pattern
                 m_services[typeof(T)] = item;
                 result = item;
             }
-            
-            if (!m_signals.TryGetValue(typeof(T), out ISignal signal) && result == null)
-            {
-                signal = Activator.CreateInstance<T>() as ISignal;
-                result = signal;
-            }
 
             if (result == null)
             {
-                throw new Exception($"ServiceLocator has no services or signals name {typeof(T)}");
+                throw new Exception($"ServiceLocator has no services name {typeof(T)}");
             }
 
             return result as T;
         }
 
-        public static void Set<T>(T inst) where T : class
+        public static void Set<T>(T inst) where T : class, IService
         {
             if (!Instance.m_services.ContainsKey(inst.GetType()))
             {
                 Instance.m_services[inst.GetType()] = inst as IService;
             }
-            else if (!Instance.m_signals.ContainsKey(inst.GetType()))
-            {
-                Instance.m_signals[inst.GetType()] = inst as ISignal;
-            }
         }
 
-        private T Resolve<T>() where T : class
+        private T Resolve<T>() where T : class, IService
         {
-            object result = m_services.TryGetValue(typeof(T), out IService item) ? item :
-                m_signals.TryGetValue(typeof(T), out ISignal signal) ? signal : Set<T>();
-
-            return result as T;
+            return m_services.TryGetValue(typeof(T), out IService service) ? service as T : Set<T>();
         }
 
     }

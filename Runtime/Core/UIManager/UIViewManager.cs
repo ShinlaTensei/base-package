@@ -55,13 +55,13 @@ namespace Base.Core
             base.Start();
 
             m_addressableManager = ServiceLocator.Get<AddressableManager>();
-            RegisterContext(0);
+            RegisterContext(CoreContext.GLOBAL_CONTEXT);
             IsInitialize = true;
         }
 
         private void OnDestroy()
         {
-            UnRegisterContext(0);
+            UnRegisterContext(CoreContext.GLOBAL_CONTEXT);
             IsInitialize = false;
         }
 
@@ -70,7 +70,7 @@ namespace Base.Core
         /// </summary>
         private void NotifyUIViewChanged()
         {
-            ServiceLocator.Get<OnUIViewChangedSignal>()?.Dispatch(m_previous, m_current);
+            SignalLocator.Get<OnUIViewChangedSignal>()?.Dispatch(m_previous, m_current);
         }
         private async UniTask<T> ShowAsync<T>(T instance, Action<T> onInit = null, Transform root = null, 
                                               CancellationToken cancellationToken = default) where T : UIView

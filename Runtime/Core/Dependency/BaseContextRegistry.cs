@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Base.Core
 {
+    public static class CoreContext
+    {
+        public const int GLOBAL_CONTEXT = 0;
+        public const int HOME_CONTEXT = 1;
+        public const int GAME_CONTEXT = 2;
+    }
     public class BaseContextRegistry : SingletonMono<BaseContextRegistry>
     {
         /// <summary>

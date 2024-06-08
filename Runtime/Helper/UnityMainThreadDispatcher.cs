@@ -118,11 +118,11 @@ public class UnityMainThreadDispatcher : BaseMono
 
     protected override void Start()
     {
-        BaseContextRegistry.TryGetOrCreateContext(0).Register(this);
+        BaseContextRegistry.TryGetOrCreateContext(CoreContext.GLOBAL_CONTEXT).Register(this);
     }
 
     void OnDestroy()
     {
-        BaseContextRegistry.TryGetOrCreateContext(0).UnRegister(this);
+        BaseContextRegistry.TryGetOrCreateContext(CoreContext.GLOBAL_CONTEXT).UnRegister(this);
     }
 }

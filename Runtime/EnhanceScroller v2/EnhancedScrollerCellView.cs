@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using Base.Helper;
 
 namespace EnhancedUI.EnhancedScroller
 {
     /// <summary>
     /// This is the base class that all cell views should derive from
     /// </summary>
-    public class EnhancedScrollerCellView : MonoBehaviour
+    public class EnhancedScrollerCellView : BaseMono
     {
         /// <summary>
         /// The cellIdentifier is a unique string that allows the scroller
