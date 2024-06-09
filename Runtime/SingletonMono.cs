@@ -8,6 +8,8 @@ namespace Base
     /// Inherit from this base class to create a singleton.
     /// e.g. public class MyClassName : Singleton<MyClassName> {}
     /// </summary>
+    
+    [DefaultExecutionOrder(5000)]
     public class SingletonMono<T> : BaseMono where T : BaseMono
     {
         [SerializeField] private bool isPersistent;
