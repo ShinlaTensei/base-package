@@ -114,14 +114,14 @@ namespace Base.Helper
             return obj;
         }
 
-        public void RegisterContext(int contextId)
+        public void RegisterContext<T>(int contextId, T source) where T : MonoBehaviour
         {
-            BaseContextRegistry.TryGetOrCreateContext(contextId).Register(this);
+            BaseContextRegistry.TryGetOrCreateContext(contextId).Register(source);
         }
 
-        public void UnRegisterContext(int contextId)
+        public void UnRegisterContext<T>(int contextId, T source) where T : MonoBehaviour
         {
-            BaseContextRegistry.TryGetOrCreateContext(contextId).UnRegister(this);
+            BaseContextRegistry.TryGetOrCreateContext(contextId).UnRegister(source);
         }
     }
 }
