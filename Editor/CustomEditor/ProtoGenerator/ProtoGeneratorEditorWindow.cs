@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -76,15 +77,13 @@ namespace Base.Editor
             return protoFileName;
         }
 
-        private void DrawProtoFiles(in IList<string> protoFiles)
+        private void DrawListProto(IList<string> protoFiles, string searchStr)
         {
-            if (protoFiles.Count <= 0)
+            if (!string.IsNullOrEmpty(searchStr))
             {
-                return;
+                protoFiles = protoFiles.Where(str => str.Contains(searchStr)).ToList();
             }
-
-            GUILayout.BeginArea(new Rect(15f, 120f, 300f, position.height - 80f));
-            SirenixEditorGUI.BeginVerticalList();
+            SirenixEditorGUI.BeginVerticalList(true, true);
             for (int i = 0; i < protoFiles.Count; i++)
             {
                 SirenixEditorGUI.BeginListItem();
@@ -102,6 +101,26 @@ namespace Base.Editor
             }
 
             SirenixEditorGUI.EndVerticalList();
+        }
+
+        private Vector2 m_scrollPosition;
+        private string m_searchString = string.Empty;
+        private void DrawProtoFiles(IList<string> protoFiles)
+        {
+            if (protoFiles.Count <= 0)
+            {
+                return;
+            }
+
+            protoFiles = protoFiles.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
+
+            GUILayout.BeginArea(new Rect(15f, 120f, 300f, position.height - 150f));
+            SirenixEditorGUI.BeginToolbarBoxHeader();
+            m_searchString = SirenixEditorGUI.ToolbarSearchField(m_searchString);
+            SirenixEditorGUI.EndToolbarBoxHeader();
+            m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, false, true, GUILayout.MaxHeight(position.height - 200f));
+            DrawListProto(protoFiles, m_searchString);
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
 
             if (GUI.Button(new Rect(position.width - 200f, position.height - 100f, 100f, 50f), "Generate"))
