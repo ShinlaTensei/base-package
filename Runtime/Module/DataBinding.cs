@@ -25,6 +25,13 @@ namespace Base.Module
 
         protected override void DisposeOnInheritance()
         {
+            foreach (var provider in m_bindingProvider.Values)
+            {
+                if (provider is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
             m_bindingProvider.Clear();
         }
 
