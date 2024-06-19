@@ -31,18 +31,18 @@ namespace SearchTools
 
             includeIcons = new[]
                            {
-                               AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/ExcludeIcon.png"),
-                               AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/IncludeIcon.png"),
-                               AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/UnknownIcon.png"),
-                               AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/AmbiguousIcon.png"),
+                               AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/ExcludeIcon.png"),
+                               AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/IncludeIcon.png"),
+                               AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/UnknownIcon.png"),
+                               AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/AmbiguousIcon.png"),
                            };
             spritePackingTagIcon = EditorGUIUtility.FindTexture("PreTextureMipMapHigh");
             assetBundleIcons     = new[]
                                    {
-                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/AssetBundleExcludeIcon.png"),
-                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/AssetBundleIncludeIcon.png"),
-                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/AssetBundleUnknownIcon.png"),
-                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.paidrubik.baseframework/Sprites/SearchTools/AssetBundleAmbiguousIcon.png"),
+                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/AssetBundleExcludeIcon.png"),
+                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/AssetBundleIncludeIcon.png"),
+                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/AssetBundleUnknownIcon.png"),
+                                       AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/base-package/Sprites/SearchTool/AssetBundleAmbiguousIcon.png"),
                                    };
 
             StartAnalyze();
