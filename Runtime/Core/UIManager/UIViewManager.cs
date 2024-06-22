@@ -261,8 +261,7 @@ namespace Base.Core
             if (m_addressableManager.IsInitialize && m_addressableManager.IsReadyToGetBundle)
             {
                 prefabPath = modelName;
-                inst = await m_addressableManager.InstantiateAsync(prefabPath,
-                        parent: GetCanvasWithTag(UICanvasType.RootCanvas, attribute.SceneName), retryCount: 5,
+                inst = await m_addressableManager.InstantiateAsync(prefabPath, retryCount: 5,
                         cancellationToken: cancellationToken);
             }
 
@@ -303,7 +302,7 @@ namespace Base.Core
                 return;
             }
 
-            Transform parent = root != null ? root : GetCanvasWithTag(instance.CanvasType, instance.CacheGameObject.scene.name);
+            Transform parent = root != null ? root : GetCanvasWithTag(instance.CanvasType);
             if (parent) instance.CacheTransform.SetParent(parent, false);
 
             instance.CacheTransform.SetScale(1);
@@ -353,34 +352,28 @@ namespace Base.Core
 
         #region Canvas Handle
 
-        private Dictionary<string, Transform> m_uiCanvasPool = new Dictionary<string, Transform>();
+        private IDictionary<string, Transform> m_uiCanvasPool = new Dictionary<string, Transform>();
 
-        public Transform GetCanvasWithTag(UICanvasType enumTag, string sceneName)
+        public Transform GetCanvasWithTag(UICanvasType enumTag)
         {
-            string newTag = !(enumTag is UICanvasType.None) ? enumTag.ToString() : UICanvasType.RootCanvas.ToString();
-            Scene  scene  = SceneManager.GetSceneByName(sceneName);
-
-            if (!scene.isLoaded) return null;
-
-            string key = $"{newTag}-{scene.name}";
-            if (m_uiCanvasPool.TryGetValue(key, out Transform result))
+            UICanvasType newTag = !(enumTag is UICanvasType.None) ? enumTag : UICanvasType.RootCanvas;
+            
+            
+            if (m_uiCanvasPool.TryGetValue(newTag.ToString(), out Transform result))
             {
                 return result;
             }
 
-            GameObject[] objects = GameObject.FindGameObjectsWithTag(newTag);
-            for (int i = 0; i < objects.Length; ++i)
+            GameObject[] objects = GameObject.FindGameObjectsWithTag(newTag.ToString());
+            if (objects.Length > 0)
             {
-                if (objects[i].scene.name.Equals(scene.name, StringComparison.CurrentCulture))
-                {
-                    Transform final = objects[i].transform.FindChildRecursive<Transform>(RootName);
-                    m_uiCanvasPool.TryAdd($"{newTag}-{scene.name}", final);
+                Transform final = objects[0].transform.FindChildRecursive<Transform>(RootName);
+                m_uiCanvasPool.TryAdd(newTag.ToString(), final);
 
-                    return final;
-                }
+                return final;
             }
 
-            PDebug.WarnFormat("Cannot find canvas with tag {tag} in scene: {sceneName}", newTag, sceneName);
+            PDebug.WarnFormat("Cannot find canvas with tag {tag}", newTag);
 
             return null;
         }
