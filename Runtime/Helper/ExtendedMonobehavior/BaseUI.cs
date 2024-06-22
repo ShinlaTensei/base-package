@@ -12,21 +12,21 @@ namespace Base.Helper
 {
     public class BaseUI : UIBehaviour
     {
-        private RectTransform _rectTransform;
-        private Transform _transform;
-        private GameObject _gameObject;
+        private RectTransform m_rectTransform;
+        private Transform m_transform;
+        private GameObject m_gameObject;
         public int InstanceId => CacheGameObject.GetInstanceID();
 
         public Transform CacheTransform
         {
             get
             {
-                if (_transform is null)
+                if (m_transform is null)
                 {
-                    _transform = transform;
+                    m_transform = transform;
                 }
 
-                return _transform;
+                return m_transform;
             }
         }
 
@@ -34,12 +34,12 @@ namespace Base.Helper
         {
             get
             {
-                if (_gameObject is null)
+                if (m_gameObject is null)
                 {
-                    _gameObject = gameObject;
+                    m_gameObject = gameObject;
                 }
 
-                return _gameObject;
+                return m_gameObject;
             }
         }
 
@@ -47,12 +47,12 @@ namespace Base.Helper
         {
             get
             {
-                if (_rectTransform is null)
+                if (m_rectTransform is null)
                 {
-                    _rectTransform = gameObject.GetComponent<RectTransform>();
+                    m_rectTransform = gameObject.GetComponent<RectTransform>();
                 }
 
-                return _rectTransform;
+                return m_rectTransform;
             }
         }
 
