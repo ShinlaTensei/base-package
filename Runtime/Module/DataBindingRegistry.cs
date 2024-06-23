@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Base.Core;
 using Base.Helper;
 using Base.Logging;
 using UniRx;
@@ -14,7 +15,7 @@ namespace Base.Module
     /// <summary>
     /// This class is used to observe the change of the in game data and notify listener for those changes
     /// </summary>
-    public sealed class DataBindingRegistry : SingletonNonMono<DataBindingRegistry>
+    public sealed class DataBindingRegistry : SingletonMono<DataBindingRegistry>
     {
         /// <summary>
         /// Backing field of <see cref="BindingProvider"/>
@@ -23,8 +24,10 @@ namespace Base.Module
 
         private IDictionary<System.Type, object> BindingProvider => m_bindingProvider ??= new Dictionary<Type, object>();
 
-        protected override void DisposeOnInheritance()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+            
             foreach (var provider in m_bindingProvider.Values)
             {
                 if (provider is IDisposable disposable)
