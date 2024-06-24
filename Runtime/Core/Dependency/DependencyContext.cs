@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Base.Helper;
 using Base.Logging;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Base.Core
@@ -22,9 +23,22 @@ namespace Base.Core
         
         private IList<Type> PendingToRemoved => m_pendingToRemoved;
 
-        public T Get<T>()
+        public T Get<T>() where T : MonoBehaviour
         {
-            if (UnityDependencyRegistry.TryGetValue(typeof(T), out UnityDependencyObject dependency))
+            if (!UnityDependencyRegistry.TryGetValue(typeof(T), out UnityDependencyObject dependency))
+            {
+                try
+                {
+                    T target = new GameObject(nameof(T)).AddComponent<T>();
+                    Register(target);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"Get Dependency of type {nameof(T)} not found", e);
+                }
+            }
+            
+            if (UnityDependencyRegistry.TryGetValue(typeof(T), out dependency))
             {
                 return (T)dependency.Target;
             }
