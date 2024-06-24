@@ -46,7 +46,7 @@ namespace Base.Helper
         /// <param name="dueTime">Time delay at start</param>
         /// <param name="interval">Time delay every frame</param>
         /// <param name="callback">Action</param>
-        public static IDisposable RunInterval(float dueTime, int interval, Action callback = null)
+        public static IDisposable RunInterval(int dueTime, int interval, Action callback = null)
         {
             return Observable.Timer(TimeSpan.FromSeconds(dueTime), TimeSpan.FromSeconds(interval))
                                                .Subscribe(_ => callback?.Invoke(), e => Instance.OnError(e))
@@ -60,10 +60,10 @@ namespace Base.Helper
         /// <param name="numberOfTimeRun">Time limit run</param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static IDisposable RunInterval(int timeInSeconds, int numberOfTimeRun, Action callback = null)
+        public static IDisposable RunInterval(int timeInSeconds, int numberOfTimeRun, Action onNext = null, Action callback = null)
         {
             return Observable.Interval(TimeSpan.FromSeconds(timeInSeconds)).Take(numberOfTimeRun)
-                .Subscribe(_ => callback?.Invoke(), e => Instance.OnError(e))
+                .Subscribe(_ => onNext?.Invoke(), e => Instance.OnError(e), onCompleted: () => callback?.Invoke())
                 .AddTo(Instance.CompositeDisposable);
         }
         
