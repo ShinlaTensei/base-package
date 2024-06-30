@@ -120,7 +120,7 @@ namespace Base
         {
             m_onTimerFinished = onTimerFinished;
             m_onTimerRunning  = onTimerRunning;
-            m_runningInterval = BaseInterval.RunInterval(1f, OnTimerRunningAfterSetup);
+            m_runningInterval = BaseInterval.RunInterval(1, OnTimerRunningAfterSetup);
         }
 
         public void StopRunningTimer()

@@ -48,6 +48,12 @@ namespace Base.Module
                 BindingProvider[key] = dataBinding;
             }
 
+            if (dataBinding == null)
+            {
+                dataBinding = new DataBindingReactive<T>();
+                BindingProvider[key] = dataBinding;
+            }
+
             DataBindingReactive<T> final = dataBinding as DataBindingReactive<T>;
             
             if (final == null)
@@ -69,6 +75,11 @@ namespace Base.Module
             }
 
             return provider;
+        }
+
+        public void UnBind<T>()
+        {
+            
         }
     }
     

@@ -1,19 +1,16 @@
 ﻿using System;
 using Base.Helper;
 using System.Collections.Generic;
-using Base.Module;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Base.Pattern
 {
+    [AddComponentMenu("Base Component/Character State Controller")]
     public class CharacterStateController : BaseMono
     {
         [SerializeField] private Animator animator = null;
         
         [SerializeField] private CharacterState currentState = null;
-
-        [SerializeField, CustomClassDrawer] private MovementReferenceParam movementReferenceParam = new MovementReferenceParam();
         
         private Dictionary<string, CharacterState> _states = new Dictionary<string, CharacterState>();
         
@@ -42,16 +39,6 @@ namespace Base.Pattern
         /// Gets the previous state used by the state machine
         /// </summary>
         public CharacterState PreviousState => _previousState;
-        
-        /// <summary>
-        /// Gets the external reference in reference mode [external]
-        /// </summary>
-        public Transform ExternalReference => movementReferenceParam.external;
-        
-        /// <summary>
-        /// Gets the reference mode
-        /// </summary>
-        public MovementReferenceMode ReferenceMode => movementReferenceParam.movementReferenceMode;
 
         private bool CanCurrentStateOverrideAnimator => CurrentState.IsOverrideAnimator && Animator != null && CurrentState.RuntimeAnimator != null;
 
@@ -119,7 +106,7 @@ namespace Base.Pattern
             base.Start();
             if (CurrentState != null)
             {
-                CurrentState.EnterState(0, CurrentState);
+                CurrentState.EnterStateBehaviour(0, CurrentState);
 
                 if (CanCurrentStateOverrideAnimator)
                 {
@@ -148,7 +135,7 @@ namespace Base.Pattern
                     Animator.runtimeAnimatorController = CurrentState.RuntimeAnimator;
                 }
 
-                CurrentState.EnterState(dt, PreviousState);
+                CurrentState.EnterStateBehaviour(dt, PreviousState);
             }
             
             CurrentState.PreUpdateBehaviour(dt);
@@ -162,11 +149,7 @@ namespace Base.Pattern
         }
 
         // --------------------------- End of Unity Event function ----------------------------------------- //
-
-        private void InitializeAnimation()
-        {
-            
-        }
+        
         private void AddAndInitializeState()
         {
             CharacterState[] stateArray = this.GetComponentsInChildren<CharacterState>();
@@ -212,6 +195,7 @@ namespace Base.Pattern
 
                     _previousState = CurrentState;
                     currentState = nextState;
+                    currentState.CharacterStateController = this;
 
                     return true;
                 }
@@ -220,17 +204,4 @@ namespace Base.Pattern
             return false;
         }
     }
-
-    [System.Serializable]
-    public class MovementReferenceParam
-    {
-        [Tooltip("Choose what type of moment reference should be using. Should it use its own transform, the world coordinates or an external transform")]
-        public MovementReferenceMode movementReferenceMode;
-
-        [ShowIf("@this.movementReferenceParam", Value = MovementReferenceMode.External)]
-        public Transform external = null;
-    }
-    
-    public enum MovementReferenceMode {World, External, Character}
-
 }

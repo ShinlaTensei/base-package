@@ -19,7 +19,7 @@ namespace Base.Pattern
         [SerializeField, Condition("isOverrideAnimator", true)] 
         private RuntimeAnimatorController runtimeAnimatorController = null;
         
-        protected CharacterStateController CharacterStateController { get; private set; }
+        public CharacterStateController CharacterStateController { get; set; }
 
         public RuntimeAnimatorController RuntimeAnimator => runtimeAnimatorController;
         
@@ -27,30 +27,17 @@ namespace Base.Pattern
 
         public bool IsOverrideAnimator => isOverrideAnimator;
 
-        protected virtual void Awake()
-        {
-            CharacterStateController = this.GetComponentInBranch<CharacterStateController>();
-        }
-
         protected virtual void Start()
         {
             StateNameHash = Animator.StringToHash(this.GetType().Name);
         }
-        
-        protected virtual void OnEnable() {}
-        
-        protected virtual void OnDisable() {}
-        
-        protected virtual void Update() {}
-
-        protected virtual void OnDestroy() {}
 
         /// <summary>
         /// This method runs once when the state has entered the state machine
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="fromState"></param>
-        public virtual void EnterState(float dt, CharacterState fromState) { }
+        public virtual void EnterStateBehaviour(float dt, CharacterState fromState) { }
         
         /// <summary>
         /// This method runs once when the state has exited the state machine
@@ -72,7 +59,7 @@ namespace Base.Pattern
         /// <param name="dt"> The fixed delta time in every frame </param>
         public virtual void UpdateBehaviour(float dt) {}
 
-        public abstract void FixedUpdateBehaviour(float dt);
+        public virtual void FixedUpdateBehaviour(float dt) {}
 
         /// <summary>
         /// This method runs after the main Update method
