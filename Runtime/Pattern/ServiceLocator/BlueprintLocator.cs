@@ -48,6 +48,11 @@ namespace Base.Pattern
                 Instance.m_blueprints[inst.GetType()] = inst as IBlueprint;
             }
         }
+        
+        public static bool IsSet<T>() where T : class, IBlueprint
+        {
+            return Instance.m_blueprints.ContainsKey(typeof(T));
+        }
 
         private T Resolve<T>() where T : class, IBlueprint
         {

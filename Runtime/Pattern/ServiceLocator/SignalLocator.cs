@@ -52,6 +52,11 @@ namespace Base.Pattern
                 Instance.m_signals[inst.GetType()] = inst as ISignal;
             }
         }
+        
+        public static bool IsSet<T>() where T : class, ISignal
+        {
+            return Instance.m_signals.ContainsKey(typeof(T));
+        }
 
         private T Resolve<T>() where T : class, ISignal
         {

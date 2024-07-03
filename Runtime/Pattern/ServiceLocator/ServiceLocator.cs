@@ -63,6 +63,11 @@ namespace Base.Pattern
             }
         }
 
+        public static bool IsSet<T>() where T : class, IService
+        {
+            return Instance.m_services.ContainsKey(typeof(T));
+        }
+
         private T Resolve<T>() where T : class, IService
         {
             return m_services.TryGetValue(typeof(T), out IService service) ? service as T : Set<T>();
