@@ -169,7 +169,7 @@ namespace Base.Core
             {
                 m_spriteRenderer.sprite = sprite;
             }
-            
+            PDebug.Info("[ImageDownloader] Finish loading image from: " + m_url);
             OnCompleted?.Invoke(sprite);
             
             Dispose();
