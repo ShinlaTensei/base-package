@@ -71,6 +71,22 @@ namespace Base.Helper
                 return string.Empty;
             }
         }
+
+        public static string ToMD5(string input)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] inputHash = Encoding.UTF8.GetBytes(input);
+                byte[] md5Hash = md5.ComputeHash(inputHash);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < md5Hash.Length; ++i)
+                {
+                    sb.Append(md5Hash[i].ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
+        }
     }
 
 }
