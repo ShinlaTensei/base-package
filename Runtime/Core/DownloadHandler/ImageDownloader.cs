@@ -132,7 +132,10 @@ namespace Base.Core
             
             if (request.responseCode == (long) HttpStatusCode.OK)
             {
-                await File.WriteAllBytesAsync(SAVE_PATH + m_hash, request.downloadHandler.data, m_cancellationToken);
+                if (!File.Exists(SAVE_PATH + m_hash))
+                {
+                    await File.WriteAllBytesAsync(SAVE_PATH + m_hash, request.downloadHandler.data, m_cancellationToken);
+                }
             }
            
             request.Dispose();
