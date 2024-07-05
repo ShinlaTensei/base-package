@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using Base.Core;
 using Base.Helper;
 
-public interface IMainThreadDispatcher : IService
+public interface IMainThreadDispatcher
 {
     /// <summary>
     /// Locks the queue and adds the IEnumerator to the queue
@@ -27,7 +27,7 @@ public interface IMainThreadDispatcher : IService
     void Dispatch(float delay, Action action);
 }
 
-public class UnityMainThreadDispatcher : BaseMono
+public class UnityMainThreadDispatcher : BaseMono, IMainThreadDispatcher
 {
     readonly ConcurrentQueue<Action> _executionQueue = new ConcurrentQueue<Action>();
 

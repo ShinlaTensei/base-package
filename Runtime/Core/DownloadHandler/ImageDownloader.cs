@@ -15,7 +15,7 @@ namespace Base.Core
 {
     public class ImageDownloader : IDisposable
     {
-        private readonly string SAVE_PATH = Application.persistentDataPath + Path.DirectorySeparatorChar + "textures" + Path.DirectorySeparatorChar;
+        private static string SAVE_PATH = Application.persistentDataPath + Path.DirectorySeparatorChar + "textures" + Path.DirectorySeparatorChar;
 
         private string m_url;
         private string m_hash;
