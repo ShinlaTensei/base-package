@@ -155,7 +155,7 @@ namespace Base.Core
             if (texture == null)
             {
                 byte[] fileData = File.ReadAllBytes(SAVE_PATH + m_hash);
-                texture = new Texture2D(2, 2);
+                texture = new Texture2D(1, 1, TextureFormat.ARGB32, 1, true);
                 texture.LoadImage(fileData);
             }
 
