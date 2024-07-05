@@ -11,6 +11,7 @@ namespace Base.Core
     public interface ISignal
     {
         void RemoveAllListener();
+        bool HasListener();
     }
 
     public class Signal : ISignal
@@ -21,6 +22,11 @@ namespace Base.Core
         {
             Listener = null;
             OnceListener = null;
+        }
+
+        public bool HasListener()
+        {
+            return Listener.GetInvocationList().Length > 0 || OnceListener.GetInvocationList().Length > 0;
         }
 
         public void Subscribe(Action callback, bool isOnce = false)
@@ -75,6 +81,11 @@ namespace Base.Core
     {
         private event Action<T> Listener = null;
         private event Action<T> OnceListener = null;
+        
+        public bool HasListener()
+        {
+            return Listener.GetInvocationList().Length > 0 || OnceListener.GetInvocationList().Length > 0;
+        }
         public void Subscribe(Action<T> callback, bool isOnce = false)
         {
             if (isOnce) OnceListener = AddUnique(OnceListener, callback);
@@ -130,6 +141,11 @@ namespace Base.Core
     {
         private event Action<T, V> Listener = null;
         private event Action<T, V> OnceListener = null;
+        
+        public bool HasListener()
+        {
+            return Listener.GetInvocationList().Length > 0 || OnceListener.GetInvocationList().Length > 0;
+        }
         public void Subscribe(Action<T, V> callback, bool isOnce = false)
         {
             if (isOnce) OnceListener = AddUnique(OnceListener, callback);
@@ -185,6 +201,11 @@ namespace Base.Core
     {
         private event Action<T, V, U> Listener = null;
         private event Action<T, V, U> OnceListener = null;
+        
+        public bool HasListener()
+        {
+            return Listener.GetInvocationList().Length > 0 || OnceListener.GetInvocationList().Length > 0;
+        }
         public void Subscribe(Action<T, V, U> callback, bool isOnce = false)
         {
             if (isOnce) OnceListener = AddUnique(OnceListener, callback);

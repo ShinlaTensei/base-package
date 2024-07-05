@@ -5,7 +5,9 @@ using System.Net;
 using System.Threading;
 using Base.Helper;
 using Base.Logging;
+using Base.Pattern;
 using Cysharp.Threading.Tasks;
+using DTT.Utils.Exceptions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -67,7 +69,7 @@ namespace Base.Core
         {
             if (m_url == null)
             {
-                Error("Url has not been set. Use Load function to set image url");
+                Error(new NullReferenceException("Url has not been set. Use Load function to set image url"));
                 return;
             }
 
@@ -78,7 +80,7 @@ namespace Base.Core
             }
             catch (Exception e)
             {
-                Error(e.Message);
+                Error(e);
                 return;
             }
             
@@ -99,16 +101,24 @@ namespace Base.Core
             }
         }
 
-        private void Error(string message)
+        private void Error(long responseCode, string message)
         {
             PDebug.Error(message);
-            
+            if (SignalLocator.Get<NetworkErrorSignal>().HasListener())
+            {
+                SignalLocator.Get<NetworkErrorSignal>().Dispatch(responseCode);
+            }
             OnError?.Invoke(message);
         }
 
         private void Error(Exception exception)
         {
-            Error(exception.Message);
+            PDebug.Error(exception.Message);
+            if (SignalLocator.Get<CommonErrorSignal>().HasListener())
+            {
+                SignalLocator.Get<CommonErrorSignal>().Dispatch(exception.Message);
+            }
+            OnError.Invoke(exception.Message);
         }
 
         private string CreateMD5(string input)
@@ -119,14 +129,14 @@ namespace Base.Core
         private async UniTask DownloadImage()
         {
             UnityWebRequest request = UnityWebRequestTexture.GetTexture(m_url);
-
+            
             UnityWebRequestAsyncOperation operation = request.SendWebRequest();
             await UniTask.WaitUntil(() => operation.isDone || Application.internetReachability == NetworkReachability.NotReachable
                 , cancellationToken: m_cancellationToken);
             
             if (request.result is UnityWebRequest.Result.ProtocolError or UnityWebRequest.Result.ConnectionError)
             {
-                Error("Error while downloading: " + request.error);
+                Error(request.responseCode, "Error while downloading: " + request.error);
                 await UniTask.Yield();
             }
             
@@ -148,7 +158,7 @@ namespace Base.Core
         {
             if (!File.Exists(SAVE_PATH + m_hash))
             {
-                Error("Load image file failed! ");
+                Error(new NullOrEmptyException("Load image file failed! "));
                 return;
             }
 

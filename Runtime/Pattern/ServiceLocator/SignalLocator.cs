@@ -58,6 +58,16 @@ namespace Base.Pattern
             return Instance.m_signals.ContainsKey(typeof(T));
         }
 
+        public static bool HasListener<T>() where T : class, ISignal
+        {
+            if (Instance.m_signals.TryGetValue(typeof(T), out ISignal signal))
+            {
+                return signal.HasListener();
+            }
+
+            return false;
+        }
+
         private T Resolve<T>() where T : class, ISignal
         {
             return m_signals.TryGetValue(typeof(T), out ISignal service) ? service as T : Set<T>();
