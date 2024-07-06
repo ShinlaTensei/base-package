@@ -36,5 +36,13 @@ namespace Base.Core
         {
             return TryGetOrCreateContext(Convert.ToInt32(enumValue));
         }
+
+        public static void StopContext(int index)
+        {
+            if (Instance.ContextRegistry.ContainsKey(index))
+            {
+                Instance.ContextRegistry.Remove(index);
+            }
+        }
     }
 }

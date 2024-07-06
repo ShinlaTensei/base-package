@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace Base.Core
 {
-    public class DependencyContext
+    public class DependencyContext : IDisposable
     {
         /// <summary>
         /// Backing field of <see cref="UnityDependencyRegistry"/>
@@ -105,6 +105,22 @@ namespace Base.Core
             }
             
             PendingToRemoved.Clear();
+        }
+
+        private void ReleaseUnmanagedResources()
+        {
+            UnityDependencyRegistry.Clear();
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~DependencyContext()
+        {
+            ReleaseUnmanagedResources();
         }
     }
 }
