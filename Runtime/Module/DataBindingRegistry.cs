@@ -76,11 +76,6 @@ namespace Base.Module
 
             return provider;
         }
-
-        public void UnBind<T>()
-        {
-            
-        }
     }
     
     /// <summary>
