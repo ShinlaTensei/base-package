@@ -39,8 +39,9 @@ namespace Base.Core
 
         public static void StopContext(int index)
         {
-            if (Instance.ContextRegistry.ContainsKey(index))
+            if (Instance.ContextRegistry.TryGetValue(index, out DependencyContext context))
             {
+                context.Dispose();
                 Instance.ContextRegistry.Remove(index);
             }
         }
