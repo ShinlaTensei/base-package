@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Base.Helper;
+using NUnit.Framework;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
@@ -41,6 +42,7 @@ namespace Base.Editor
 
             DrawPathSelectable();
             IList<string> protoFilename = LoadAllProtoInPath(m_sourceProtoPath);
+            IList<string> destinationName = LoadAllDestinationInPath(m_destinationPath);
             DrawProtoFiles(protoFilename);
         }
 
@@ -54,14 +56,14 @@ namespace Base.Editor
                 SirenixEditorFields.FolderPathField(destinationPathRect, new GUIContent("Destination"), m_destinationPath, "Assets", true, true);
         }
 
-        private IList<string> LoadAllProtoInPath(string path)
+        private IList<string> LoadAllProtoInPath(string sourcePath)
         {
-            if (string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(sourcePath))
             {
                 return new List<string>();
             }
 
-            m_protoFullPath = Directory.GetFiles(path, "*.proto", SearchOption.AllDirectories);
+            m_protoFullPath = Directory.GetFiles(sourcePath, "*.proto", SearchOption.AllDirectories);
 
             if (m_protoFullPath.Count <= 0)
             {
@@ -77,12 +79,25 @@ namespace Base.Editor
             return protoFileName;
         }
 
+        private IList<string> LoadAllDestinationInPath(string destinationPath)
+        {
+            if (string.IsNullOrEmpty(destinationPath))
+            {
+                return new List<string>();
+            }
+
+            IList<string> destinationName = new List<string>();
+            destinationName = Directory.GetDirectories(destinationPath).ToList();
+            return destinationName;
+        }
+
         private void DrawListProto(IList<string> protoFiles, string searchStr)
         {
             if (!string.IsNullOrEmpty(searchStr))
             {
                 protoFiles = protoFiles.Where(str => str.Contains(searchStr)).ToList();
             }
+
             SirenixEditorGUI.BeginVerticalList(true, true);
             for (int i = 0; i < protoFiles.Count; i++)
             {
@@ -105,6 +120,7 @@ namespace Base.Editor
 
         private Vector2 m_scrollPosition;
         private string m_searchString = string.Empty;
+
         private void DrawProtoFiles(IList<string> protoFiles)
         {
             if (protoFiles.Count <= 0)
@@ -125,23 +141,58 @@ namespace Base.Editor
 
             if (GUI.Button(new Rect(position.width - 200f, position.height - 100f, 100f, 50f), "Generate"))
             {
-                if (string.IsNullOrEmpty(m_destinationPath))
+                GenerateProto();
+            }
+        }
+
+        private async Task GenerateProto()
+        {
+            if (string.IsNullOrEmpty(m_destinationPath))
+            {
+                return;
+            }
+
+            if (m_selectedProtoToGenerate.Count > 0)
+            {
+                IList<string> arg = new List<string>();
+                for (int i = 0; i < m_selectedProtoToGenerate.Count; i++)
                 {
-                    return;
+                    if (m_selectedProtoToGenerate[i])
+                    {
+                        string relativePath = Path.GetRelativePath(m_sourceProtoPath, m_protoFullPath[i]);
+                        if (relativePath.Contains(Path.DirectorySeparatorChar))
+                        {
+                            relativePath = relativePath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                        }
+
+                        arg.Add(relativePath);
+                    }
                 }
 
-                if (m_selectedProtoToGenerate.Count > 0)
+                IDictionary<string, IList<string>> mapSubfoldersProto = new Dictionary<string, IList<string>>();
+                foreach (var protoPath in arg)
                 {
-                    IList<string> arg = new List<string>();
-                    for (int i = 0; i < m_selectedProtoToGenerate.Count; i++)
+                    string[] split = protoPath.Split(Path.AltDirectorySeparatorChar);
+                    string subFolder = string.Join(Path.AltDirectorySeparatorChar, split, 0, split.Length - 1);
+                    if (!Directory.Exists(Path.Combine(m_destinationPath, subFolder)))
                     {
-                        if (m_selectedProtoToGenerate[i])
-                        {
-                            arg.Add(Path.GetRelativePath(m_sourceProtoPath, m_protoFullPath[i]));
-                        }
+                        Directory.CreateDirectory(Path.Combine(m_destinationPath, subFolder));
                     }
 
-                    _ = StartProcess(m_sourceProtoPath, m_destinationPath, arg.ToArray());
+                    if (!mapSubfoldersProto.ContainsKey(subFolder))
+                    {
+                        mapSubfoldersProto[subFolder] = new List<string>();
+                    }
+
+                    if (mapSubfoldersProto.TryGetValue(subFolder, out IList<string> listProto))
+                    {
+                        listProto.AddIfNotContains(protoPath);
+                    }
+                }
+
+                foreach (var kvp in mapSubfoldersProto)
+                {
+                    await StartProcess(m_sourceProtoPath, Path.Combine(m_destinationPath, kvp.Key), kvp.Value.ToArray());
                 }
             }
         }
@@ -149,9 +200,10 @@ namespace Base.Editor
         private async Task StartProcess(string protoSourcePath, string destinationPath, params string[] arg)
         {
             string tempBatchFile = Path.GetTempFileName() + ".bat";
-            
-            await File.WriteAllTextAsync(tempBatchFile, $"protoc --proto_path={protoSourcePath} --csharp_out={destinationPath} {string.Join(" ", arg)}");
-            
+
+            await File.WriteAllTextAsync(tempBatchFile,
+                $"protoc --proto_path={protoSourcePath} --csharp_out={destinationPath} {string.Join(" ", arg)}");
+
             ProcessStartInfo processStartInfo = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
@@ -159,6 +211,7 @@ namespace Base.Editor
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                RedirectStandardInput = true,
                 UseShellExecute = false,
                 LoadUserProfile = true,
                 WorkingDirectory = PathUtility.GetProjectPath()
@@ -167,7 +220,7 @@ namespace Base.Editor
             using (Process process = new Process())
             {
                 process.StartInfo = processStartInfo;
-            
+
                 process.OutputDataReceived += (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
@@ -175,7 +228,7 @@ namespace Base.Editor
                         Debug.Log($"Proto Generate Output: {e.Data}");
                     }
                 };
-            
+
                 process.ErrorDataReceived += (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))

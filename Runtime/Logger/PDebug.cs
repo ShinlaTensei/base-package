@@ -29,7 +29,7 @@ namespace Base.Logging
 
             var logFile = new FileTarget("File")
             {
-                FileName = FileUtilities.GetSystemPath() + Path.DirectorySeparatorChar + "${shortdate}_debug.log",
+                FileName = PathUtility.GetSystemPath() + Path.DirectorySeparatorChar + "${shortdate}_debug.log",
                 CreateDirs = true,
                 KeepFileOpen = true,
                 ConcurrentWrites = false,

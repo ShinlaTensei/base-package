@@ -22,6 +22,20 @@ namespace Base.Helper
             return m_projectPath;
         }
         
+        /// <summary>
+        /// Get the system path based on platform
+        /// </summary>
+        /// <returns>The path specific on each platform
+        /// (Window:"C:\Users\{Your_user_name}\", Android: "/storage/emulated/0/Android/data/{your_package_name}/files/")</returns>
+        public static string GetSystemPath()
+        {
+#if (UNITY_EDITOR || UNITY_STANDALONE || UNITY_STANDALONE_WIN) && !UNITY_EDITOR_OSX
+            return Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
+#elif UNITY_ANDROID || !DEBUG || UNITY_EDITOR_OSX
+            return Application.persistentDataPath + Path.DirectorySeparatorChar;
+#endif
+        }
+        
         public static string TrimSlashes(string path)
         {
             path = TrimLeadingSlashes(path);
@@ -57,15 +71,42 @@ namespace Base.Helper
         /// Combines path1 and path2 with a forward slash '/'
         public static string Combine(string path1, string path2)
         {
-            while (path1.EndsWith("/") || path1.EndsWith("\\"))
+            while (path1.EndsWith(Path.DirectorySeparatorChar) || path1.EndsWith(Path.AltDirectorySeparatorChar))
             {
                 path1 = path1.Substring(0, path1.Length - 1);
             }
-            while (path2.StartsWith("/") || path2.StartsWith("\\"))
+            while (path2.StartsWith(Path.DirectorySeparatorChar) || path2.StartsWith(Path.AltDirectorySeparatorChar))
             {
                 path1 = path1.Substring(1);
             }
-            return path1 + "/" + path2;
+            return path1 + Path.DirectorySeparatorChar + path2;
+        }
+        
+        public static void CreateFolder(string folderRelativePath)
+        {
+            string path = PathUtility.GetSystemPath() + folderRelativePath;
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
+        
+        public static void CreateFolderInProject(string folderRelativePath)
+        {
+            string path = Combine(GetProjectPath(), folderRelativePath);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        public static void CreateFolder(string directory, string folderName)
+        {
+            string path = directory + folderName;
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
         }
     }
 }

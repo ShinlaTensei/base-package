@@ -338,37 +338,5 @@ namespace Base.Helper
         }
 
         #endregion
-
-        /// <summary>
-        /// Get the system path based on platform
-        /// </summary>
-        /// <returns>The path specific on each platform
-        /// (Window:"C:\Users\{Your_user_name}\", Android: "/storage/emulated/0/Android/data/{your_package_name}/files/")</returns>
-        public static string GetSystemPath()
-        {
-#if (UNITY_EDITOR || UNITY_STANDALONE || UNITY_STANDALONE_WIN) && !UNITY_EDITOR_OSX
-            return Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
-#elif UNITY_ANDROID || !DEBUG || UNITY_EDITOR_OSX
-            return Application.persistentDataPath + "/";
-#endif
-        }
-
-        public static void CreateFolder(string folderRelativePath)
-        {
-            string path = GetSystemPath() + folderRelativePath;
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-        }
-
-        public static void CreateFolder(string directory, string folderName)
-        {
-            string path = directory + folderName;
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-        }
     }
 }
