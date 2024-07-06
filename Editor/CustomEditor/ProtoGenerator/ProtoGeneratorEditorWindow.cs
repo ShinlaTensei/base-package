@@ -42,7 +42,6 @@ namespace Base.Editor
 
             DrawPathSelectable();
             IList<string> protoFilename = LoadAllProtoInPath(m_sourceProtoPath);
-            IList<string> destinationName = LoadAllDestinationInPath(m_destinationPath);
             DrawProtoFiles(protoFilename);
         }
 
@@ -64,6 +63,7 @@ namespace Base.Editor
             }
 
             m_protoFullPath = Directory.GetFiles(sourcePath, "*.proto", SearchOption.AllDirectories);
+            m_protoFullPath = m_protoFullPath.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
 
             if (m_protoFullPath.Count <= 0)
             {
@@ -127,8 +127,6 @@ namespace Base.Editor
             {
                 return;
             }
-
-            protoFiles = protoFiles.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
 
             GUILayout.BeginArea(new Rect(15f, 120f, 300f, position.height - 150f));
             SirenixEditorGUI.BeginToolbarBoxHeader();
