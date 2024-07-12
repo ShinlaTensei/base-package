@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using Base.Helper;
 using Base.Logging;
@@ -123,7 +124,7 @@ namespace Base.Core
 
         private string CreateMD5(string input)
         {
-            return Encryption.ComputeHash(input);
+            return Encryption.ComputeHash(Encoding.UTF8.GetBytes(input));
         }
 
         private async UniTask DownloadImage()

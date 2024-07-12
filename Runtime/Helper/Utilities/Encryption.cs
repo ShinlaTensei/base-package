@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
@@ -86,7 +87,7 @@ namespace Base.Helper
         /// <summary>
         /// Usage: Create a checksum string for small to moderately sized data
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="inputData"></param>
         /// <param name="hashType">Type of the hash
         /// <list type="HashType">
         /// <item><description>MD5</description></item>
@@ -95,7 +96,7 @@ namespace Base.Helper
         /// </param>
         /// <returns>Hash string</returns>
         /// <exception cref="NullReferenceException"></exception>
-        public static string ComputeHash(string input, HashType hashType = HashType.MD5)
+        public static string ComputeHash(byte[] inputData, HashType hashType = HashType.MD5)
         {
             HashAlgorithm hashAlgorithm = null;
             switch (hashType)
@@ -112,12 +113,11 @@ namespace Base.Helper
             {
                 throw new NullReferenceException("Hash Algorithm is null");
             }
-            byte[] inputHash = Encoding.UTF8.GetBytes(input);
-            byte[] md5Hash = hashAlgorithm.ComputeHash(inputHash);
+            byte[] md5Hash = hashAlgorithm.ComputeHash(inputData);
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < md5Hash.Length; ++i)
             {
-                sb.Append(md5Hash[i].ToString("X2"));
+                sb.Append(md5Hash[i].ToString("X2").ToLower(CultureInfo.CurrentCulture));
             }
             hashAlgorithm.Dispose();
             return sb.ToString();
@@ -139,7 +139,7 @@ namespace Base.Helper
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hash.Length; i++)
                 {
-                    sb.Append(hash[i].ToString("X2"));
+                    sb.Append(hash[i].ToString("X2").ToLower(CultureInfo.CurrentCulture));
                 }
 
                 return sb.ToString();
