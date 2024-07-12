@@ -9,9 +9,20 @@ namespace Base.Helper
 {
     public static class Encryption
     {
+        public enum HashType
+        {
+            /// <summary>
+            /// MD5 Hash
+            /// </summary>
+            MD5,
+            /// <summary>
+            /// SHA256 Hash
+            /// </summary>
+            SHA256
+        }
         private static readonly string _privateKey = "aYwxsNCz";
 
-        public static RijndaelManaged GetRijndaelManaged(string privateKey)
+        private static RijndaelManaged GetRijndaelManaged(string privateKey)
         {
             byte[] array = new byte[16];
             byte[] key = Encoding.UTF8.GetBytes(privateKey);
@@ -27,12 +38,12 @@ namespace Base.Helper
             };
         }
 
-        public static byte[] Encrypt(byte[] plainByte, RijndaelManaged rijndaelManaged)
+        private static byte[] Encrypt(byte[] plainByte, RijndaelManaged rijndaelManaged)
         {
             return rijndaelManaged.CreateEncryptor().TransformFinalBlock(plainByte, 0, plainByte.Length);
         }
         
-        public static byte[] Decrypt(byte[] encryptedData, RijndaelManaged rijndaelManaged)
+        private static byte[] Decrypt(byte[] encryptedData, RijndaelManaged rijndaelManaged)
         {
             return rijndaelManaged.CreateDecryptor().TransformFinalBlock(encryptedData, 0, encryptedData.Length);
         }
@@ -71,17 +82,64 @@ namespace Base.Helper
                 return string.Empty;
             }
         }
-
-        public static string ToMD5(string input)
+        
+        /// <summary>
+        /// Usage: Create a checksum string for small to moderately sized data
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="hashType">Type of the hash
+        /// <list type="HashType">
+        /// <item><description>MD5</description></item>
+        /// <item><description>SHA256</description></item>
+        /// </list>
+        /// </param>
+        /// <returns>Hash string</returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public static string ComputeHash(string input, HashType hashType = HashType.MD5)
         {
-            using (MD5 md5 = MD5.Create())
+            HashAlgorithm hashAlgorithm = null;
+            switch (hashType)
             {
-                byte[] inputHash = Encoding.UTF8.GetBytes(input);
-                byte[] md5Hash = md5.ComputeHash(inputHash);
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < md5Hash.Length; ++i)
+                case HashType.MD5:
+                    hashAlgorithm = MD5.Create();
+                    break;
+                case HashType.SHA256:
+                    hashAlgorithm = SHA256.Create();
+                    break;
+            }
+
+            if (hashAlgorithm == null)
+            {
+                throw new NullReferenceException("Hash Algorithm is null");
+            }
+            byte[] inputHash = Encoding.UTF8.GetBytes(input);
+            byte[] md5Hash = hashAlgorithm.ComputeHash(inputHash);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < md5Hash.Length; ++i)
+            {
+                sb.Append(md5Hash[i].ToString("X2"));
+            }
+            hashAlgorithm.Dispose();
+            return sb.ToString();
+        }
+
+        public static string TransformHash(byte[] inputBytes, int chunkSize = 10)
+        {
+            using (SHA256 sha = SHA256.Create())
+            {
+                int offset = 0;
+                while (offset < inputBytes.Length - chunkSize)
                 {
-                    sb.Append(md5Hash[i].ToString("X2"));
+                    sha.TransformBlock(inputBytes, offset, chunkSize, inputBytes, offset);
+                    offset += chunkSize;
+                }
+
+                sha.TransformFinalBlock(inputBytes, 0, inputBytes.Length - offset);
+                byte[] hash = sha.Hash;
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hash.Length; i++)
+                {
+                    sb.Append(hash[i].ToString("X2"));
                 }
 
                 return sb.ToString();

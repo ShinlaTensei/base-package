@@ -354,11 +354,14 @@ namespace Base.Helper
                 {
                     foreach (TimelineClip clip in controlTrack.GetClips())
                     {
-                        ControlPlayableAsset playableClip = (ControlPlayableAsset)clip.asset;
+                        if (clip.displayName.Equals(objectToBind.name))
+                        {
+                            ControlPlayableAsset playableClip = (ControlPlayableAsset)clip.asset;
 
-                        timeline.SetReferenceValue(playableClip.sourceGameObject.exposedName, objectToBind);
+                            timeline.SetReferenceValue(playableClip.sourceGameObject.exposedName, objectToBind);
 
-                        return;
+                            return;
+                        }
                     }
                 }
             }

@@ -123,7 +123,7 @@ namespace Base.Core
 
         private string CreateMD5(string input)
         {
-            return Encryption.ToMD5(input);
+            return Encryption.ComputeHash(input);
         }
 
         private async UniTask DownloadImage()

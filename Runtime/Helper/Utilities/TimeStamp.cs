@@ -8,6 +8,10 @@ namespace Base.Helper
     {
         public static DateTime EpochUTC = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public static DateTime EpochLocal = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
+
+        public const string TIME_FORMAT_D_H_M_S = @"dd\.hh\:mm\:ss";
+        public const string TIME_FORMAT_H_M_S = @"hh\:mm\:ss";
+        public const string TIME_FORMAT_M_S = @"mm\:ss";
         
         /// <summary>
         /// Get time UTC in seconds.
@@ -83,6 +87,12 @@ namespace Base.Helper
                 return DateTime.Now;
             }
         }
+
+        public static string GetTimeString(long timeInSeconds, string format)
+        {
+            TimeSpan timeSpan = TimeSpan.FromSeconds(timeInSeconds);
+            return timeSpan.ToString(@format);
+        }
         
         public static string GetTimeString(long timeInSeconds, bool noSpace = false)
         {
@@ -108,21 +118,6 @@ namespace Base.Helper
             {
                 return noSpace ? $"0m{timeInSeconds}s" : $"0m {timeInSeconds}s";
             }
-        }
-        
-        public static string GetTimerString(long timeInSeconds)
-        {
-            int munites = (int) (timeInSeconds / 60);
-            int seconds = (int) (timeInSeconds % 60);
-            return string.Format("{0:D2}:{1:D2}", munites, seconds);
-        }
-
-        public static string GetTimerString_H_M_S(long timeInSeconds)
-        {
-            int hours   = (int) (timeInSeconds / (60 * 60));
-            int munites = (int) ((timeInSeconds - hours * (60 * 60)) / 60);
-            int seconds = (int) (timeInSeconds % 60);
-            return string.Format("{0:D2}:{1:D2}:{2:D2}", hours, munites, seconds);
         }
 
         public static long ConvertLocalToUTC(long localTimeStamp)
