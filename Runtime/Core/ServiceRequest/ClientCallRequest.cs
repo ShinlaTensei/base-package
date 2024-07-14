@@ -259,7 +259,30 @@ namespace Base.Core
             return this;
         }
 
-        private async UniTask<object> SendAsyncInternal(CancellationToken ct)
+        public async UniTask<ClientCallResult<T>> SendAsync()
+        {
+            string methodString = Method.GetMethodString();
+            try
+            {
+                IClientCallResult result;
+
+                result = await SendAsyncInternal(CancellationToken);
+                return (ClientCallResult<T>) result;
+            }
+            catch (Exception e)
+            {
+                ClientCallResult<T> result = new ClientCallResult<T>(
+                    failureInfo: new FailureInfo {errorCode = CANCELLED_ERROR_CODE, message = e.ToString()},
+                    statusCode: 0,
+                    transactionResult: TransactionResult.Failed,
+                    responseData: default,
+                    requestUri: Uri, responseHeaders: null, null);
+
+                throw;
+            }
+        }
+
+        private async UniTask<IClientCallResult> SendAsyncInternal(CancellationToken ct)
         {
             PDebug.Debug("<color=white>SendRequest :" + Uri + " - ServiceName: " + ServiceName + " </color>\n" + "<color=white>Method:</color> " +
                          Method.GetMethodString());

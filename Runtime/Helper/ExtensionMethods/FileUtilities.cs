@@ -242,9 +242,9 @@ namespace Base.Helper
                 {
                     byte[] bytes = File.ReadAllBytes(filePath);
                     string base64string = Encoding.UTF8.GetString(bytes);
-                    string encrypted = Encoding.UTF8.GetString(Convert.FromBase64String(base64string));
-                    string jsonData = Encryption.Decrypt(encrypted);
-                    T data = JsonConvert.DeserializeObject<T>(jsonData);
+                    byte[] encrypted = Convert.FromBase64String(base64string);
+                    byte[] rawData = Encryption.Decrypt(encrypted);
+                    T data = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(rawData));
 
                     return data;
                 }
@@ -292,9 +292,8 @@ namespace Base.Helper
                 }
 
                 string jsonData = JsonConvert.SerializeObject(data);
-                string encrypted = Encryption.Encrypt(jsonData);
-                byte[] bytes = Encoding.UTF8.GetBytes(encrypted);
-                string final = Convert.ToBase64String(bytes);
+                byte[] rawData = Encryption.Encrypt(jsonData);
+                string final = Convert.ToBase64String(rawData);
                 File.WriteAllLines(filePath, new[] {final});
             }
             catch (Exception e)
