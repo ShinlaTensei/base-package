@@ -34,7 +34,7 @@ namespace Base.Core
         
         }
         public ClientCallResult(FailureInfo failureInfo, HttpStatusCode statusCode, TransactionResult transactionResult,
-            T responseData, string requestUri, Dictionary<string, string> responseHeaders)
+            T responseData, string requestUri, Dictionary<string, string> responseHeaders, BaseResponseProto baseResponseData)
         {
             FailureInfo = failureInfo;
             StatusCode = statusCode;
@@ -42,6 +42,7 @@ namespace Base.Core
             ResponseData = responseData;
             RequestUri = requestUri;
             ResponseHeaders = responseHeaders;
+            ResponseProto = baseResponseData;
         }
     }
     
