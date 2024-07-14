@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Base.Logging;
 using UnityEngine;
 
 namespace Base.Helper
@@ -49,38 +50,37 @@ namespace Base.Helper
             return rijndaelManaged.CreateDecryptor().TransformFinalBlock(encryptedData, 0, encryptedData.Length);
         }
 
-        public static string Encrypt(string content)
+        public static byte[] Encrypt(string content)
         {
             using (var rijndaelManaged = GetRijndaelManaged(_privateKey))
             {
-                return Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(content), rijndaelManaged));
+                return Encrypt(Encoding.UTF8.GetBytes(content), rijndaelManaged);
             }
         }
         
-        public static string Encrypt(byte[] plainBytes)
+        public static byte[] Encrypt(byte[] plainBytes)
         {
             using (var rijndaelManaged = GetRijndaelManaged(_privateKey))
             {
-                return Convert.ToBase64String(Encrypt(plainBytes, rijndaelManaged));
+                return Encrypt(plainBytes, rijndaelManaged);
             }
         }
         
-        public static string Decrypt(string encryptedText, Action<bool> result = null)
+        public static byte[] Decrypt(byte[] data, Action<bool> result = null)
         {
             try
             {
                 using (var rijndaelManaged = GetRijndaelManaged(_privateKey))
                 {
-                    byte[] encryptedData = Convert.FromBase64String(encryptedText);
                     result?.Invoke(obj: true);
-                    return Encoding.UTF8.GetString(Decrypt(encryptedData, rijndaelManaged));
+                    return Decrypt(data, rijndaelManaged);
                 }
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning("Decode Exception: " + ex.Message);
+                PDebug.ErrorFormat("Decode Exception: " + ex.Message);
                 result?.Invoke(obj: false);
-                return string.Empty;
+                return null;
             }
         }
         
