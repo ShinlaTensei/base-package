@@ -39,19 +39,6 @@ namespace Base.Helper
             }
         }
 
-        public RectTransform CacheRectTransform
-        {
-            get
-            {
-                if (m_rectTransform == null)
-                {
-                    m_rectTransform = gameObject.GetComponent<RectTransform>();
-                }
-
-                return m_rectTransform;
-            }
-        }
-
         public bool Active
         {
             get => CacheGameObject.activeSelf;
