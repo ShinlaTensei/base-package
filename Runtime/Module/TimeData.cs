@@ -5,6 +5,7 @@
 #endregion
 
 using System;
+using Base.Core;
 using Base.Helper;
 using Base.Pattern;
 

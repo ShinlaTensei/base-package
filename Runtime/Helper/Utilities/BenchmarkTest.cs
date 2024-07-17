@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Base.Logging;
-using UniRx;
-using UnityEngine;
 
 namespace Base.Helper
 {

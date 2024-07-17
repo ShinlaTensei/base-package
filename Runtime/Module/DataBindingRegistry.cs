@@ -28,14 +28,14 @@ namespace Base.Module
         {
             base.OnDestroy();
             
-            foreach (var provider in m_bindingProvider.Values)
+            foreach (var provider in BindingProvider.Values)
             {
                 if (provider is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
             }
-            m_bindingProvider.Clear();
+            BindingProvider.Clear();
         }
 
         public DataBindingReactive<T> GetOrCreateProvider<T>()

@@ -108,7 +108,7 @@ namespace Base.Helper
 
         public void UnRegisterContext<T>(int contextId, T source) where T : MonoBehaviour
         {
-            BaseContextRegistry.TryGetOrCreateContext(contextId).UnRegister(source);
+            BaseContextRegistry.TryGetOrCreateContext(contextId)?.UnRegister(source);
         }
     }
 }

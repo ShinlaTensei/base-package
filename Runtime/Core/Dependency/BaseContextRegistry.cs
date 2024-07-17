@@ -23,6 +23,10 @@ namespace Base.Core
 
         public static DependencyContext TryGetOrCreateContext(int index)
         {
+            if (Instance == null)
+            {
+                return null;
+            }
             if (!Instance.ContextRegistry.TryGetValue(index, out DependencyContext context))
             {
                 context = new DependencyContext();
