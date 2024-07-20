@@ -1,6 +1,7 @@
 ﻿using System;
 using Base.Helper;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace Base.Pattern
@@ -68,6 +69,12 @@ namespace Base.Pattern
 
             return null;
         }
+
+        public ReadOnlyCollection<CharacterState> GetStates()
+        {
+            IList<CharacterState> newList = new List<CharacterState>(_states.Values);
+            return new ReadOnlyCollection<CharacterState>(newList);
+        }
         
         /// <summary>
         /// Adds a particular state to the transition state queue (as a potential transition). The state machine will eventually check if the transition is accepted or rejected 
@@ -106,6 +113,7 @@ namespace Base.Pattern
             base.Start();
             if (CurrentState != null)
             {
+                CurrentState.CharacterStateController = this;
                 CurrentState.EnterStateBehaviour(0, CurrentState);
 
                 if (CanCurrentStateOverrideAnimator)
@@ -145,6 +153,10 @@ namespace Base.Pattern
 
         private void Update()
         {
+            if (CurrentState == null)
+            {
+                return;
+            }
             CurrentState.UpdateBehaviour(Time.deltaTime);
         }
 
