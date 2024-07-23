@@ -14,7 +14,9 @@ using Base.Core;
 using Base.Helper;
 using Base.Pattern;
 using Cysharp.Threading.Tasks;
+using UniRx;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Base
 {
@@ -82,30 +84,26 @@ namespace Base
 
         private async UniTask PlayAsync(AudioAssetData audioAssetData)
         {
-            AudioClip clip = await audioAssetData.Evaluate(AddressableManager);
-
-            if (!AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
-            {
-                source = PoolSystem.Rent<AudioSource>(Vector3.zero, Quaternion.identity, PoolSystem.Instance.CacheTransform);
-                AudioSourceMap[audioAssetData.ObjectName] = source;
-            }
+            AudioClip clip = await audioAssetData.Evaluate(AddressableManager).AttachExternalCancellation(CancellationToken.Token);
+            
+            AudioSource source = PoolSystem.Rent<AudioSource>(Vector3.zero, Quaternion.identity, PoolSystem.Instance.CacheTransform);
+            AudioSourceMap[audioAssetData.ObjectName] = source;
             source.clip = clip;
             source.volume = audioAssetData.Volume;
             source.Play();
+            BaseInterval.RunAfterTime(clip.length, () => PoolSystem.Return(source)).AddTo(CancellationToken.Token);
         }
         
         private async UniTask PlayOneshotAsync(AudioAssetData audioAssetData)
         {
-            AudioClip clip = await audioAssetData.Evaluate(AddressableManager);
+            AudioClip clip = await audioAssetData.Evaluate(AddressableManager).AttachExternalCancellation(CancellationToken.Token);
             
-            if (!AudioSourceMap.TryGetValue(audioAssetData.ObjectName, out AudioSource source))
-            {
-                source = PoolSystem.Rent<AudioSource>(Vector3.zero, Quaternion.identity, PoolSystem.Instance.CacheTransform);
-                AudioSourceMap[audioAssetData.ObjectName] = source;
-            }
+            AudioSource source = PoolSystem.Rent<AudioSource>(Vector3.zero, Quaternion.identity, PoolSystem.Instance.CacheTransform);
+            AudioSourceMap[audioAssetData.ObjectName] = source;
             
             source.volume = audioAssetData.Volume;
             source.PlayOneShot(clip);
+            BaseInterval.RunAfterTime(clip.length, () => PoolSystem.Return(source)).AddTo(CancellationToken.Token);
         }
 
         public override void Dispose()

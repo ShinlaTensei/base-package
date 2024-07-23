@@ -16,7 +16,7 @@ namespace Base.Helper
         /// </summary>
         /// <param name="timeInSeconds"></param>
         /// <param name="callBack"></param>
-        public static IDisposable RunInterval(int timeInSeconds, Action callBack = null)
+        public static IDisposable RunInterval(float timeInSeconds, Action callBack = null)
         {
             IDisposable disposable = Observable.Interval(TimeSpan.FromSeconds(timeInSeconds)).Subscribe(_ => callBack?.Invoke(), e => Instance
                                                                                                                                         .OnError(e));
@@ -29,7 +29,7 @@ namespace Base.Helper
         /// </summary>
         /// <param name="timeInSeconds"></param>
         /// <param name="callback"></param>
-        public static IDisposable RunInterval(int timeInSeconds, Action<long> callback = null)
+        public static IDisposable RunInterval(float timeInSeconds, Action<long> callback = null)
         {
             return Observable.Interval(TimeSpan.FromSeconds(timeInSeconds), Scheduler.MainThread)
                                                .Subscribe(unit =>
@@ -46,7 +46,7 @@ namespace Base.Helper
         /// <param name="dueTime">Time delay at start</param>
         /// <param name="interval">Time delay every frame</param>
         /// <param name="callback">Action</param>
-        public static IDisposable RunInterval(int dueTime, int interval, Action callback = null)
+        public static IDisposable RunInterval(float dueTime, int interval, Action callback = null)
         {
             return Observable.Timer(TimeSpan.FromSeconds(dueTime), TimeSpan.FromSeconds(interval))
                                                .Subscribe(_ => callback?.Invoke(), e => Instance.OnError(e))
@@ -60,7 +60,7 @@ namespace Base.Helper
         /// <param name="numberOfTimeRun">Time limit run</param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static IDisposable RunInterval(int timeInSeconds, int numberOfTimeRun, Action onNext = null, Action callback = null)
+        public static IDisposable RunInterval(float timeInSeconds, int numberOfTimeRun, Action onNext = null, Action callback = null)
         {
             return Observable.Interval(TimeSpan.FromSeconds(timeInSeconds)).Take(numberOfTimeRun)
                 .Subscribe(_ => onNext?.Invoke(), e => Instance.OnError(e), onCompleted: () => callback?.Invoke())
@@ -73,7 +73,7 @@ namespace Base.Helper
         /// <param name="dueTime">Time delay at start</param>
         /// <param name="startAction"></param>
         /// <param name="scheduler">Can be schedule on MainThread, MainThreadEndOfFrame, ...</param>
-        public static IDisposable RunAfterTime(int dueTime, Action startAction = null, IScheduler scheduler = null)
+        public static IDisposable RunAfterTime(float dueTime, Action startAction = null, IScheduler scheduler = null)
         {
             scheduler ??= Scheduler.MainThread;
 
