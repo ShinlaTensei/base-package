@@ -9,9 +9,11 @@ namespace Base.Helper
         public static DateTime EpochUTC = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public static DateTime EpochLocal = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
-        public const string TIME_FORMAT_D_H_M_S = @"dd\.hh\:mm\:ss";
-        public const string TIME_FORMAT_H_M_S = @"hh\:mm\:ss";
-        public const string TIME_FORMAT_M_S = @"mm\:ss";
+        public const string TIME_SPAN_FORMAT_D_H_M_S = @"dd\.hh\:mm\:ss";
+        public const string TIME_SPAN_FORMAT_H_M_S = @"hh\:mm\:ss";
+        public const string TIME_SPAN_FORMAT_M_S = @"mm\:ss";
+
+        public const string DATE_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
         
         /// <summary>
         /// Get time UTC in seconds.
