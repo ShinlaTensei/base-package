@@ -84,7 +84,7 @@ namespace Base.Core
         
         public bool HasListener()
         {
-            return Listener.GetInvocationList().Length > 0 || OnceListener.GetInvocationList().Length > 0;
+            return Listener?.GetInvocationList().Length > 0 || OnceListener?.GetInvocationList().Length > 0;
         }
         public void Subscribe(Action<T> callback, bool isOnce = false)
         {

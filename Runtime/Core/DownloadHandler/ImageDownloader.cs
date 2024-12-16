@@ -9,6 +9,7 @@ using Base.Logging;
 using Base.Pattern;
 using Cysharp.Threading.Tasks;
 using DTT.Utils.Exceptions;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -24,10 +25,12 @@ namespace Base.Core
         private string m_hash;
         private Image m_image;
         private SpriteRenderer m_spriteRenderer;
+        private Texture2D m_texture2D;
         private CancellationToken m_cancellationToken;
 
         private Action<string> OnError;
         private Action<Sprite> OnCompleted;
+        private Action<Texture2D> OnCompletedTexture2D;
 
         public static ImageDownloader Create() => new ImageDownloader();
 
@@ -41,6 +44,12 @@ namespace Base.Core
             OnCompleted = action;
             return this;
         }
+
+        public ImageDownloader WithCompleted(Action<Texture2D> action)
+        {
+            OnCompletedTexture2D = action;
+            return this;
+        }
         public ImageDownloader Into(Image image)
         {
             m_image = image;
@@ -50,6 +59,12 @@ namespace Base.Core
         public ImageDownloader Into(SpriteRenderer renderer)
         {
             m_spriteRenderer = renderer;
+            return this;
+        }
+
+        public ImageDownloader Into(Texture2D texture2D)
+        {
+            m_texture2D = texture2D;
             return this;
         }
 
@@ -119,7 +134,7 @@ namespace Base.Core
             {
                 SignalLocator.Get<CommonErrorSignal>().Dispatch(exception.Message);
             }
-            OnError.Invoke(exception.Message);
+            OnError?.Invoke(exception.Message);
         }
 
         private string CreateMD5(string input)
@@ -151,25 +166,25 @@ namespace Base.Core
            
             request.Dispose();
             request = null;
-            
-            LoadTextureToSprite();
+
+            if (m_image != null || m_spriteRenderer != null)
+            {
+                LoadTextureToSprite();
+            }
+            else
+            {
+                LoadTextureToTexture2D(ref m_texture2D);
+            }
         }
 
         private void LoadTextureToSprite(Texture2D texture = null)
         {
-            if (!File.Exists(SAVE_PATH + m_hash))
-            {
-                Error(new NullOrEmptyException("Load image file failed! "));
-                return;
-            }
-
+            LoadTextureToTexture2D(ref texture);
             if (texture == null)
             {
-                byte[] fileData = File.ReadAllBytes(SAVE_PATH + m_hash);
-                texture = new Texture2D(1, 1, TextureFormat.ARGB32, 1, true);
-                texture.LoadImage(fileData);
+                Error(new NullReferenceException("[ImageDownloader] Target texture is null"));
+                return;
             }
-
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             if (m_image != null)
             {
@@ -185,12 +200,31 @@ namespace Base.Core
             
             Dispose();
         }
+        
+        private void LoadTextureToTexture2D(ref Texture2D texture)
+        {
+            if (!File.Exists(SAVE_PATH + m_hash))
+            {
+                Error(new NullOrEmptyException("Load image file failed! "));
+                return;
+            }
+
+            if (texture == null)
+            {
+                texture = new Texture2D(1, 1, TextureFormat.ARGB32, 1, true);
+            }
+            
+            byte[] fileData = File.ReadAllBytes(SAVE_PATH + m_hash);
+            texture.LoadImage(fileData);
+            OnCompletedTexture2D?.Invoke(texture);
+        }
 
         public void Dispose()
         {
             m_image = null;
             m_spriteRenderer = null;
             OnCompleted = null;
+            OnCompletedTexture2D = null;
             OnError = null;
             GC.SuppressFinalize(this);
             GC.Collect();
