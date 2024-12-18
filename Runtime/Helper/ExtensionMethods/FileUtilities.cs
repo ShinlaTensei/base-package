@@ -231,8 +231,15 @@ namespace Base.Helper
 
             return default;
         }
-
-        public static T LoadDataWithEncrypted<T>(string filePath)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="key">The private key for encryption</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T LoadDataWithEncrypted<T>(string filePath, string key)
         {
             if (String.IsNullOrEmpty(filePath)) return default;
 
@@ -241,9 +248,7 @@ namespace Base.Helper
                 try
                 {
                     byte[] bytes = File.ReadAllBytes(filePath);
-                    string base64string = Encoding.UTF8.GetString(bytes);
-                    byte[] encrypted = Convert.FromBase64String(base64string);
-                    byte[] rawData = Encryption.Decrypt(encrypted);
+                    byte[] rawData = Encryption.Decrypt(bytes, key);
                     T data = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(rawData));
 
                     return data;
@@ -277,7 +282,7 @@ namespace Base.Helper
             File.WriteAllLines(filePath, new[] {final});
         }
 
-        public static void SaveDataWithEncrypted<T>(string fileDirectory, string fileName, T data)
+        public static void SaveDataWithEncrypted<T>(string fileDirectory, string fileName, T data, string key)
         {
             try
             {
@@ -292,8 +297,8 @@ namespace Base.Helper
                 }
 
                 string jsonData = JsonConvert.SerializeObject(data);
-                byte[] rawData = Encryption.Encrypt(jsonData);
-                string final = Convert.ToBase64String(rawData);
+                byte[] rawData = Encryption.Encrypt(jsonData, key);
+                string final = Encoding.UTF8.GetString(rawData);
                 File.WriteAllLines(filePath, new[] {final});
             }
             catch (Exception e)

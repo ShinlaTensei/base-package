@@ -389,8 +389,8 @@ namespace Base.Core
                 string encryptedMode = rawData != null ? wr.GetResponseHeader("Encrypt") : string.Empty;
                 switch (encryptedMode)
                 {
-                    case "rijndael":
-                        rawData = Encryption.Decrypt(rawData);
+                    case "aes":
+                        //rawData = Encryption.Decrypt(rawData);
                         break;
                     default:
                         break;

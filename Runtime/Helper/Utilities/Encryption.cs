@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Base.Logging;
@@ -24,62 +25,86 @@ namespace Base.Helper
         }
         private static readonly string _privateKey = "aYwxsNCz";
 
-        private static RijndaelManaged GetRijndaelManaged(string privateKey)
+        private static Aes GetAesManaged(string privateKey)
         {
-            byte[] array = new byte[16];
-            byte[] key = Encoding.UTF8.GetBytes(privateKey);
-            Array.Copy(key, array, Math.Min(array.Length, key.Length));
-            return new RijndaelManaged()
-            {
-                Mode = CipherMode.CBC,
-                Padding = PaddingMode.PKCS7,
-                KeySize = 128,
-                BlockSize = 128,
-                Key = array,
-                IV = array
-            };
+            byte[] keyBytes = Encoding.UTF8.GetBytes(privateKey);
+            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var key = new Rfc2898DeriveBytes(keyBytes, saltBytes, 1000);
+            Aes aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.KeySize = 256;
+            aes.BlockSize = 128;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Key = key.GetBytes(aes.KeySize / 8);
+            aes.IV = key.GetBytes(aes.BlockSize / 8);
+            key.Dispose();
+            return aes;
         }
 
-        private static byte[] Encrypt(byte[] plainByte, RijndaelManaged rijndaelManaged)
+        private static byte[] Encrypt(byte[] plainByte, Aes aesManaged)
         {
-            return rijndaelManaged.CreateEncryptor().TransformFinalBlock(plainByte, 0, plainByte.Length);
+            byte[] output;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ICryptoTransform encryptor = aesManaged.CreateEncryptor();
+                using (CryptoStream cryptoStream = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                {
+                    cryptoStream.Write(plainByte, 0, plainByte.Length);
+                    cryptoStream.Close();
+                }
+
+                output = ms.ToArray();
+            }
+
+            return output;
         }
         
-        private static byte[] Decrypt(byte[] encryptedData, RijndaelManaged rijndaelManaged)
+        private static byte[] Decrypt(byte[] encryptedData, Aes aesManaged)
         {
-            return rijndaelManaged.CreateDecryptor().TransformFinalBlock(encryptedData, 0, encryptedData.Length);
+            byte[] output;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ICryptoTransform decryptor = aesManaged.CreateDecryptor();
+                using (CryptoStream cryptoStream = new CryptoStream(ms, decryptor, CryptoStreamMode.Write))
+                {
+                    cryptoStream.Write(encryptedData, 0, encryptedData.Length);
+                    cryptoStream.Close();
+                }
+
+                output = ms.ToArray();
+            }
+
+            return output;
         }
 
-        public static byte[] Encrypt(string content)
+        public static byte[] Encrypt(string content, string key)
         {
-            using (var rijndaelManaged = GetRijndaelManaged(_privateKey))
+            using (var rijndaelManaged = GetAesManaged(key))
             {
                 return Encrypt(Encoding.UTF8.GetBytes(content), rijndaelManaged);
             }
         }
         
-        public static byte[] Encrypt(byte[] plainBytes)
+        public static byte[] Encrypt(byte[] plainBytes, string key)
         {
-            using (var rijndaelManaged = GetRijndaelManaged(_privateKey))
+            using (var rijndaelManaged = GetAesManaged(key))
             {
                 return Encrypt(plainBytes, rijndaelManaged);
             }
         }
         
-        public static byte[] Decrypt(byte[] data, Action<bool> result = null)
+        public static byte[] Decrypt(byte[] data, string key)
         {
             try
             {
-                using (var rijndaelManaged = GetRijndaelManaged(_privateKey))
+                using (var rijndaelManaged = GetAesManaged(key))
                 {
-                    result?.Invoke(obj: true);
                     return Decrypt(data, rijndaelManaged);
                 }
             }
             catch (Exception ex)
             {
                 PDebug.ErrorFormat("Decode Exception: " + ex.Message);
-                result?.Invoke(obj: false);
                 return null;
             }
         }
@@ -123,7 +148,7 @@ namespace Base.Helper
             return sb.ToString();
         }
 
-        public static string TransformHash(byte[] inputBytes, int chunkSize = 10)
+        public static string TransformHashSHA256(byte[] inputBytes, int chunkSize = 10)
         {
             using (SHA256 sha = SHA256.Create())
             {
@@ -136,6 +161,29 @@ namespace Base.Helper
 
                 sha.TransformFinalBlock(inputBytes, 0, inputBytes.Length - offset);
                 byte[] hash = sha.Hash;
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hash.Length; i++)
+                {
+                    sb.Append(hash[i].ToString("X2").ToLower(CultureInfo.CurrentCulture));
+                }
+
+                return sb.ToString();
+            }
+        }
+        
+        public static string TransformHashMD5(byte[] inputBytes, int chunkSize = 10)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                int offset = 0;
+                while (offset < inputBytes.Length - chunkSize)
+                {
+                    md5.TransformBlock(inputBytes, offset, chunkSize, inputBytes, offset);
+                    offset += chunkSize;
+                }
+
+                md5.TransformFinalBlock(inputBytes, 0, inputBytes.Length - offset);
+                byte[] hash = md5.Hash;
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hash.Length; i++)
                 {

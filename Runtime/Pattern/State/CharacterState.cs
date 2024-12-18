@@ -27,7 +27,7 @@ namespace Base.Pattern
 
         public bool IsOverrideAnimator => isOverrideAnimator;
 
-        protected virtual void Start()
+        protected override void Start()
         {
             StateNameHash = Animator.StringToHash(this.GetType().Name);
         }
