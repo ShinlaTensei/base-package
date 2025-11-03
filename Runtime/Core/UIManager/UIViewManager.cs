@@ -378,9 +378,9 @@ namespace Base.Core
             return null;
         }
 
-        public void Remove(UICanvasType canvasType, string sceneName)
+        public void Remove(UICanvasType canvasType)
         {
-            string key = $"{canvasType.ToString()}-{sceneName}";
+            string key = $"{canvasType.ToString()}";
             if (m_uiCanvasPool.ContainsKey(key))
             {
                 m_uiCanvasPool.Remove(key);
@@ -389,7 +389,7 @@ namespace Base.Core
 
         public void RegisterCanvas(CanvasRegister canvas)
         {
-            string key = $"{canvas.CacheGameObject.tag}-{canvas.CacheGameObject.scene.name}";
+            string key = $"{canvas.CacheGameObject.tag}";
             if (!m_uiCanvasPool.ContainsKey(key))
             {
                 m_uiCanvasPool[key] = canvas.CacheTransform;
